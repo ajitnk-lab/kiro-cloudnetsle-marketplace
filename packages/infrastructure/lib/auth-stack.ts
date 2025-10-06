@@ -112,7 +112,9 @@ export class AuthStack extends Construct {
       },
     })
 
-    // Add GitHub Identity Provider
+    // GitHub Identity Provider - temporarily disabled due to AWS timeout issues
+    // Will be re-enabled after initial deployment
+    /*
     const githubProvider = new cognito.UserPoolIdentityProviderOidc(this, 'GitHubProvider', {
       userPool: this.userPool,
       name: 'GitHub',
@@ -123,13 +125,15 @@ export class AuthStack extends Construct {
       attributeMapping: {
         email: cognito.ProviderAttribute.other('email'),
         givenName: cognito.ProviderAttribute.other('name'),
+        familyName: cognito.ProviderAttribute.other('name'), // GitHub doesn't separate first/last names
         profilePicture: cognito.ProviderAttribute.other('avatar_url'),
       },
     })
+    */
 
     // Configure the client to use the identity providers
     this.userPoolClient.node.addDependency(googleProvider)
-    this.userPoolClient.node.addDependency(githubProvider)
+    // this.userPoolClient.node.addDependency(githubProvider) // Temporarily disabled
 
     // Create User Pool Domain
     const userPoolDomain = new cognito.UserPoolDomain(this, 'MarketplaceUserPoolDomain', {

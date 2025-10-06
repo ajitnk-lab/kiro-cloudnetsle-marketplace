@@ -3,6 +3,9 @@ import 'source-map-support/register'
 import * as cdk from 'aws-cdk-lib'
 import { MarketplaceInfrastructureStack } from '../lib/marketplace-infrastructure-stack'
 
+// Ensure Node.js types are available
+declare const process: any
+
 const app = new cdk.App()
 
 // Get environment configuration

@@ -42,7 +42,7 @@ export class DataStack extends Construct {
 
     // DynamoDB Tables
     this.userTable = new dynamodb.Table(this, 'UserTable', {
-      tableName: 'marketplace-users',
+      tableName: `marketplace-users-${cdk.Aws.ACCOUNT_ID}`,
       partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -64,7 +64,7 @@ export class DataStack extends Construct {
     })
 
     this.solutionTable = new dynamodb.Table(this, 'SolutionTable', {
-      tableName: 'marketplace-solutions',
+      tableName: `marketplace-solutions-${cdk.Aws.ACCOUNT_ID}`,
       partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -94,7 +94,7 @@ export class DataStack extends Construct {
     })
 
     this.sessionTable = new dynamodb.Table(this, 'SessionTable', {
-      tableName: 'marketplace-sessions',
+      tableName: `marketplace-sessions-${cdk.Aws.ACCOUNT_ID}`,
       partitionKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -104,7 +104,7 @@ export class DataStack extends Construct {
 
     // Partner Application Table
     this.partnerApplicationTable = new dynamodb.Table(this, 'PartnerApplicationTable', {
-      tableName: 'marketplace-partner-applications',
+      tableName: `marketplace-partner-applications-${cdk.Aws.ACCOUNT_ID}`,
       partitionKey: { name: 'applicationId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -157,7 +157,7 @@ export class DataStack extends Construct {
 
     this.database = new rds.DatabaseInstance(this, 'MarketplaceDatabase', {
       engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_15_4,
+        version: rds.PostgresEngineVersion.VER_15_7,
       }),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
       vpc: this.vpc,
@@ -166,7 +166,7 @@ export class DataStack extends Construct {
       },
       securityGroups: [dbSecurityGroup],
       databaseName: 'marketplace',
-      credentials: rds.Credentials.fromGeneratedSecret('marketplace-admin', {
+      credentials: rds.Credentials.fromGeneratedSecret('marketplace_admin', {
         secretName: 'marketplace/database/credentials',
       }),
       backupRetention: cdk.Duration.days(7),
