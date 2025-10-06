@@ -1,0 +1,108 @@
+{
+  "mcpServers": {
+    "aws-knowledge-mcp-server": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://knowledge-mcp.global.api.aws"
+      ],
+      "env": {
+        "UV_TIMEOUT": "1200"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ]
+    },
+    "core-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.core-mcp-server@latest"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "UV_TIMEOUT": "3600",
+        "UV_COMPILE_BYTECODE": "0",
+        "UV_PRECOMPILE": "0",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ]
+    },
+    "aws-documentation": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-documentation-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_DOCUMENTATION_PARTITION": "aws",
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "UV_TIMEOUT": "1200"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ]
+    },
+    "fetch-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "env": {
+        "UV_TIMEOUT": "1200",
+        "UV_COMPILE_BYTECODE": "1"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ]
+    },
+    "aws-api-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-api-mcp-server@latest"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "UV_TIMEOUT": "1200"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ]
+    },
+    "github-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git"
+      ],
+      "env": {
+        "UV_TIMEOUT": "1200",
+        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ]
+    },
+    "git-repo-research-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.git-repo-research-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "default",
+        "AWS_REGION": "us-east-1",
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+      },
+      "disabled": false,
+      "autoApprove": [
+        "*"
+      ]
+    }
+  }
+}
