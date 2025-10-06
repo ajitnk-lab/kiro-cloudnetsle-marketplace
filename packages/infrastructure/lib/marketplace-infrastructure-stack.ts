@@ -3,6 +3,7 @@ import { Construct } from 'constructs'
 import { AuthStack } from './auth-stack'
 import { DataStack } from './data-stack'
 import { ApiStack } from './api-stack'
+import { FrontendStack } from './frontend-stack'
 
 export class MarketplaceInfrastructureStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -23,6 +24,9 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
       assetsBucket: dataStack.assetsBucket,
     })
 
+    // Create frontend deployment (S3 + CloudFront)
+    const frontendStack = new FrontendStack(this, 'FrontendStack')
+
     // Output important values
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: authStack.userPool.userPoolId,
@@ -42,6 +46,21 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'AssetsBucketName', {
       value: dataStack.assetsBucket.bucketName,
       description: 'S3 Assets Bucket Name',
+    })
+
+    new cdk.CfnOutput(this, 'WebsiteUrl', {
+      value: frontendStack.websiteUrl,
+      description: 'Frontend Website URL (CloudFront)',
+    })
+
+    new cdk.CfnOutput(this, 'WebsiteBucketName', {
+      value: frontendStack.websiteBucket.bucketName,
+      description: 'S3 Website Bucket Name',
+    })
+
+    new cdk.CfnOutput(this, 'CloudFrontDistributionId', {
+      value: frontendStack.distribution.distributionId,
+      description: 'CloudFront Distribution ID',
     })
   }
 }

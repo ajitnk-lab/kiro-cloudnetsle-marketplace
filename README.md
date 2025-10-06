@@ -232,43 +232,84 @@ npm run deploy
 - ✅ Sample solutions and users
 - ✅ Realistic data for testing
 
-## Current Testing Instructions
+## Deployment Instructions
 
-### Frontend Development Testing
-```bash
-# Install dependencies
-npm install
+### Prerequisites
+- Node.js 18+
+- AWS CLI configured with appropriate permissions
+- AWS CDK CLI installed globally: `npm install -g aws-cdk`
 
-# Start frontend development server
-cd packages/frontend
-npm run dev
+### Quick Deployment (Recommended)
 
-# Visit http://localhost:5173 in your browser
+**Windows:**
+```powershell
+# Run the deployment script
+.\deploy.ps1
 ```
 
-### Backend Infrastructure Testing
+**Linux/Mac:**
 ```bash
-# Configure AWS credentials
-aws configure
+# Make script executable and run
+chmod +x deploy.sh
+./deploy.sh
+```
 
-# Deploy infrastructure
+### Manual Deployment
+
+**Step 1: Deploy Backend Infrastructure**
+```bash
 cd packages/infrastructure
+npm install
 npm run bootstrap  # First time only
 npm run deploy
+```
 
-# Test API endpoints
+**Step 2: Deploy Frontend**
+```bash
+cd packages/frontend
+npm install
+npm run build
+npm run deploy
+```
+
+### Development Testing
+
+**Frontend Development (Local):**
+```bash
+cd packages/frontend
+npm install
+npm run dev
+# Visit http://localhost:5173
+```
+
+**Backend Testing (After AWS Deployment):**
+```bash
+# Get API Gateway URL from CloudFormation outputs
+aws cloudformation describe-stacks --stack-name MarketplaceInfrastructureStack
+
+# Test endpoints
 curl -X GET https://your-api-gateway-url/catalog
 ```
 
-### Unit Testing
-```bash
-# Run infrastructure tests
-cd packages/infrastructure
-npm test
+### Post-Deployment Testing
 
-# Run frontend tests (when available)
-cd packages/frontend
-npm test
+After deployment, you can test:
+
+1. **Frontend URL**: Check CloudFormation outputs for `WebsiteUrl`
+2. **API Gateway**: Check CloudFormation outputs for `ApiGatewayUrl`
+3. **User Registration**: Test customer and partner registration
+4. **Authentication**: Test login with email/password
+5. **Partner Workflow**: Apply for partner status and solution management
+6. **Admin Functions**: User and solution management (requires admin role)
+
+### Environment Configuration
+
+Create `.env` file in `packages/frontend/`:
+```env
+VITE_API_URL=https://your-api-gateway-url
+VITE_AWS_REGION=us-east-1
+VITE_USER_POOL_ID=your-cognito-user-pool-id
+VITE_USER_POOL_CLIENT_ID=your-cognito-client-id
 ```
 
 ## Specifications
