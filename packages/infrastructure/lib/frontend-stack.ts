@@ -42,7 +42,7 @@ export class FrontendStack extends Construct {
     // CloudFront Distribution
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
-        origin: new origins.S3Origin(this.websiteBucket, {
+        origin: origins.S3BucketOrigin.withOriginAccessIdentity(this.websiteBucket, {
           originAccessIdentity,
         }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
