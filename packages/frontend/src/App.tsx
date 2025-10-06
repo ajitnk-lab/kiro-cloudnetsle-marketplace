@@ -8,6 +8,7 @@ import { CatalogPage } from './pages/CatalogPage'
 import { SolutionDetailPage } from './pages/SolutionDetailPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { VerifyEmailPage } from './pages/VerifyEmailPage'
+import { PartnerDashboardPage } from './pages/PartnerDashboardPage'
 import { AuthCallback } from './components/AuthCallback'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
@@ -28,6 +29,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/dashboard"
+            element={
+              <ProtectedRoute requiredRole="partner">
+                <PartnerDashboardPage />
               </ProtectedRoute>
             }
           />
