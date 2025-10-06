@@ -7,6 +7,7 @@ import { RegisterPage } from './pages/RegisterPage'
 import { CatalogPage } from './pages/CatalogPage'
 import { SolutionDetailPage } from './pages/SolutionDetailPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { VerifyEmailPage } from './pages/VerifyEmailPage'
 import { AuthCallback } from './components/AuthCallback'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
@@ -20,6 +21,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/solutions/:id" element={<SolutionDetailPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
             path="/profile"

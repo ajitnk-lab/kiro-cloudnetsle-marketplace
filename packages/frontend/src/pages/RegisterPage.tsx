@@ -78,7 +78,8 @@ export function RegisterPage() {
       clearError()
       const { confirmPassword, agreeToTerms, ...registerData } = data
       await registerUser(registerData)
-      navigate('/')
+      // Redirect to verification page with email parameter
+      navigate(`/verify-email?email=${encodeURIComponent(data.email)}`)
     } catch (error) {
       // Error is handled by the auth context
     }

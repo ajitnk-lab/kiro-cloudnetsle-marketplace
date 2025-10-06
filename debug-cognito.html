@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cognito Debug Test</title>
+</head>
+<body>
+    <h1>Cognito Configuration Test</h1>
+    <div id="output"></div>
+    
+    <script>
+        // Test Cognito configuration
+        const config = {
+            UserPoolId: 'us-east-1_8mn2piFO9',
+            ClientId: '4r53lkj3i65e6tbaijatci3vra'
+        };
+        
+        document.getElementById('output').innerHTML = `
+            <p><strong>Cognito Config:</strong></p>
+            <p>User Pool ID: ${config.UserPoolId}</p>
+            <p>Client ID: ${config.ClientId}</p>
+            <p>Environment Variables Available: ${typeof window !== 'undefined'}</p>
+        `;
+        
+        // Test if Cognito SDK would work
+        console.log('Cognito Config:', config);
+    </script>
+</body>
+</html>

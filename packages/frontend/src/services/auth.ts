@@ -10,6 +10,14 @@ const poolData = {
   ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
 }
 
+// Debug: Log configuration (remove in production)
+console.log('Cognito Pool Data:', {
+  UserPoolId: poolData.UserPoolId,
+  ClientId: poolData.ClientId,
+  hasUserPoolId: !!poolData.UserPoolId,
+  hasClientId: !!poolData.ClientId
+})
+
 const userPool = new CognitoUserPool(poolData)
 
 const api = axios.create({
@@ -76,6 +84,23 @@ export const authService = {
 
   // Register new user
   async register(data: RegisterData): Promise<{ user: User; token: string }> {
+    // Temporary: Test direct API call to see if that's the issue
+    console.log('Testing direct API call first...')
+    try {
+      const testResponse = await api.post('/auth/register', {
+        userId: 'test-user-' + Date.now(),
+        email: data.email,
+        role: data.role,
+        profile: {
+          name: data.name,
+          company: data.company || '',
+        },
+      })
+      console.log('Direct API call successful:', testResponse.data)
+    } catch (testError: any) {
+      console.error('Direct API call failed:', testError.response?.data || testError.message)
+    }
+    
     return new Promise((resolve, reject) => {
       const { name, email, password, role, company } = data
       
@@ -95,9 +120,16 @@ export const authService = {
         attributeList.push(new CognitoUserAttribute({ Name: 'custom:company', Value: company }))
       }
 
+      console.log('Attempting Cognito registration with:', { email, attributeList })
+      
       userPool.signUp(email, password, attributeList, [], async (err, result) => {
         if (err) {
           console.error('Cognito registration error:', err)
+          console.error('Error details:', {
+            code: (err as any).code,
+            message: err.message,
+            name: err.name
+          })
           reject(new Error(err.message || 'Registration failed'))
           return
         }
@@ -106,7 +138,9 @@ export const authService = {
           try {
             // Create user profile in our backend
             const userId = result.user.getUsername()
-            await api.post('/auth/register', {
+            console.log('Cognito registration successful, creating profile:', { userId, email, role })
+            
+            const profileData = {
               userId,
               email,
               role,
@@ -114,7 +148,10 @@ export const authService = {
                 name,
                 company: company || '',
               },
-            })
+            }
+            console.log('Sending profile data to backend:', profileData)
+            
+            await api.post('/auth/register', profileData)
 
             // For now, return a mock response since the user needs to verify email
             const mockUser: User = {
