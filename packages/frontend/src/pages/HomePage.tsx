@@ -1,4 +1,4 @@
-import React from 'react'
+// React import not needed in React 17+
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Search, ShoppingBag, Users, TrendingUp, Shield, Zap } from 'lucide-react'

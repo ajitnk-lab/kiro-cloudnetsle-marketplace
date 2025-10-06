@@ -1,4 +1,4 @@
-import React from 'react'
+// React import not needed in React 17+
 import { useParams } from 'react-router-dom'
 
 export function SolutionDetailPage() {

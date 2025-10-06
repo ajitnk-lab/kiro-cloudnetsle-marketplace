@@ -1,4 +1,4 @@
-import React from 'react'
+// React import not needed in React 17+
 import { useAuth } from '../contexts/AuthContext'
 import { User, Mail, Building, Calendar, Shield } from 'lucide-react'
 
