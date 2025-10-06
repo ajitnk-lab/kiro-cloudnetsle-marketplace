@@ -11,7 +11,8 @@
       },
       "disabled": false,
       "autoApprove": [
-        "*"
+        "*",
+        "aws___list_regions"
       ]
     },
     "core-mcp-server": {
