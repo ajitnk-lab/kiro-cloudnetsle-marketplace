@@ -46,7 +46,7 @@
 
   - _Requirements: 10.1, 10.2, 10.4_
 
-- [ ] 3. Build authentication system with social login support
+- [x] 3. Build authentication system with social login support
 
 
   - Create Cognito User Pool with custom attributes for user roles
