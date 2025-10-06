@@ -1,6 +1,0 @@
-{
-  "name": "kiro-cloudnetsle-marketplace",
-  "description": "Marketplace Platform - Self-service online marketplace portal built with AWS CDK and React",
-  "private": false,
-  "auto_init": true
-}
