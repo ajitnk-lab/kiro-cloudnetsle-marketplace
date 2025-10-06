@@ -1,6 +1,7 @@
 export interface Solution {
   solutionId: string
   partnerId: string
+  partnerName?: string
   name: string
   description: string
   category: string
@@ -9,14 +10,20 @@ export interface Solution {
     model: 'upfront' | 'subscription'
     amount: number
     currency: 'INR'
-    billingCycle?: 'monthly' | 'annual'
+    billingCycle?: 'month' | 'year'
   }
   assets: {
     images: string[]
-    documentation: string[]
+    documents: string[]
     downloadUrl?: string
   }
-  status: 'draft' | 'pending' | 'approved' | 'rejected'
+  features?: string[]
+  requirements?: {
+    system?: string
+    storage?: string
+    users?: string
+  }
+  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'active'
   createdAt: string
   updatedAt: string
 }
