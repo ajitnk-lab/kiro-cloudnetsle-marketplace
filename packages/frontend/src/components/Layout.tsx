@@ -32,13 +32,36 @@ export function Layout({ children }: LayoutProps) {
                 <span>Browse Solutions</span>
               </Link>
               
-              {user?.role === 'partner' && (
+              {isAuthenticated && user?.role === 'customer' && (
                 <Link
-                  to="/partner/dashboard"
+                  to="/dashboard"
                   className="text-gray-700 hover:text-blue-600 transition-colors"
                 >
-                  Partner Dashboard
+                  Dashboard
                 </Link>
+              )}
+              
+              {user?.role === 'partner' && (
+                <>
+                  <Link
+                    to="/partner/dashboard"
+                    className="text-gray-700 hover:text-blue-600 transition-colors"
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/partner/solutions"
+                    className="text-gray-700 hover:text-blue-600 transition-colors"
+                  >
+                    My Solutions
+                  </Link>
+                  <Link
+                    to="/partner/application"
+                    className="text-gray-700 hover:text-blue-600 transition-colors"
+                  >
+                    Application
+                  </Link>
+                </>
               )}
               
               {user?.role === 'admin' && (

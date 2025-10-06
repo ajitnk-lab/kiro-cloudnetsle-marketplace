@@ -9,14 +9,23 @@ import { SolutionDetailPage } from './pages/SolutionDetailPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { VerifyEmailPage } from './pages/VerifyEmailPage'
 import { PartnerDashboardPage } from './pages/PartnerDashboardPage'
+import { PartnerApplicationPage } from './pages/PartnerApplicationPage'
+import { SolutionManagementPage } from './pages/SolutionManagementPage'
+import CheckoutPage from './pages/CheckoutPage'
+import PaymentSuccessPage from './pages/PaymentSuccessPage'
+import DashboardPage from './pages/DashboardPage'
 import { AuthCallback } from './components/AuthCallback'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import ErrorBoundary from './components/ErrorBoundary'
+import { ToastProvider } from './components/Toast'
 
 function App() {
   return (
-    <AuthProvider>
-      <Layout>
-        <Routes>
+    <ErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <Layout>
+          <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -25,10 +34,34 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
+            path="/checkout/:solutionId"
+            element={
+              <ProtectedRoute>
+                <CheckoutPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment/success"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccessPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
               </ProtectedRoute>
             }
           />
@@ -40,9 +73,27 @@ function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
-      </Layout>
-    </AuthProvider>
+          <Route
+            path="/partner/application"
+            element={
+              <ProtectedRoute requiredRole="partner">
+                <PartnerApplicationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/solutions"
+            element={
+              <ProtectedRoute requiredRole="partner">
+                <SolutionManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          </Routes>
+          </Layout>
+        </AuthProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   )
 }
 

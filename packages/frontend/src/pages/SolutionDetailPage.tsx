@@ -195,7 +195,10 @@ export function SolutionDetailPage() {
                 </div>
               </div>
 
-              <button className="w-full btn-primary mb-4">
+              <button 
+                onClick={() => navigate(`/checkout/${solution.solutionId}`)}
+                className="w-full btn-primary mb-4"
+              >
                 <DollarSign className="h-4 w-4 mr-2" />
                 {solution.pricing.model === 'subscription' ? 'Start Subscription' : 'Purchase Now'}
               </button>

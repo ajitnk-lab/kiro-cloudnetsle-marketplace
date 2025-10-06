@@ -12,6 +12,8 @@ interface ApiStackProps {
   userTable: dynamodb.Table
   solutionTable: dynamodb.Table
   partnerApplicationTable: dynamodb.Table
+  transactionTable: dynamodb.Table
+  userSolutionsTable: dynamodb.Table
   assetsBucket: s3.Bucket
 }
 
@@ -60,6 +62,8 @@ export class ApiStack extends Construct {
     props.userTable.grantReadWriteData(lambdaRole)
     props.solutionTable.grantReadWriteData(lambdaRole)
     props.partnerApplicationTable.grantReadWriteData(lambdaRole)
+    props.transactionTable.grantReadWriteData(lambdaRole)
+    props.userSolutionsTable.grantReadWriteData(lambdaRole)
     props.assetsBucket.grantReadWrite(lambdaRole)
 
     // Grant Cognito permissions for user management
@@ -160,12 +164,72 @@ export class ApiStack extends Construct {
       timeout: cdk.Duration.seconds(30),
     })
 
+    // Payment Lambda Functions
+    const paymentFunction = new lambda.Function(this, 'PaymentFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'payment-handler.createPaymentRequest',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        USERS_TABLE: props.userTable.tableName,
+        SOLUTIONS_TABLE: props.solutionTable.tableName,
+        TRANSACTIONS_TABLE: props.transactionTable.tableName,
+        USER_SOLUTIONS_TABLE: props.userSolutionsTable.tableName,
+        INSTAMOJO_API_KEY: 'test_api_key', // Replace with actual key in production
+        INSTAMOJO_AUTH_TOKEN: 'test_auth_token', // Replace with actual token in production
+        INSTAMOJO_ENDPOINT: 'https://test.instamojo.com/api/1.1/',
+        FRONTEND_URL: 'https://dddzq9ul1ygr3.cloudfront.net',
+        API_GATEWAY_URL: `https://${this.api.restApiId}.execute-api.${cdk.Aws.REGION}.amazonaws.com/prod`,
+        FROM_EMAIL: 'noreply@marketplace.com',
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    const paymentWebhookFunction = new lambda.Function(this, 'PaymentWebhookFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'payment-handler.handleWebhook',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        USERS_TABLE: props.userTable.tableName,
+        SOLUTIONS_TABLE: props.solutionTable.tableName,
+        TRANSACTIONS_TABLE: props.transactionTable.tableName,
+        USER_SOLUTIONS_TABLE: props.userSolutionsTable.tableName,
+        FRONTEND_URL: 'https://dddzq9ul1ygr3.cloudfront.net',
+        FROM_EMAIL: 'noreply@marketplace.com',
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    const transactionStatusFunction = new lambda.Function(this, 'TransactionStatusFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'payment-handler.getTransactionStatus',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        TRANSACTIONS_TABLE: props.transactionTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    const userTransactionsFunction = new lambda.Function(this, 'UserTransactionsFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'payment-handler.getUserTransactions',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        TRANSACTIONS_TABLE: props.transactionTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
     // API Routes
     const authApi = this.api.root.addResource('auth')
     const catalogApi = this.api.root.addResource('catalog')
     const userApi = this.api.root.addResource('user')
     const adminApi = this.api.root.addResource('admin')
     const partnerApi = this.api.root.addResource('partner')
+    const paymentsApi = this.api.root.addResource('payments')
 
     // Auth routes
     authApi.addResource('register').addMethod('POST', new apigateway.LambdaIntegration(registerFunction))
@@ -251,6 +315,18 @@ export class ApiStack extends Construct {
     })
     const adminSolutionIdResource = adminSolutionsResource.addResource('{solutionId}')
     adminSolutionIdResource.addMethod('PUT', new apigateway.LambdaIntegration(solutionManagementFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+
+    // Payment routes
+    paymentsApi.addResource('create').addMethod('POST', new apigateway.LambdaIntegration(paymentFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    paymentsApi.addResource('webhook').addMethod('POST', new apigateway.LambdaIntegration(paymentWebhookFunction))
+    paymentsApi.addResource('transaction').addResource('{transactionId}').addMethod('GET', new apigateway.LambdaIntegration(transactionStatusFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    paymentsApi.addResource('user').addResource('{userId}').addResource('transactions').addMethod('GET', new apigateway.LambdaIntegration(userTransactionsFunction), {
       authorizer: cognitoAuthorizer,
     })
   }

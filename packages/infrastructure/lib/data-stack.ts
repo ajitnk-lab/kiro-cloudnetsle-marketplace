@@ -10,6 +10,8 @@ export class DataStack extends Construct {
   public readonly solutionTable: dynamodb.Table
   public readonly sessionTable: dynamodb.Table
   public readonly partnerApplicationTable: dynamodb.Table
+  public readonly transactionTable: dynamodb.Table
+  public readonly userSolutionsTable: dynamodb.Table
   public readonly assetsBucket: s3.Bucket
   public readonly vpc: ec2.Vpc
   public readonly database: rds.DatabaseInstance
@@ -124,6 +126,54 @@ export class DataStack extends Construct {
       indexName: 'StatusIndex',
       partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'submittedAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Transaction Table for payment processing
+    this.transactionTable = new dynamodb.Table(this, 'TransactionTable', {
+      tableName: `marketplace-transactions-${cdk.Aws.ACCOUNT_ID}`,
+      partitionKey: { name: 'transactionId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    })
+
+    // Add GSI for user transactions
+    this.transactionTable.addGlobalSecondaryIndex({
+      indexName: 'UserIndex',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for payment request lookup
+    this.transactionTable.addGlobalSecondaryIndex({
+      indexName: 'PaymentRequestIndex',
+      partitionKey: { name: 'paymentRequestId', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for solution transactions
+    this.transactionTable.addGlobalSecondaryIndex({
+      indexName: 'SolutionIndex',
+      partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // User Solutions Table for access management
+    this.userSolutionsTable = new dynamodb.Table(this, 'UserSolutionsTable', {
+      tableName: `marketplace-user-solutions-${cdk.Aws.ACCOUNT_ID}`,
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    })
+
+    // Add GSI for solution access lookup
+    this.userSolutionsTable.addGlobalSecondaryIndex({
+      indexName: 'SolutionIndex',
+      partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'accessGrantedAt', type: dynamodb.AttributeType.STRING },
     })
 
     // S3 Bucket for assets

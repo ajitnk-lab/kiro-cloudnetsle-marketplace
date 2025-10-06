@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { 
   Package, 
@@ -111,29 +112,29 @@ export function PartnerDashboardPage() {
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
+              <Link to="/partner/solutions/new" className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
                 <Plus className="h-5 w-5 text-blue-600 mr-3" />
                 <div className="text-left">
                   <p className="font-medium text-gray-900">Add New Solution</p>
                   <p className="text-sm text-gray-600">Create and publish a new solution</p>
                 </div>
-              </button>
+              </Link>
 
-              <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
+              <Link to="/partner/analytics" className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
                 <BarChart3 className="h-5 w-5 text-green-600 mr-3" />
                 <div className="text-left">
                   <p className="font-medium text-gray-900">View Analytics</p>
                   <p className="text-sm text-gray-600">Check your performance metrics</p>
                 </div>
-              </button>
+              </Link>
 
-              <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors">
+              <Link to="/partner/solutions" className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors">
                 <FileText className="h-5 w-5 text-purple-600 mr-3" />
                 <div className="text-left">
-                  <p className="font-medium text-gray-900">Manage Orders</p>
-                  <p className="text-sm text-gray-600">View and process customer orders</p>
+                  <p className="font-medium text-gray-900">Manage Solutions</p>
+                  <p className="text-sm text-gray-600">View and edit your solutions</p>
                 </div>
-              </button>
+              </Link>
 
               <button className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors">
                 <Settings className="h-5 w-5 text-gray-600 mr-3" />
