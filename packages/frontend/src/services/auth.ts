@@ -133,7 +133,7 @@ export const authService = {
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            status: 'pending',
+            status: 'active', // Set to active since post-confirmation will create active user
           }
 
           resolve({
@@ -151,6 +151,22 @@ export const authService = {
   async getCurrentUser(): Promise<User> {
     const response = await api.get('/user/profile')
     return response.data.user
+  },
+
+  // Refresh current user data (useful after profile updates)
+  async refreshCurrentUser(): Promise<User> {
+    const token = this.getToken()
+    if (!token) {
+      throw new Error('No authentication token available')
+    }
+    
+    const response = await api.get('/user/profile', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    
+    const user = response.data.user
+    this.setStoredUser(user) // Update stored user data
+    return user
   },
 
   // Update user profile

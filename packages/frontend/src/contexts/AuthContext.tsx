@@ -7,6 +7,7 @@ interface AuthContextType extends AuthState {
   register: (data: RegisterData) => Promise<void>
   logout: () => void
   updateProfile: (profile: Partial<User['profile']>) => Promise<void>
+  refreshUser: () => Promise<void>
   clearError: () => void
 }
 
@@ -124,6 +125,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const refreshUser = async () => {
+    try {
+      const user = await authService.refreshCurrentUser()
+      dispatch({ type: 'SET_USER', payload: user })
+    } catch (error: any) {
+      console.error('Failed to refresh user data:', error)
+      // If refresh fails, user might need to login again
+      logout()
+    }
+  }
+
   const clearError = () => {
     dispatch({ type: 'CLEAR_ERROR' })
   }
@@ -134,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register,
     logout,
     updateProfile,
+    refreshUser,
     clearError,
   }
 

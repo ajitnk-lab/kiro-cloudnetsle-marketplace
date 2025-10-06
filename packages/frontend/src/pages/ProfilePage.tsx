@@ -1,9 +1,21 @@
-// React import not needed in React 17+
+import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { User, Mail, Building, Calendar, Shield } from 'lucide-react'
+import { User, Mail, Building, Calendar, Shield, RefreshCw } from 'lucide-react'
 
 export function ProfilePage() {
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      await refreshUser()
+    } catch (error) {
+      console.error('Failed to refresh user data:', error)
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
 
   if (!user) {
     return (
@@ -17,9 +29,19 @@ export function ProfilePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile</h1>
-        <p className="text-gray-600">Manage your account information and preferences</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile</h1>
+          <p className="text-gray-600">Manage your account information and preferences</p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="btn-outline flex items-center"
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
