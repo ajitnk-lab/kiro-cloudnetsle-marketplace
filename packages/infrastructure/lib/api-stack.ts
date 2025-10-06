@@ -146,8 +146,38 @@ export class ApiStack extends Construct {
       environment: {
         SOLUTION_TABLE_NAME: props.solutionTable.tableName,
         ASSETS_BUCKET_NAME: props.assetsBucket.bucketName,
+        AWS_REGION: cdk.Aws.REGION,
       },
       role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Solution Management Lambda Function (Admin)
+    const solutionManagementFunction = new lambda.Function(this, 'SolutionManagementFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'solution-management.handler',
+      code: lambda.Code.fromAsset('lambda/catalog'),
+      environment: {
+        SOLUTION_TABLE_NAME: props.solutionTable.tableName,
+        USER_TABLE_NAME: props.userTable.tableName,
+        FROM_EMAIL: 'noreply@marketplace.com',
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Solution Management Lambda Function
+    const solutionManagementFunction = new lambda.Function(this, 'SolutionManagementFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'solution-management.handler',
+      code: lambda.Code.fromAsset('lambda/catalog'),
+      environment: {
+        SOLUTION_TABLE_NAME: props.solutionTable.tableName,
+        ASSETS_BUCKET_NAME: props.assetsBucket.bucketName,
+        AWS_REGION: cdk.Aws.REGION,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
     })
 
     // API Routes
@@ -206,9 +236,54 @@ export class ApiStack extends Construct {
       authorizer: cognitoAuthorizer,
     })
 
-    // Catalog routes
+    // Catalog routes (public)
     catalogApi.addMethod('GET', new apigateway.LambdaIntegration(catalogFunction))
     catalogApi.addResource('search').addMethod('GET', new apigateway.LambdaIntegration(catalogFunction))
+    catalogApi.addResource('categories').addMethod('GET', new apigateway.LambdaIntegration(catalogFunction))
     catalogApi.addResource('{solutionId}').addMethod('GET', new apigateway.LambdaIntegration(catalogFunction))
+    
+    // Image upload route (protected)
+    catalogApi.addResource('upload-image').addMethod('POST', new apigateway.LambdaIntegration(catalogFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+
+    // Partner solution management routes (protected)
+    const partnerSolutionsResource = partnerApi.addResource('solutions')
+    partnerSolutionsResource.addMethod('POST', new apigateway.LambdaIntegration(catalogFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    partnerSolutionsResource.addMethod('GET', new apigateway.LambdaIntegration(catalogFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    partnerSolutionsResource.addResource('{solutionId}').addMethod('PUT', new apigateway.LambdaIntegration(catalogFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    partnerSolutionsResource.addResource('{solutionId}').addMethod('DELETE', new apigateway.LambdaIntegration(catalogFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+
+    // Admin solution management routes (protected)
+    const adminSolutionsResource = adminApi.addResource('solutions')
+    adminSolutionsResource.addMethod('GET', new apigateway.LambdaIntegration(solutionManagementFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    adminSolutionsResource.addResource('{solutionId}').addMethod('PUT', new apigateway.LambdaIntegration(solutionManagementFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    partnerSolutionsResource.addResource('{solutionId}').addMethod('PUT', new apigateway.LambdaIntegration(solutionManagementFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    partnerSolutionsResource.addResource('{solutionId}').addMethod('DELETE', new apigateway.LambdaIntegration(solutionManagementFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+
+    // Admin solution management routes (protected)
+    const adminSolutionsResource = adminApi.addResource('solutions')
+    adminSolutionsResource.addMethod('GET', new apigateway.LambdaIntegration(solutionManagementFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    adminSolutionsResource.addResource('{solutionId}').addMethod('PUT', new apigateway.LambdaIntegration(solutionManagementFunction), {
+      authorizer: cognitoAuthorizer,
+    })
   }
 }
