@@ -13,7 +13,9 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
     const dataStack = new DataStack(this, 'DataStack')
 
     // Create authentication layer (Cognito)
-    const authStack = new AuthStack(this, 'AuthStack')
+    const authStack = new AuthStack(this, 'AuthStack', {
+      userTableName: dataStack.userTable.tableName,
+    })
 
     // Create API layer (API Gateway, Lambda functions)
     const apiStack = new ApiStack(this, 'ApiStack', {

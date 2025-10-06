@@ -84,23 +84,6 @@ export const authService = {
 
   // Register new user
   async register(data: RegisterData): Promise<{ user: User; token: string }> {
-    // Temporary: Test direct API call to see if that's the issue
-    console.log('Testing direct API call first...')
-    try {
-      const testResponse = await api.post('/auth/register', {
-        userId: 'test-user-' + Date.now(),
-        email: data.email,
-        role: data.role,
-        profile: {
-          name: data.name,
-          company: data.company || '',
-        },
-      })
-      console.log('Direct API call successful:', testResponse.data)
-    } catch (testError: any) {
-      console.error('Direct API call failed:', testError.response?.data || testError.message)
-    }
-    
     return new Promise((resolve, reject) => {
       const { name, email, password, role, company } = data
       
@@ -135,46 +118,28 @@ export const authService = {
         }
 
         if (result?.user) {
-          try {
-            // Create user profile in our backend
-            const userId = result.user.getUsername()
-            console.log('Cognito registration successful, creating profile:', { userId, email, role })
-            
-            const profileData = {
-              userId,
-              email,
-              role,
-              profile: {
-                name,
-                company: company || '',
-              },
-            }
-            console.log('Sending profile data to backend:', profileData)
-            
-            await api.post('/auth/register', profileData)
-
-            // For now, return a mock response since the user needs to verify email
-            const mockUser: User = {
-              userId,
-              email,
-              role: role as 'customer' | 'partner' | 'admin',
-              profile: {
-                name,
-                company: company || '',
-              },
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              status: 'pending',
-            }
-
-            resolve({
-              user: mockUser,
-              token: 'pending_verification', // Temporary token
-            })
-          } catch (apiError: any) {
-            console.error('Profile creation error:', apiError)
-            reject(new Error(apiError.response?.data?.error || 'Failed to create user profile'))
+          // User profile will be created automatically by Cognito post-confirmation trigger
+          const userId = result.user.getUsername()
+          console.log('Cognito registration successful:', { userId, email, role })
+          
+          // Return success response - user needs to verify email
+          const mockUser: User = {
+            userId,
+            email,
+            role: role as 'customer' | 'partner' | 'admin',
+            profile: {
+              name,
+              company: company || '',
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            status: 'pending',
           }
+
+          resolve({
+            user: mockUser,
+            token: 'pending_verification', // Temporary token
+          })
         } else {
           reject(new Error('Registration failed - no user returned'))
         }

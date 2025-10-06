@@ -1,5 +1,7 @@
 import * as cdk from 'aws-cdk-lib'
 import * as cognito from 'aws-cdk-lib/aws-cognito'
+import * as lambda from 'aws-cdk-lib/aws-lambda'
+import * as iam from 'aws-cdk-lib/aws-iam'
 import { Construct } from 'constructs'
 
 export class AuthStack extends Construct {
@@ -7,8 +9,28 @@ export class AuthStack extends Construct {
   public readonly userPoolClient: cognito.UserPoolClient
   public readonly identityPool: cognito.CfnIdentityPool
 
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props: { userTableName: string }) {
     super(scope, id)
+
+    // Create Post Confirmation Lambda Function
+    const postConfirmationFunction = new lambda.Function(this, 'PostConfirmationFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'post-confirmation.handler',
+      code: lambda.Code.fromAsset('lambda/auth'),
+      environment: {
+        USER_TABLE_NAME: props.userTableName,
+      },
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Grant DynamoDB permissions to the Lambda function
+    postConfirmationFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['dynamodb:PutItem'],
+        resources: [`arn:aws:dynamodb:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:table/${props.userTableName}`],
+      })
+    )
 
     // Create Cognito User Pool
     this.userPool = new cognito.UserPool(this, 'MarketplaceUserPool', {
@@ -61,6 +83,9 @@ export class AuthStack extends Construct {
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+      lambdaTriggers: {
+        postConfirmation: postConfirmationFunction,
+      },
     })
 
     // Create User Pool Client
