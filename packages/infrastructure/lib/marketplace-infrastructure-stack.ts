@@ -19,6 +19,7 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
       userPool: authStack.userPool,
       userTable: dataStack.userTable,
       solutionTable: dataStack.solutionTable,
+      partnerApplicationTable: dataStack.partnerApplicationTable,
       assetsBucket: dataStack.assetsBucket,
     })
 

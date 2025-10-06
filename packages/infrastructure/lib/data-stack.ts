@@ -9,6 +9,7 @@ export class DataStack extends Construct {
   public readonly userTable: dynamodb.Table
   public readonly solutionTable: dynamodb.Table
   public readonly sessionTable: dynamodb.Table
+  public readonly partnerApplicationTable: dynamodb.Table
   public readonly assetsBucket: s3.Bucket
   public readonly vpc: ec2.Vpc
   public readonly database: rds.DatabaseInstance
@@ -99,6 +100,30 @@ export class DataStack extends Construct {
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       timeToLiveAttribute: 'expiresAt',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+    })
+
+    // Partner Application Table
+    this.partnerApplicationTable = new dynamodb.Table(this, 'PartnerApplicationTable', {
+      tableName: 'marketplace-partner-applications',
+      partitionKey: { name: 'applicationId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    })
+
+    // Add GSI for user applications
+    this.partnerApplicationTable.addGlobalSecondaryIndex({
+      indexName: 'UserIndex',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'submittedAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for status-based queries
+    this.partnerApplicationTable.addGlobalSecondaryIndex({
+      indexName: 'StatusIndex',
+      partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'submittedAt', type: dynamodb.AttributeType.STRING },
     })
 
     // S3 Bucket for assets
