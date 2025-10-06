@@ -15,17 +15,18 @@
     "invalidate": "aws cloudfront create-invalidation --distribution-id $(aws cloudformation describe-stacks --stack-name MarketplaceInfrastructureStack --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' --output text) --paths '/*'"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.3.0",
+    "amazon-cognito-identity-js": "^6.3.15",
+    "axios": "^1.5.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.279.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.15.0",
-    "axios": "^1.5.0",
-    "zustand": "^4.4.0",
     "react-hook-form": "^7.45.0",
+    "react-router-dom": "^6.15.0",
+    "tailwind-merge": "^1.14.0",
     "zod": "^3.22.0",
-    "@hookform/resolvers": "^3.3.0",
-    "lucide-react": "^0.279.0",
-    "clsx": "^2.0.0",
-    "tailwind-merge": "^1.14.0"
+    "zustand": "^4.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

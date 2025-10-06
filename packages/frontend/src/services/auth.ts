@@ -1,8 +1,16 @@
 import axios from 'axios'
+import { CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserAttribute } from 'amazon-cognito-identity-js'
 import { LoginCredentials, RegisterData, User } from '../types/auth'
 
-// This will be replaced with actual Cognito configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
+
+// Cognito configuration
+const poolData = {
+  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
+  ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
+}
+
+const userPool = new CognitoUserPool(poolData)
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -23,16 +31,118 @@ api.interceptors.request.use((config) => {
 export const authService = {
   // Login with email/password
   async login(credentials: LoginCredentials): Promise<{ user: User; token: string }> {
-    // This will be replaced with Cognito authentication
-    const response = await api.post('/auth/login', credentials)
-    return response.data
+    return new Promise((resolve, reject) => {
+      const { email, password } = credentials
+      
+      const authenticationDetails = new AuthenticationDetails({
+        Username: email,
+        Password: password,
+      })
+
+      const cognitoUser = new CognitoUser({
+        Username: email,
+        Pool: userPool,
+      })
+
+      cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: async (result) => {
+          try {
+            const idToken = result.getIdToken().getJwtToken()
+            
+            // Get user profile from our backend
+            const response = await api.get('/user/profile', {
+              headers: { Authorization: `Bearer ${idToken}` }
+            })
+            
+            resolve({
+              user: response.data.user,
+              token: idToken,
+            })
+          } catch (error: any) {
+            console.error('Profile fetch error:', error)
+            reject(new Error('Failed to fetch user profile'))
+          }
+        },
+        onFailure: (err) => {
+          console.error('Cognito login error:', err)
+          reject(new Error(err.message || 'Login failed'))
+        },
+        newPasswordRequired: () => {
+          reject(new Error('New password required'))
+        },
+      })
+    })
   },
 
   // Register new user
   async register(data: RegisterData): Promise<{ user: User; token: string }> {
-    // This will be replaced with Cognito registration
-    const response = await api.post('/auth/register', data)
-    return response.data
+    return new Promise((resolve, reject) => {
+      const { name, email, password, role, company } = data
+      
+      // Split name into first and last name for Cognito
+      const nameParts = name.trim().split(' ')
+      const givenName = nameParts[0] || name
+      const familyName = nameParts.slice(1).join(' ') || 'User'
+      
+      const attributeList = [
+        new CognitoUserAttribute({ Name: 'email', Value: email }),
+        new CognitoUserAttribute({ Name: 'given_name', Value: givenName }),
+        new CognitoUserAttribute({ Name: 'family_name', Value: familyName }),
+        new CognitoUserAttribute({ Name: 'custom:role', Value: role || 'customer' }),
+      ]
+      
+      if (company) {
+        attributeList.push(new CognitoUserAttribute({ Name: 'custom:company', Value: company }))
+      }
+
+      userPool.signUp(email, password, attributeList, [], async (err, result) => {
+        if (err) {
+          console.error('Cognito registration error:', err)
+          reject(new Error(err.message || 'Registration failed'))
+          return
+        }
+
+        if (result?.user) {
+          try {
+            // Create user profile in our backend
+            const userId = result.user.getUsername()
+            await api.post('/auth/register', {
+              userId,
+              email,
+              role,
+              profile: {
+                name,
+                company: company || '',
+              },
+            })
+
+            // For now, return a mock response since the user needs to verify email
+            const mockUser: User = {
+              userId,
+              email,
+              role: role as 'customer' | 'partner' | 'admin',
+              profile: {
+                name,
+                company: company || '',
+              },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              status: 'pending',
+            }
+
+            resolve({
+              user: mockUser,
+              token: 'pending_verification', // Temporary token
+            })
+          } catch (apiError: any) {
+            console.error('Profile creation error:', apiError)
+            reject(new Error(apiError.response?.data?.error || 'Failed to create user profile'))
+          }
+        } else {
+          reject(new Error('Registration failed - no user returned'))
+        }
+      })
+    })
   },
 
   // Get current user profile
@@ -47,9 +157,20 @@ export const authService = {
     return response.data.user
   },
 
-  // Social login URLs (will be replaced with actual Cognito hosted UI URLs)
+  // Social login URLs using Cognito hosted UI
   getSocialLoginUrl(provider: 'google' | 'github'): string {
-    return `${API_BASE_URL}/auth/social/${provider}`
+    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN
+    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID
+    const redirectUri = import.meta.env.VITE_REDIRECT_URI
+    
+    const identityProvider = provider === 'google' ? 'Google' : 'GitHub'
+    
+    return `https://${cognitoDomain}/oauth2/authorize?` +
+      `identity_provider=${identityProvider}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `response_type=code&` +
+      `client_id=${clientId}&` +
+      `scope=email+openid+profile`
   },
 
   // Logout
