@@ -9,7 +9,31 @@ exports.handler = async (event) => {
   
   try {
     // This function is triggered automatically by Cognito after user confirmation
-    const { userAttributes, userName } = event.request
+    // For post-confirmation trigger, the user info is in different places
+    const userAttributes = event.request.userAttributes
+    const userName = event.userName // This is the correct property for post-confirmation
+    
+    console.log('Event details:', {
+      userName,
+      userAttributes,
+      eventType: event.triggerSource,
+      eventUserName: event.userName,
+      requestUserName: event.request?.userName
+    })
+    
+    // Try different ways to get the userName based on trigger type
+    const userId = userName || event.userName || event.request?.userName
+    
+    // Validate required fields
+    if (!userId) {
+      console.error('userId is missing from event')
+      throw new Error('userId is required but missing from event')
+    }
+    
+    if (!userAttributes || !userAttributes.email) {
+      console.error('userAttributes or email is missing')
+      throw new Error('userAttributes.email is required but missing from event')
+    }
     
     // Extract user information from Cognito attributes
     const email = userAttributes.email
@@ -20,7 +44,7 @@ exports.handler = async (event) => {
     
     // Create user profile in DynamoDB
     const userProfile = {
-      userId: userName, // This is the Cognito user ID
+      userId: userId, // This is the Cognito user ID
       email,
       role,
       profile: {
@@ -35,7 +59,14 @@ exports.handler = async (event) => {
       cognitoStatus: 'confirmed',
     }
 
-    console.log('Creating user profile:', userProfile)
+    console.log('Creating user profile:', JSON.stringify(userProfile, null, 2))
+    console.log('Table name:', process.env.USER_TABLE_NAME)
+    
+    // Validate the userProfile has userId
+    if (!userProfile.userId) {
+      console.error('userProfile.userId is missing:', userProfile)
+      throw new Error('userId is missing from userProfile')
+    }
 
     await docClient.send(new PutCommand({
       TableName: process.env.USER_TABLE_NAME,
