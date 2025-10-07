@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ug63mrbfol.execute-api.us-east-1.amazonaws.com/prod';
 
 export interface PaymentRequest {
   solutionId: string;

@@ -336,10 +336,19 @@ exports.handler = async (event) => {
         }
       }
 
+      // Transform solution to parse JSON strings back to objects
+      const transformedSolution = {
+        ...result.Item,
+        pricing: typeof result.Item.pricing === 'string' ? JSON.parse(result.Item.pricing) : result.Item.pricing,
+        assets: typeof result.Item.assets === 'string' ? JSON.parse(result.Item.assets) : result.Item.assets,
+        features: Array.isArray(result.Item.features) ? result.Item.features : (typeof result.Item.features === 'string' ? JSON.parse(result.Item.features) : []),
+        tags: Array.isArray(result.Item.tags) ? result.Item.tags : (typeof result.Item.tags === 'string' ? JSON.parse(result.Item.tags) : []),
+      }
+
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ solution: result.Item }),
+        body: JSON.stringify({ solution: transformedSolution }),
       }
     }
 
@@ -424,12 +433,21 @@ exports.handler = async (event) => {
       const endIndex = startIndex + parseInt(limit)
       const paginatedItems = sortedItems.slice(startIndex, endIndex)
 
+      // Transform solutions to parse JSON strings back to objects
+      const transformedSolutions = paginatedItems.map(solution => ({
+        ...solution,
+        pricing: typeof solution.pricing === 'string' ? JSON.parse(solution.pricing) : solution.pricing,
+        assets: typeof solution.assets === 'string' ? JSON.parse(solution.assets) : solution.assets,
+        features: Array.isArray(solution.features) ? solution.features : (typeof solution.features === 'string' ? JSON.parse(solution.features) : []),
+        tags: Array.isArray(solution.tags) ? solution.tags : (typeof solution.tags === 'string' ? JSON.parse(solution.tags) : []),
+      }))
+
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
-          solutions: paginatedItems,
-          count: paginatedItems.length,
+          solutions: transformedSolutions,
+          count: transformedSolutions.length,
           total: sortedItems.length,
           hasMore: endIndex < sortedItems.length,
         }),
@@ -451,12 +469,22 @@ exports.handler = async (event) => {
       Limit: 20, // Default limit
     }))
 
+    // Transform solutions to parse JSON strings back to objects
+    const transformedSolutions = (result.Items || []).map(solution => ({
+      ...solution,
+      pricing: typeof solution.pricing === 'string' ? JSON.parse(solution.pricing) : solution.pricing,
+      assets: typeof solution.assets === 'string' ? JSON.parse(solution.assets) : solution.assets,
+      features: Array.isArray(solution.features) ? solution.features : (typeof solution.features === 'string' ? JSON.parse(solution.features) : []),
+      tags: Array.isArray(solution.tags) ? solution.tags : (typeof solution.tags === 'string' ? JSON.parse(solution.tags) : []),
+    }))
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        solutions: result.Items || [],
+        solutions: transformedSolutions,
         count: result.Count || 0,
+        total: result.Count || 0, // Add total field for frontend compatibility
       }),
     }
   } catch (error) {

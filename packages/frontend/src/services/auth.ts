@@ -2,12 +2,12 @@ import axios from 'axios'
 import { CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserAttribute } from 'amazon-cognito-identity-js'
 import { LoginCredentials, RegisterData, User } from '../types/auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ug63mrbfol.execute-api.us-east-1.amazonaws.com/prod'
 
 // Cognito configuration
 const poolData = {
-  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
-  ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
+  UserPoolId: import.meta.env.VITE_USER_POOL_ID,
+  ClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID,
 }
 
 // Debug: Log configuration (remove in production)

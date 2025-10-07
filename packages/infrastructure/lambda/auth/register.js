@@ -25,55 +25,74 @@ exports.handler = async (event) => {
       }
     }
 
-    // This function is called after Cognito registration to create user profile
     const body = JSON.parse(event.body || '{}')
-    const { userId, email, role = 'customer', profile = {} } = body
+    console.log('Registration request body:', body)
 
-    if (!userId || !email) {
+    // Handle both direct registration and post-confirmation
+    if (body.userId && body.email) {
+      // This is a post-confirmation call from Cognito
+      const { userId, email, role = 'customer', profile = {} } = body
+
+      const userProfile = {
+        userId,
+        email,
+        role,
+        profile: {
+          name: profile.name || '',
+          company: profile.company || '',
+          ...profile,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'active',
+      }
+
+      await docClient.send(new PutCommand({
+        TableName: process.env.USER_TABLE_NAME,
+        Item: userProfile,
+      }))
+
       return {
-        statusCode: 400,
+        statusCode: 201,
         headers,
-        body: JSON.stringify({ error: 'userId and email are required' }),
+        body: JSON.stringify({
+          message: 'User profile created successfully',
+          user: userProfile,
+        }),
+      }
+    } else {
+      // This is a direct registration request from frontend
+      const { name, email, password, role = 'customer', company } = body
+
+      if (!name || !email || !password) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: 'Name, email, and password are required' }),
+        }
+      }
+
+      // For now, return success and let frontend handle Cognito registration
+      // The actual Cognito registration is handled by the frontend
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          message: 'Registration request received. Please complete registration through Cognito.',
+          email,
+          role,
+        }),
       }
     }
-
-    // Create user profile in DynamoDB
-    const userProfile = {
-      userId,
-      email,
-      role,
-      profile: {
-        name: profile.name || '',
-        company: profile.company || '',
-        ...profile,
-      },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      status: 'active',
-    }
-
-    await docClient.send(new PutCommand({
-      TableName: process.env.USER_TABLE_NAME,
-      Item: userProfile,
-    }))
-
-    return {
-      statusCode: 201,
-      headers,
-      body: JSON.stringify({
-        message: 'User profile created successfully',
-        user: userProfile,
-      }),
-    }
   } catch (error) {
-    console.error('Error creating user profile:', error)
+    console.error('Error in registration:', error)
     return {
       statusCode: 500,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ error: 'Internal server error' }),
+      body: JSON.stringify({ error: 'Internal server error', details: error.message }),
     }
   }
 }
