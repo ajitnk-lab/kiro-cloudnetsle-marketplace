@@ -212,9 +212,10 @@ exports.handleWebhook = async (event) => {
 
     await dynamodb.update(updateParams).promise();
 
-    // If payment successful, grant access to solution
+    // If payment successful, grant access to solution and calculate commission
     if (status === 'Credit') {
       await grantSolutionAccess(transaction.userId, transaction.solutionId);
+      await calculateAndRecordCommission(transaction);
       await sendPaymentConfirmationEmail(transaction);
     }
 
@@ -257,6 +258,73 @@ async function grantSolutionAccess(userId, solutionId) {
     console.error('Error granting solution access:', error);
     throw error;
   }
+}
+
+async function calculateAndRecordCommission(transaction) {
+  try {
+    // Get solution details to determine category and partner
+    const solutionResult = await dynamodb.get({
+      TableName: process.env.SOLUTIONS_TABLE,
+      Key: { solutionId: transaction.solutionId }
+    }).promise();
+
+    if (!solutionResult.Item) {
+      console.error('Solution not found for commission calculation:', transaction.solutionId);
+      return;
+    }
+
+    const solution = solutionResult.Item;
+
+    // Calculate commission using Lambda function
+    const commissionPayload = {
+      transactionId: transaction.transactionId,
+      solutionId: transaction.solutionId,
+      amount: transaction.amount,
+      category: solution.category,
+      partnerId: solution.partnerId
+    };
+
+    // For now, calculate commission directly (in production, you might want to use a separate Lambda)
+    const commissionRate = getCommissionRateForCategory(solution.category);
+    const commissionAmount = transaction.amount * commissionRate;
+    const partnerEarnings = transaction.amount - commissionAmount;
+
+    // Update transaction with commission data
+    await dynamodb.update({
+      TableName: process.env.TRANSACTIONS_TABLE,
+      Key: { transactionId: transaction.transactionId },
+      UpdateExpression: 'SET commissionData = :commissionData, partnerEarnings = :partnerEarnings',
+      ExpressionAttributeValues: {
+        ':commissionData': {
+          commissionRate,
+          commissionAmount,
+          partnerEarnings,
+          calculatedAt: new Date().toISOString()
+        },
+        ':partnerEarnings': partnerEarnings
+      }
+    }).promise();
+
+    console.log(`Commission calculated for transaction ${transaction.transactionId}: ₹${commissionAmount} (${commissionRate * 100}%)`);
+  } catch (error) {
+    console.error('Error calculating commission:', error);
+  }
+}
+
+function getCommissionRateForCategory(category) {
+  const rates = {
+    'Business Software': 0.15,
+    'Development Tools': 0.12,
+    'Marketing & Sales': 0.18,
+    'Analytics & Data': 0.15,
+    'Communication': 0.14,
+    'E-commerce': 0.20,
+    'Security': 0.16,
+    'Productivity': 0.13,
+    'Design & Creative': 0.17,
+    'Education': 0.10
+  };
+  return rates[category] || 0.15; // 15% default
 }
 
 async function sendPaymentConfirmationEmail(transaction) {

@@ -50,6 +50,11 @@ export const catalogService = {
     return response.data.solution
   },
 
+  // Alias for getSolution to match form expectations
+  async getSolutionById(solutionId: string): Promise<Solution> {
+    return this.getSolution(solutionId)
+  },
+
   // Create solution (partner only)
   async createSolution(solution: Omit<Solution, 'solutionId' | 'createdAt' | 'updatedAt' | 'status'>): Promise<Solution> {
     const response = await api.post('/partner/solutions', solution)
@@ -80,15 +85,12 @@ export const catalogService = {
   },
 
   // Upload solution image
-  async uploadImage(file: File): Promise<{ imageUrl: string }> {
-    const formData = new FormData()
-    formData.append('image', file)
-    
+  async uploadImage(formData: FormData): Promise<string> {
     const response = await api.post('/catalog/upload-image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     })
-    return response.data
+    return response.data.imageUrl
   },
 }

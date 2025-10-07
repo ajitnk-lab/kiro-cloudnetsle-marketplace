@@ -14,6 +14,9 @@ import { SolutionManagementPage } from './pages/SolutionManagementPage'
 import CheckoutPage from './pages/CheckoutPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import DashboardPage from './pages/DashboardPage'
+import SolutionFormPage from './pages/SolutionFormPage'
+import AdminDashboardPage from './pages/AdminDashboardPage'
+import PartnerAnalyticsPage from './pages/PartnerAnalyticsPage'
 import { AuthCallback } from './components/AuthCallback'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -86,6 +89,38 @@ function App() {
             element={
               <ProtectedRoute requiredRole="partner">
                 <SolutionManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/solutions/new"
+            element={
+              <ProtectedRoute requiredRole="partner">
+                <SolutionFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/solutions/:solutionId/edit"
+            element={
+              <ProtectedRoute requiredRole="partner">
+                <SolutionFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/analytics"
+            element={
+              <ProtectedRoute requiredRole="partner">
+                <PartnerAnalyticsPage />
               </ProtectedRoute>
             }
           />

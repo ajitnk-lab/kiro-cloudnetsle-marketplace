@@ -12,6 +12,8 @@ export class DataStack extends Construct {
   public readonly partnerApplicationTable: dynamodb.Table
   public readonly transactionTable: dynamodb.Table
   public readonly userSolutionsTable: dynamodb.Table
+  public readonly commissionSettingsTable: dynamodb.Table
+  public readonly partnerEarningsTable: dynamodb.Table
   public readonly assetsBucket: s3.Bucket
   public readonly vpc: ec2.Vpc
   public readonly database: rds.DatabaseInstance
@@ -174,6 +176,41 @@ export class DataStack extends Construct {
       indexName: 'SolutionIndex',
       partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'accessGrantedAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Commission Settings Table
+    this.commissionSettingsTable = new dynamodb.Table(this, 'CommissionSettingsTable', {
+      tableName: `marketplace-commission-settings-${cdk.Aws.ACCOUNT_ID}`,
+      partitionKey: { name: 'settingId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    })
+
+    // Add GSI for category-based commission rates
+    this.commissionSettingsTable.addGlobalSecondaryIndex({
+      indexName: 'CategoryIndex',
+      partitionKey: { name: 'category', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'effectiveDate', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Partner Earnings Table
+    this.partnerEarningsTable = new dynamodb.Table(this, 'PartnerEarningsTable', {
+      tableName: `marketplace-partner-earnings-${cdk.Aws.ACCOUNT_ID}`,
+      partitionKey: { name: 'partnerId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'month', type: dynamodb.AttributeType.STRING }, // Format: YYYY-MM
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    })
+
+    // Add GSI for monthly earnings reports
+    this.partnerEarningsTable.addGlobalSecondaryIndex({
+      indexName: 'MonthIndex',
+      partitionKey: { name: 'month', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'totalEarnings', type: dynamodb.AttributeType.NUMBER },
     })
 
     // S3 Bucket for assets
