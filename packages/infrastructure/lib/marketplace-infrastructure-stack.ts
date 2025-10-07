@@ -4,6 +4,7 @@ import { AuthStack } from './auth-stack'
 import { DataStack } from './data-stack'
 import { ApiStack } from './api-stack'
 import { FrontendStack } from './frontend-stack'
+import { EmailStack } from './email-stack'
 
 export class MarketplaceInfrastructureStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -15,6 +16,13 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
     // Create authentication layer (Cognito)
     const authStack = new AuthStack(this, 'AuthStack', {
       userTableName: dataStack.userTable.tableName,
+    })
+
+    // Create email layer (SES)
+    const emailStack = new EmailStack(this, 'EmailStack', {
+      fromEmail: 'ajitnk2006+noreply@gmail.com',
+      adminEmail: 'ajitnk2006+admin@gmail.com',
+      replyToEmail: 'ajitnk2006+support@gmail.com'
     })
 
     // Create API layer (API Gateway, Lambda functions)
@@ -65,6 +73,16 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'CloudFrontDistributionId', {
       value: frontendStack.distribution.distributionId,
       description: 'CloudFront Distribution ID',
+    })
+
+    new cdk.CfnOutput(this, 'SESFromEmail', {
+      value: emailStack.fromEmail,
+      description: 'SES verified from email address',
+    })
+
+    new cdk.CfnOutput(this, 'EmailSetupInstructions', {
+      value: 'Run ./setup-ses-emails.ps1 to verify email addresses for sending notifications',
+      description: 'Email setup instructions',
     })
   }
 }
