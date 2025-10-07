@@ -15,7 +15,8 @@ const env = {
 }
 
 // Create the main infrastructure stack
-new MarketplaceInfrastructureStack(app, 'MarketplaceInfrastructureStack', {
+const uniqueId = `MP-${Date.now()}`
+new MarketplaceInfrastructureStack(app, uniqueId, {
   env,
   description: 'Marketplace Platform - Main infrastructure stack',
   tags: {

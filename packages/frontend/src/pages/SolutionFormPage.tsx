@@ -42,14 +42,13 @@ const SolutionFormPage: React.FC = () => {
     control,
     handleSubmit,
     watch,
-    setValue,
     formState: { errors },
     reset
   } = useForm<SolutionFormData>({
     resolver: zodResolver(solutionSchema),
     defaultValues: {
       pricing: {
-        type: 'upfront',
+        model: 'upfront',
         currency: 'INR'
       },
       features: [''],
@@ -67,7 +66,7 @@ const SolutionFormPage: React.FC = () => {
     name: 'tags'
   });
 
-  const watchedPricingType = watch('pricing.type');
+  const watchedPricingModel = watch('pricing.model');
 
   useEffect(() => {
     if (isEditing && solutionId) {
@@ -76,7 +75,7 @@ const SolutionFormPage: React.FC = () => {
   }, [solutionId, isEditing]);
 
   const loadExistingSolution = async () => {
-    const solution = await executeWithErrorHandling(
+    await executeWithErrorHandling(
       () => catalogService.getSolutionById(solutionId!),
       {
         onSuccess: (data) => {
@@ -89,14 +88,14 @@ const SolutionFormPage: React.FC = () => {
             description: data.description,
             category: data.category,
             pricing: {
-              type: data.pricing.type,
-              upfrontPrice: data.pricing.upfrontPrice,
-              monthlyPrice: data.pricing.monthlyPrice,
-              currency: data.pricing.currency
+              model: data.pricing.model,
+              amount: data.pricing.amount,
+              currency: data.pricing.currency,
+              billingCycle: data.pricing.billingCycle
             },
             features: data.features || [''],
             tags: data.tags || [''],
-            requirements: data.requirements || '',
+            requirements: typeof data.requirements === 'string' ? data.requirements : '',
             supportInfo: data.supportInfo || ''
           });
         },
@@ -124,7 +123,7 @@ const SolutionFormPage: React.FC = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const imageUrl = await executeWithErrorHandling(
+      await executeWithErrorHandling(
         () => catalogService.uploadImage(formData),
         {
           onSuccess: (url) => {
@@ -293,14 +292,11 @@ const SolutionFormPage: React.FC = () => {
                 <div className="bg-gray-50 rounded-lg p-6">
                   <div className="text-center mb-4">
                     <div className="text-2xl font-bold text-gray-900">
-                      ₹{watchedPricingType === 'upfront' 
-                        ? (watch('pricing.upfrontPrice') || 0).toLocaleString()
-                        : (watch('pricing.monthlyPrice') || 0).toLocaleString()
-                      }
-                      {watchedPricingType === 'subscription' && '/month'}
+                      ₹{(watch('pricing.amount') || 0).toLocaleString()}
+                      {watchedPricingModel === 'subscription' && '/month'}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {watchedPricingType === 'subscription' ? 'Monthly subscription' : 'One-time purchase'}
+                      {watchedPricingModel === 'subscription' ? 'Monthly subscription' : 'One-time purchase'}
                     </div>
                   </div>
                 </div>
@@ -434,7 +430,7 @@ const SolutionFormPage: React.FC = () => {
                     Pricing Model *
                   </label>
                   <select
-                    {...register('pricing.type')}
+                    {...register('pricing.model')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="upfront">One-time Purchase</option>
@@ -442,43 +438,22 @@ const SolutionFormPage: React.FC = () => {
                   </select>
                 </div>
 
-                {watchedPricingType === 'upfront' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Price (₹) *
-                    </label>
-                    <input
-                      {...register('pricing.upfrontPrice', { valueAsNumber: true })}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                    {errors.pricing?.upfrontPrice && (
-                      <p className="mt-1 text-sm text-red-600">{errors.pricing.upfrontPrice.message}</p>
-                    )}
-                  </div>
-                )}
-
-                {watchedPricingType === 'subscription' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Monthly Price (₹) *
-                    </label>
-                    <input
-                      {...register('pricing.monthlyPrice', { valueAsNumber: true })}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0.00"
-                    />
-                    {errors.pricing?.monthlyPrice && (
-                      <p className="mt-1 text-sm text-red-600">{errors.pricing.monthlyPrice.message}</p>
-                    )}
-                  </div>
-                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    {watchedPricingModel === 'subscription' ? 'Monthly Price (₹) *' : 'Price (₹) *'}
+                  </label>
+                  <input
+                    {...register('pricing.amount', { valueAsNumber: true })}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                  />
+                  {errors.pricing?.amount && (
+                    <p className="mt-1 text-sm text-red-600">{errors.pricing.amount.message}</p>
+                  )}
+                </div>
               </div>
             </div>
 

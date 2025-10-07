@@ -15,7 +15,7 @@ const CheckoutPage: React.FC = () => {
   
   const [solution, setSolution] = useState<Solution | null>(null);
   const { error, isLoading, executeWithErrorHandling } = useApiError();
-  const { success, error: showError } = useToast();
+  const { error: showError } = useToast();
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const CheckoutPage: React.FC = () => {
   }, [solutionId, isAuthenticated, navigate]);
 
   const loadSolution = async () => {
-    const solutionData = await executeWithErrorHandling(
+    await executeWithErrorHandling(
       () => catalogService.getSolutionById(solutionId!),
       {
         onSuccess: (data) => setSolution(data),
@@ -47,9 +47,7 @@ const CheckoutPage: React.FC = () => {
 
     setProcessing(true);
 
-    const amount = solution.pricing.type === 'upfront' 
-      ? solution.pricing.upfrontPrice 
-      : solution.pricing.monthlyPrice;
+    const amount = solution.pricing.amount;
 
     await executeWithErrorHandling(
       () => paymentService.initiatePayment(solution.solutionId, amount!, solution.name),
@@ -105,11 +103,9 @@ const CheckoutPage: React.FC = () => {
     );
   }
 
-  const amount = solution.pricing.type === 'upfront' 
-    ? solution.pricing.upfrontPrice 
-    : solution.pricing.monthlyPrice;
+  const amount = solution.pricing.amount;
 
-  const isSubscription = solution.pricing.type === 'subscription';
+  const isSubscription = solution.pricing.model === 'subscription';
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

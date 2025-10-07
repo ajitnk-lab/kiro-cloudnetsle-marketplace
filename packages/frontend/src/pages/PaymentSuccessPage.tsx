@@ -7,7 +7,7 @@ import { CheckCircle, XCircle, Loader2, Download, ArrowRight } from 'lucide-reac
 const PaymentSuccessPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState(true);

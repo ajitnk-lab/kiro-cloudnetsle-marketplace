@@ -1,21 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../components/Toast';
-import { useApiError } from '../hooks/useApiError';
+// import { useToast } from '../components/Toast';
+// import { useApiError } from '../hooks/useApiError';
 import { 
   DollarSign, 
   TrendingUp, 
   Package, 
-  Users,
-  Calendar,
-  Download,
   Eye,
   Star,
-  BarChart3,
-  PieChart,
   ArrowUpRight,
   ArrowDownRight,
-  Filter,
   RefreshCw
 } from 'lucide-react';
 
@@ -53,8 +47,6 @@ interface AnalyticsData {
 
 const PartnerAnalyticsPage: React.FC = () => {
   const { user } = useAuth();
-  const { success, error: showError } = useToast();
-  const { executeWithErrorHandling, isLoading } = useApiError();
   
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>({
     totalEarnings: 0,
@@ -389,7 +381,7 @@ const PartnerAnalyticsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {analyticsData.topSolutions.map((solution, index) => (
+                  {analyticsData.topSolutions.map((solution) => (
                     <tr key={solution.solutionId}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{solution.name}</div>

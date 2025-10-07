@@ -7,21 +7,15 @@ import { Solution } from '../types/solution';
 import { 
   Users, 
   Package, 
-  DollarSign, 
   TrendingUp,
   CheckCircle,
   XCircle,
   Clock,
   AlertCircle,
   Eye,
-  Edit,
-  Trash2,
   Filter,
   Search,
-  MoreVertical,
-  UserCheck,
-  UserX,
-  Settings
+  UserCheck
 } from 'lucide-react';
 
 interface AdminStats {
@@ -36,7 +30,7 @@ interface AdminStats {
 const AdminDashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { success, error: showError } = useToast();
-  const { executeWithErrorHandling, isLoading } = useApiError();
+  const { executeWithErrorHandling } = useApiError();
   
   const [activeTab, setActiveTab] = useState<'overview' | 'solutions' | 'users' | 'partners'>('overview');
   const [stats, setStats] = useState<AdminStats>({

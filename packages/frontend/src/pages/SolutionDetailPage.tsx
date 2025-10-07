@@ -1,6 +1,6 @@
 // React import not needed in React 17+
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { 
   ArrowLeft, 
   Star, 
@@ -18,6 +18,7 @@ import { Solution } from '../types/solution'
 
 export function SolutionDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [solution, setSolution] = useState<Solution | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -158,19 +159,19 @@ export function SolutionDetailPage() {
             <div className="mb-8">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">System Requirements</h3>
               <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                {solution.requirements.system && (
+                {typeof solution.requirements === 'object' && solution.requirements.system && (
                   <div>
                     <span className="font-medium text-gray-900">System: </span>
                     <span className="text-gray-700">{solution.requirements.system}</span>
                   </div>
                 )}
-                {solution.requirements.storage && (
+                {typeof solution.requirements === 'object' && solution.requirements.storage && (
                   <div>
                     <span className="font-medium text-gray-900">Storage: </span>
                     <span className="text-gray-700">{solution.requirements.storage}</span>
                   </div>
                 )}
-                {solution.requirements.users && (
+                {typeof solution.requirements === 'object' && solution.requirements.users && (
                   <div>
                     <span className="font-medium text-gray-900">Users: </span>
                     <span className="text-gray-700">{solution.requirements.users}</span>

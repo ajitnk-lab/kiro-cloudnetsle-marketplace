@@ -16,8 +16,12 @@ if (-not (Test-Path "packages/infrastructure")) {
 Write-Host "📋 Getting AWS deployment information..." -ForegroundColor Yellow
 
 try {
-    # Get CDK outputs
-    $cdkOutputs = cdk output --app "packages/infrastructure/bin/marketplace-app.js" --json 2>$null | ConvertFrom-Json
+    # Get CDK outputs using CloudFormation directly
+    $stackOutputs = aws cloudformation describe-stacks --stack-name MP-1759832846408 --query "Stacks[0].Outputs" --output json | ConvertFrom-Json
+    $cdkOutputs = @{}
+    foreach ($output in $stackOutputs) {
+        $cdkOutputs[$output.OutputKey] = $output.OutputValue
+    }
     
     if (-not $cdkOutputs) {
         Write-Host "❌ Error: Could not get CDK outputs. Make sure the infrastructure is deployed." -ForegroundColor Red
@@ -26,8 +30,8 @@ try {
     }
     
     # Extract required values
-    $userPoolId = $cdkOutputs.MarketplaceInfrastructureStack.UserPoolId
-    $userTableName = "marketplace-users-$((aws sts get-caller-identity --query Account --output text))"
+    $userPoolId = $cdkOutputs.UserPoolId
+    $userTableName = $cdkOutputs.UserTableName
     
     if (-not $userPoolId) {
         Write-Host "❌ Error: Could not find User Pool ID in CDK outputs" -ForegroundColor Red

@@ -134,28 +134,14 @@ export const solutionSchema = z.object({
     .string()
     .min(1, 'Please select a category'),
   pricing: z.object({
-    type: z.enum(['upfront', 'subscription'], {
-      required_error: 'Please select a pricing type'
+    model: z.enum(['upfront', 'subscription'], {
+      required_error: 'Please select a pricing model'
     }),
-    upfrontPrice: z
+    amount: z
       .number()
-      .min(0, 'Price must be positive')
-      .optional(),
-    monthlyPrice: z
-      .number()
-      .min(0, 'Price must be positive')
-      .optional(),
-    currency: z.string().default('INR')
-  }).refine(data => {
-    if (data.type === 'upfront' && (!data.upfrontPrice || data.upfrontPrice <= 0)) {
-      return false;
-    }
-    if (data.type === 'subscription' && (!data.monthlyPrice || data.monthlyPrice <= 0)) {
-      return false;
-    }
-    return true;
-  }, {
-    message: 'Please enter a valid price for the selected pricing type'
+      .min(0.01, 'Amount must be greater than 0'),
+    currency: z.string().default('INR'),
+    billingCycle: z.enum(['month', 'year']).optional()
   }),
   features: z
     .array(z.string().min(1, 'Feature cannot be empty'))

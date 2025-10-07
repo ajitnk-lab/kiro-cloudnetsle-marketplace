@@ -54,7 +54,7 @@ const DashboardPage: React.FC = () => {
           return {
             solution,
             accessGrantedAt: transaction.updatedAt,
-            accessType: solution.pricing.type === 'subscription' ? 'subscription' : 'purchased',
+            accessType: solution.pricing.model === 'subscription' ? 'subscription' : 'purchased',
             status: 'active'
           } as UserSolution;
         } catch (error) {

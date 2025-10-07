@@ -41,27 +41,6 @@ export class EmailStack extends Construct {
     // Create a configuration set for tracking
     const configurationSet = new ses.ConfigurationSet(this, 'MarketplaceConfigSet', {
       configurationSetName: 'marketplace-emails',
-      deliveryOptions: {
-        tlsPolicy: ses.TlsPolicy.REQUIRE,
-      },
-    })
-
-    // Add event publishing for bounce and complaint tracking
-    configurationSet.addEventDestination('CloudWatchDestination', {
-      destination: ses.EventDestination.cloudWatchDimensions({
-        defaultDimensionValue: 'marketplace',
-        dimensions: {
-          MessageTag: ses.CloudWatchDimensionSource.messageTag('emailType'),
-          EmailAddress: ses.CloudWatchDimensionSource.emailAddress(),
-        },
-      }),
-      events: [
-        ses.EmailSendingEvent.SEND,
-        ses.EmailSendingEvent.BOUNCE,
-        ses.EmailSendingEvent.COMPLAINT,
-        ses.EmailSendingEvent.DELIVERY,
-        ses.EmailSendingEvent.REJECT,
-      ],
     })
 
     // Lambda function to send verification emails automatically

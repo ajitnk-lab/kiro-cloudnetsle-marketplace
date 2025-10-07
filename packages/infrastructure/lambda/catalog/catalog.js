@@ -2,7 +2,7 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
 const { DynamoDBDocumentClient, ScanCommand, GetCommand, QueryCommand, PutCommand, UpdateCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb')
 const { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3')
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('crypto')
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
@@ -108,7 +108,7 @@ exports.handler = async (event) => {
           }
         }
 
-        const solutionId = uuidv4()
+        const solutionId = randomUUID()
         const newSolution = {
           solutionId,
           partnerId: requesterId,
@@ -274,7 +274,7 @@ exports.handler = async (event) => {
         }
       }
 
-      const imageKey = `solutions/${requesterId}/${uuidv4()}.jpg`
+      const imageKey = `solutions/${requesterId}/${randomUUID()}.jpg`
       const uploadUrl = await generatePresignedUrl(process.env.ASSETS_BUCKET_NAME, imageKey, 'putObject')
 
       return {

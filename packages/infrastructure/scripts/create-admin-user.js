@@ -46,10 +46,6 @@ async function createAdminUser() {
           {
             Name: 'custom:role',
             Value: ADMIN_CONFIG.role
-          },
-          {
-            Name: 'custom:userId',
-            Value: userId
           }
         ],
         MessageAction: 'SUPPRESS', // Don't send welcome email

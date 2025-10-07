@@ -1,9 +1,11 @@
 import * as cdk from 'aws-cdk-lib'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as s3 from 'aws-cdk-lib/aws-s3'
-import * as rds from 'aws-cdk-lib/aws-rds'
-import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import { Construct } from 'constructs'
+
+export interface DataStackProps {
+  uniqueSuffix?: string
+}
 
 export class DataStack extends Construct {
   public readonly userTable: dynamodb.Table
@@ -15,43 +17,22 @@ export class DataStack extends Construct {
   public readonly commissionSettingsTable: dynamodb.Table
   public readonly partnerEarningsTable: dynamodb.Table
   public readonly assetsBucket: s3.Bucket
-  public readonly vpc: ec2.Vpc
-  public readonly database: rds.DatabaseInstance
+  // VPC and RDS removed to reduce costs and deployment time
+  // Can be added later when needed for production
 
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props?: DataStackProps) {
     super(scope, id)
-
-    // Create VPC for RDS
-    this.vpc = new ec2.Vpc(this, 'MarketplaceVpc', {
-      maxAzs: 2,
-      natGateways: 1,
-      subnetConfiguration: [
-        {
-          cidrMask: 24,
-          name: 'Public',
-          subnetType: ec2.SubnetType.PUBLIC,
-        },
-        {
-          cidrMask: 24,
-          name: 'Private',
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-        },
-        {
-          cidrMask: 28,
-          name: 'Database',
-          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-        },
-      ],
-    })
+    
+    const uniqueSuffix = props?.uniqueSuffix || Date.now().toString()
 
     // DynamoDB Tables
     this.userTable = new dynamodb.Table(this, 'UserTable', {
-      tableName: `marketplace-users-${cdk.Aws.ACCOUNT_ID}`,
+      tableName: `marketplace-users-${uniqueSuffix}`,
       partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      pointInTimeRecovery: false, // Disabled for dev to reduce costs
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for email lookup
@@ -68,12 +49,12 @@ export class DataStack extends Construct {
     })
 
     this.solutionTable = new dynamodb.Table(this, 'SolutionTable', {
-      tableName: `marketplace-solutions-${cdk.Aws.ACCOUNT_ID}`,
+      tableName: `marketplace-solutions-${uniqueSuffix}`,
       partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      pointInTimeRecovery: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for partner solutions
@@ -98,7 +79,7 @@ export class DataStack extends Construct {
     })
 
     this.sessionTable = new dynamodb.Table(this, 'SessionTable', {
-      tableName: `marketplace-sessions-${cdk.Aws.ACCOUNT_ID}`,
+      tableName: `marketplace-sessions-${uniqueSuffix}`,
       partitionKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -108,12 +89,12 @@ export class DataStack extends Construct {
 
     // Partner Application Table
     this.partnerApplicationTable = new dynamodb.Table(this, 'PartnerApplicationTable', {
-      tableName: `marketplace-partner-applications-${cdk.Aws.ACCOUNT_ID}`,
+      tableName: `marketplace-partner-applications-${uniqueSuffix}`,
       partitionKey: { name: 'applicationId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      pointInTimeRecovery: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for user applications
@@ -132,12 +113,12 @@ export class DataStack extends Construct {
 
     // Transaction Table for payment processing
     this.transactionTable = new dynamodb.Table(this, 'TransactionTable', {
-      tableName: `marketplace-transactions-${cdk.Aws.ACCOUNT_ID}`,
+      tableName: `marketplace-transactions-${uniqueSuffix}`,
       partitionKey: { name: 'transactionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      pointInTimeRecovery: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for user transactions
@@ -162,13 +143,13 @@ export class DataStack extends Construct {
 
     // User Solutions Table for access management
     this.userSolutionsTable = new dynamodb.Table(this, 'UserSolutionsTable', {
-      tableName: `marketplace-user-solutions-${cdk.Aws.ACCOUNT_ID}`,
+      tableName: `marketplace-user-solutions-${uniqueSuffix}`,
       partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      pointInTimeRecovery: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for solution access lookup
@@ -180,12 +161,12 @@ export class DataStack extends Construct {
 
     // Commission Settings Table
     this.commissionSettingsTable = new dynamodb.Table(this, 'CommissionSettingsTable', {
-      tableName: `marketplace-commission-settings-${cdk.Aws.ACCOUNT_ID}`,
+      tableName: `marketplace-commission-settings-${uniqueSuffix}`,
       partitionKey: { name: 'settingId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      pointInTimeRecovery: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for category-based commission rates
@@ -197,13 +178,13 @@ export class DataStack extends Construct {
 
     // Partner Earnings Table
     this.partnerEarningsTable = new dynamodb.Table(this, 'PartnerEarningsTable', {
-      tableName: `marketplace-partner-earnings-${cdk.Aws.ACCOUNT_ID}`,
+      tableName: `marketplace-partner-earnings-${uniqueSuffix}`,
       partitionKey: { name: 'partnerId', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'month', type: dynamodb.AttributeType.STRING }, // Format: YYYY-MM
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      pointInTimeRecovery: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for monthly earnings reports
@@ -215,7 +196,7 @@ export class DataStack extends Construct {
 
     // S3 Bucket for assets
     this.assetsBucket = new s3.Bucket(this, 'AssetsBucket', {
-      bucketName: `marketplace-assets-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
+      bucketName: `marketplace-assets-${uniqueSuffix}`,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       versioned: true,
@@ -225,40 +206,11 @@ export class DataStack extends Construct {
           noncurrentVersionExpiration: cdk.Duration.days(30),
         },
       ],
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     })
 
-    // RDS PostgreSQL for transactions and financial data
-    const dbSecurityGroup = new ec2.SecurityGroup(this, 'DatabaseSecurityGroup', {
-      vpc: this.vpc,
-      description: 'Security group for RDS database',
-      allowAllOutbound: false,
-    })
-
-    // Allow inbound connections from Lambda functions (will be added later)
-    dbSecurityGroup.addIngressRule(
-      ec2.Peer.ipv4(this.vpc.vpcCidrBlock),
-      ec2.Port.tcp(5432),
-      'Allow PostgreSQL access from VPC'
-    )
-
-    this.database = new rds.DatabaseInstance(this, 'MarketplaceDatabase', {
-      engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_15_7,
-      }),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
-      vpc: this.vpc,
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-      },
-      securityGroups: [dbSecurityGroup],
-      databaseName: 'marketplace',
-      credentials: rds.Credentials.fromGeneratedSecret('marketplace_admin', {
-        secretName: 'marketplace/database/credentials',
-      }),
-      backupRetention: cdk.Duration.days(7),
-      deletionProtection: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-    })
+    // RDS PostgreSQL removed for now - DynamoDB handles all data
+    // Can be added later for complex transactional requirements
   }
 }

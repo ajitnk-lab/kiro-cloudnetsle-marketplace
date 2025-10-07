@@ -1,6 +1,7 @@
 export interface User {
   userId: string
   email: string
+  name?: string
   role: 'customer' | 'partner' | 'admin'
   profile: {
     name: string

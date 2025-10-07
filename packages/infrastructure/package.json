@@ -16,10 +16,12 @@
   },
   "dependencies": {
     "@aws-cdk/aws-s3-deployment": "^1.203.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.901.0",
     "@aws-sdk/client-dynamodb": "^3.902.0",
     "@aws-sdk/lib-dynamodb": "^3.902.0",
     "aws-cdk-lib": "^2.100.0",
-    "constructs": "^10.3.0"
+    "constructs": "^10.3.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

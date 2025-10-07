@@ -9,7 +9,7 @@ export interface Solution {
   pricing: {
     model: 'upfront' | 'subscription'
     amount: number
-    currency: 'INR'
+    currency: string
     billingCycle?: 'month' | 'year'
   }
   assets: {
@@ -17,13 +17,15 @@ export interface Solution {
     documents: string[]
     downloadUrl?: string
   }
-  features?: string[]
-  requirements?: {
+  features: string[]
+  requirements?: string | {
     system?: string
     storage?: string
     users?: string
   }
+  supportInfo?: string
   status: 'draft' | 'pending' | 'approved' | 'rejected' | 'active'
+  rejectionReason?: string
   createdAt: string
   updatedAt: string
 }

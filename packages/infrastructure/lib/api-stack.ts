@@ -14,6 +14,8 @@ interface ApiStackProps {
   partnerApplicationTable: dynamodb.Table
   transactionTable: dynamodb.Table
   userSolutionsTable: dynamodb.Table
+  commissionSettingsTable: dynamodb.Table
+  partnerEarningsTable: dynamodb.Table
   assetsBucket: s3.Bucket
 }
 
@@ -64,6 +66,8 @@ export class ApiStack extends Construct {
     props.partnerApplicationTable.grantReadWriteData(lambdaRole)
     props.transactionTable.grantReadWriteData(lambdaRole)
     props.userSolutionsTable.grantReadWriteData(lambdaRole)
+    props.commissionSettingsTable.grantReadWriteData(lambdaRole)
+    props.partnerEarningsTable.grantReadWriteData(lambdaRole)
     props.assetsBucket.grantReadWrite(lambdaRole)
 
     // Grant Cognito permissions for user management
@@ -174,8 +178,8 @@ export class ApiStack extends Construct {
         SOLUTIONS_TABLE: props.solutionTable.tableName,
         TRANSACTIONS_TABLE: props.transactionTable.tableName,
         USER_SOLUTIONS_TABLE: props.userSolutionsTable.tableName,
-        INSTAMOJO_API_KEY: 'test_api_key', // Replace with actual key in production
-        INSTAMOJO_AUTH_TOKEN: 'test_auth_token', // Replace with actual token in production
+        INSTAMOJO_API_KEY: 'test_api_key', // TODO: Move to Secrets Manager for production
+        INSTAMOJO_AUTH_TOKEN: 'test_auth_token', // TODO: Move to Secrets Manager for production
         INSTAMOJO_ENDPOINT: 'https://test.instamojo.com/api/1.1/',
         FRONTEND_URL: 'https://dddzq9ul1ygr3.cloudfront.net',
         API_GATEWAY_URL: `https://${this.api.restApiId}.execute-api.${cdk.Aws.REGION}.amazonaws.com/prod`,

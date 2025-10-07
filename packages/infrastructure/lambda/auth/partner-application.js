@@ -1,7 +1,7 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
 const { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb')
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('crypto')
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
@@ -111,7 +111,7 @@ exports.handler = async (event) => {
         }
       }
 
-      const applicationId = uuidv4()
+      const applicationId = randomUUID()
       const partnerApplication = {
         applicationId,
         userId: requesterId,

@@ -55,7 +55,7 @@ class PaymentService {
     } catch (error) {
       console.error('Payment request creation failed:', error);
       throw new Error(
-        error.response?.data?.error || 'Failed to create payment request'
+        (error as any).response?.data?.error || 'Failed to create payment request'
       );
     }
   }
@@ -70,7 +70,7 @@ class PaymentService {
     } catch (error) {
       console.error('Failed to fetch transaction status:', error);
       throw new Error(
-        error.response?.data?.error || 'Failed to fetch transaction status'
+        (error as any).response?.data?.error || 'Failed to fetch transaction status'
       );
     }
   }
@@ -85,7 +85,7 @@ class PaymentService {
     } catch (error) {
       console.error('Failed to fetch user transactions:', error);
       throw new Error(
-        error.response?.data?.error || 'Failed to fetch transactions'
+        (error as any).response?.data?.error || 'Failed to fetch transactions'
       );
     }
   }
@@ -122,7 +122,7 @@ class PaymentService {
   }
 
   // Helper method to handle payment success callback
-  async handlePaymentSuccess(paymentId?: string, paymentRequestId?: string): Promise<Transaction | null> {
+  async handlePaymentSuccess(_paymentId?: string, _paymentRequestId?: string): Promise<Transaction | null> {
     try {
       const transactionId = localStorage.getItem('currentTransactionId');
       if (!transactionId) {
