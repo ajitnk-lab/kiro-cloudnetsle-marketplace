@@ -1,5 +1,6 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
 const { DynamoDBDocumentClient, PutCommand, BatchWriteCommand } = require('@aws-sdk/lib-dynamodb')
+const { createAdminUser } = require('./create-admin-user')
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
@@ -328,6 +329,19 @@ async function seedSampleData() {
           console.error(`❌ Failed to add partner ${partner.profile.name}:`, error.message)
         }
       }
+    }
+    
+    // Create admin user if environment variables are available
+    if (process.env.USER_POOL_ID && process.env.USER_TABLE_NAME) {
+      console.log('🔧 Creating admin user...')
+      try {
+        await createAdminUser()
+        console.log('✅ Admin user created successfully!')
+      } catch (error) {
+        console.log('⚠️  Admin user creation skipped:', error.message)
+      }
+    } else {
+      console.log('⚠️  Skipping admin user creation (missing USER_POOL_ID or USER_TABLE_NAME)')
     }
     
     console.log('🎉 Sample data seeding completed!')
