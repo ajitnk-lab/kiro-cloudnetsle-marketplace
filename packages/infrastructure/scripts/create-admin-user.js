@@ -9,7 +9,7 @@ const cognitoClient = new CognitoIdentityProviderClient({});
 
 // Admin user configuration
 const ADMIN_CONFIG = {
-  email: 'admin@marketplace.com',
+  email: 'ajitnk2006+admin@gmail.com',
   password: 'Admin123!@#',  // Change this to a secure password
   name: 'System Administrator',
   role: 'admin'

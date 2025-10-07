@@ -29,7 +29,7 @@ node scripts/create-admin-user.js
 ### **2. Default Admin Credentials**
 
 ```
-Email: admin@marketplace.com
+Email: ajitnk2006+admin@gmail.com
 Password: Admin123!@#
 Role: admin
 ```
@@ -191,7 +191,7 @@ status: 'rejected'
 # Check Cognito User Pool
 aws cognito-idp admin-get-user \
   --user-pool-id YOUR_POOL_ID \
-  --username admin@marketplace.com
+  --username ajitnk2006+admin@gmail.com
 
 # Check DynamoDB record
 aws dynamodb get-item \

@@ -131,8 +131,8 @@ export class ApiStack extends Construct {
       environment: {
         PARTNER_APPLICATION_TABLE_NAME: props.partnerApplicationTable.tableName,
         USER_TABLE_NAME: props.userTable.tableName,
-        FROM_EMAIL: 'noreply@marketplace.com', // Update with your verified SES email
-        ADMIN_EMAIL: 'admin@marketplace.com', // Update with admin email
+        FROM_EMAIL: 'ajitnk2006+noreply@gmail.com',
+        ADMIN_EMAIL: 'ajitnk2006+admin@gmail.com',
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -179,7 +179,7 @@ export class ApiStack extends Construct {
         INSTAMOJO_ENDPOINT: 'https://test.instamojo.com/api/1.1/',
         FRONTEND_URL: 'https://dddzq9ul1ygr3.cloudfront.net',
         API_GATEWAY_URL: `https://${this.api.restApiId}.execute-api.${cdk.Aws.REGION}.amazonaws.com/prod`,
-        FROM_EMAIL: 'noreply@marketplace.com',
+        FROM_EMAIL: 'ajitnk2006+noreply@gmail.com',
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -195,7 +195,7 @@ export class ApiStack extends Construct {
         TRANSACTIONS_TABLE: props.transactionTable.tableName,
         USER_SOLUTIONS_TABLE: props.userSolutionsTable.tableName,
         FRONTEND_URL: 'https://dddzq9ul1ygr3.cloudfront.net',
-        FROM_EMAIL: 'noreply@marketplace.com',
+        FROM_EMAIL: 'ajitnk2006+noreply@gmail.com',
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),

@@ -58,7 +58,7 @@ try {
         Write-Host "🎉 SUCCESS! Admin user created successfully!" -ForegroundColor Green
         Write-Host ""
         Write-Host "📋 ADMIN LOGIN DETAILS:" -ForegroundColor Cyan
-        Write-Host "   Email: admin@marketplace.com" -ForegroundColor White
+        Write-Host "   Email: ajitnk2006+admin@gmail.com" -ForegroundColor White
         Write-Host "   Password: Admin123!@#" -ForegroundColor White
         Write-Host "   Role: admin" -ForegroundColor White
         Write-Host ""

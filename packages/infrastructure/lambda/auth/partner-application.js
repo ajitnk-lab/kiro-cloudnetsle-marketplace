@@ -37,7 +37,7 @@ const validatePartnerApplication = (application) => {
 const sendNotificationEmail = async (to, subject, body) => {
   try {
     await sesClient.send(new SendEmailCommand({
-      Source: process.env.FROM_EMAIL || 'noreply@marketplace.com',
+      Source: process.env.FROM_EMAIL || 'ajitnk2006+noreply@gmail.com',
       Destination: {
         ToAddresses: [to],
       },
