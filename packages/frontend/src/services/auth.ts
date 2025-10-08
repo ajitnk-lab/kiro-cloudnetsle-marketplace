@@ -1,64 +1,267 @@
-import axios from 'axios'
+import { Amplify } from 'aws-amplify'
+import { signIn, signUp, confirmSignUp, signOut, fetchAuthSession } from 'aws-amplify/auth'
 import { LoginCredentials, RegisterData, User } from '../types/auth'
 
-// This will be replaced with actual Cognito configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_BASE_URL = (import.meta as any).env.VITE_API_URL as string
+const USER_POOL_ID = (import.meta as any).env.VITE_USER_POOL_ID as string
+const CLIENT_ID = (import.meta as any).env.VITE_USER_POOL_CLIENT_ID as string
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-
-// Add auth token to requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+// Configure Amplify
+Amplify.configure({
+  Auth: {
+    Cognito: {
+      userPoolId: USER_POOL_ID,
+      userPoolClientId: CLIENT_ID,
+      identityPoolId: undefined as any,
+      loginWith: {
+        email: true,
+      },
+      signUpVerificationMethod: 'code',
+      userAttributes: {
+        email: {
+          required: true,
+        },
+      },
+      allowGuestAccess: false,
+      passwordFormat: {
+        minLength: 8,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireNumbers: true,
+        requireSpecialCharacters: true,
+      },
+    }
   }
-  return config
 })
 
 export const authService = {
-  // Login with email/password
   async login(credentials: LoginCredentials): Promise<{ user: User; token: string }> {
-    // This will be replaced with Cognito authentication
-    const response = await api.post('/auth/login', credentials)
-    return response.data
+    try {
+      console.log('🔐 Starting login with:', { email: credentials.email })
+      
+      try {
+        const currentSession = await fetchAuthSession()
+        if (currentSession.tokens?.idToken) {
+          console.log('👤 User already authenticated, using existing session')
+          const token = currentSession.tokens.idToken.toString()
+          
+          const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          })
+          
+          if (userResponse.ok) {
+            const userData = await userResponse.json()
+            return { user: userData.user, token }
+          } else {
+            const userInfo = currentSession.tokens?.idToken?.payload
+            if (userInfo) {
+              const user: User = {
+                userId: userInfo.sub as string,
+                email: userInfo.email as string,
+                role: (userInfo['custom:role'] as any) || 'customer',
+                profile: {
+                  name: `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim(),
+                  company: (userInfo['custom:company'] as string) || '',
+                },
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                status: 'active'
+              }
+              return { user, token }
+            }
+          }
+        }
+      } catch (sessionError) {
+        console.log('📝 No existing session, proceeding with login')
+      }
+
+      const result = await signIn({
+        username: credentials.email,
+        password: credentials.password,
+      })
+
+      if (result.isSignedIn) {
+        const session = await fetchAuthSession()
+        const token = session.tokens?.idToken?.toString()
+        
+        if (token) {
+          const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+          
+          if (userResponse.ok) {
+            const userData = await userResponse.json()
+            return { user: userData.user, token }
+          } else {
+            const userInfo = session.tokens?.idToken?.payload
+            if (userInfo) {
+              const user: User = {
+                userId: userInfo.sub as string,
+                email: userInfo.email as string,
+                role: (userInfo['custom:role'] as any) || 'customer',
+                profile: {
+                  name: `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim(),
+                  company: (userInfo['custom:company'] as string) || '',
+                },
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                status: 'active'
+              }
+              return { user, token }
+            }
+          }
+        }
+      }
+      
+      throw new Error('Login failed')
+    } catch (error: any) {
+      console.error('💥 Login error:', error)
+      
+      if (error.name === 'UserAlreadyAuthenticatedException') {
+        console.log('🔄 Signing out existing user and retrying...')
+        await signOut()
+        
+        const result = await signIn({
+          username: credentials.email,
+          password: credentials.password,
+        })
+
+        if (result.isSignedIn) {
+          const session = await fetchAuthSession()
+          const token = session.tokens?.idToken?.toString()
+          
+          if (token) {
+            const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            })
+            
+            if (userResponse.ok) {
+              const userData = await userResponse.json()
+              return { user: userData.user, token }
+            } else {
+              const userInfo = session.tokens?.idToken?.payload
+              if (userInfo) {
+                const user: User = {
+                  userId: userInfo.sub as string,
+                  email: userInfo.email as string,
+                  role: (userInfo['custom:role'] as any) || 'customer',
+                  profile: {
+                    name: `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim(),
+                    company: (userInfo['custom:company'] as string) || '',
+                  },
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                  status: 'active'
+                }
+                return { user, token }
+              }
+            }
+          }
+        }
+      }
+      
+      throw new Error(error.message || 'Invalid email or password')
+    }
   },
 
-  // Register new user
   async register(data: RegisterData): Promise<{ user: User; token: string }> {
-    // This will be replaced with Cognito registration
-    const response = await api.post('/auth/register', data)
-    return response.data
+    try {
+      const fullName = data.name || 'User Name'
+      const nameParts = fullName.trim().split(' ')
+      const firstName = nameParts[0] || 'User'
+      const lastName = nameParts.slice(1).join(' ') || 'Name'
+
+      const { userId } = await signUp({
+        username: data.email,
+        password: data.password,
+        options: {
+          userAttributes: {
+            email: data.email,
+            given_name: firstName,
+            family_name: lastName,
+            'custom:role': data.role || 'customer',
+            'custom:company': data.company || '',
+          },
+        },
+      })
+
+      return { 
+        user: { 
+          userId: userId || 'pending', 
+          email: data.email, 
+          role: data.role || 'customer',
+          profile: { 
+            name: fullName,
+            company: data.company || ''
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          status: 'pending'
+        } as User, 
+        token: 'pending-confirmation'
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error)
+      throw new Error(error.message || 'Registration failed. Please try again.')
+    }
   },
 
-  // Get current user profile
+  async confirmRegistration(email: string, code: string): Promise<void> {
+    try {
+      const { isSignUpComplete } = await confirmSignUp({
+        username: email,
+        confirmationCode: code,
+      })
+
+      if (!isSignUpComplete) {
+        throw new Error('Confirmation incomplete')
+      }
+    } catch (error: any) {
+      console.error('Confirmation error:', error)
+      throw new Error(error.message || 'Verification failed')
+    }
+  },
+
   async getCurrentUser(): Promise<User> {
-    const response = await api.get('/user/profile')
-    return response.data.user
+    const token = this.getToken()
+    if (!token) throw new Error('No token found')
+
+    const response = await fetch(`${API_BASE_URL}/user/profile`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    
+    if (response.ok) {
+      const data = await response.json()
+      return data.user
+    }
+    
+    throw new Error('Failed to get user profile')
   },
 
-  // Update user profile
   async updateProfile(profile: Partial<User['profile']>): Promise<User> {
-    const response = await api.put('/user/profile', { profile })
-    return response.data.user
+    const token = this.getToken()
+    if (!token) throw new Error('No token found')
+
+    const response = await fetch(`${API_BASE_URL}/user/profile`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ profile })
+    })
+    
+    if (response.ok) {
+      const data = await response.json()
+      return data.user
+    }
+    
+    throw new Error('Failed to update profile')
   },
 
-  // Social login URLs (will be replaced with actual Cognito hosted UI URLs)
-  getSocialLoginUrl(provider: 'google' | 'github'): string {
-    return `${API_BASE_URL}/auth/social/${provider}`
-  },
-
-  // Logout
-  logout(): void {
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('user')
-  },
-
-  // Token management
   getToken(): string | null {
     return localStorage.getItem('authToken')
   },
@@ -67,7 +270,6 @@ export const authService = {
     localStorage.setItem('authToken', token)
   },
 
-  // User management
   getStoredUser(): User | null {
     const userStr = localStorage.getItem('user')
     return userStr ? JSON.parse(userStr) : null
@@ -75,5 +277,16 @@ export const authService = {
 
   setStoredUser(user: User): void {
     localStorage.setItem('user', JSON.stringify(user))
+  },
+
+  async logout(): Promise<void> {
+    try {
+      await signOut()
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('user')
+    }
   },
 }

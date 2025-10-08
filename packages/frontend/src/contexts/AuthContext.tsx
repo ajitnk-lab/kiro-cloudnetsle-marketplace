@@ -4,7 +4,8 @@ import { authService } from '../services/auth'
 
 interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>
-  register: (data: RegisterData) => Promise<void>
+  register: (data: RegisterData) => Promise<{ needsVerification: boolean; email: string }>
+  confirmRegistration: (email: string, code: string) => Promise<void>
   logout: () => void
   updateProfile: (profile: Partial<User['profile']>) => Promise<void>
   clearError: () => void
@@ -95,13 +96,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (data: RegisterData) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
-      const { user, token } = await authService.register(data)
+      const result = await authService.register(data)
       
-      authService.setToken(token)
-      authService.setStoredUser(user)
-      dispatch({ type: 'SET_USER', payload: user })
+      // Don't set user as authenticated until email is verified
+      dispatch({ type: 'SET_LOADING', payload: false })
+      return { needsVerification: true, email: data.email }
     } catch (error: any) {
-      const message = error.response?.data?.error || 'Registration failed'
+      const message = error.message || 'Registration failed'
+      dispatch({ type: 'SET_ERROR', payload: message })
+      throw error
+    }
+  }
+
+  const confirmRegistration = async (email: string, code: string) => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      await authService.confirmRegistration(email, code)
+      
+      // After confirmation, user needs to login
+      dispatch({ type: 'SET_LOADING', payload: false })
+    } catch (error: any) {
+      const message = error.message || 'Verification failed'
       dispatch({ type: 'SET_ERROR', payload: message })
       throw error
     }
@@ -132,6 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ...state,
     login,
     register,
+    confirmRegistration,
     logout,
     updateProfile,
     clearError,

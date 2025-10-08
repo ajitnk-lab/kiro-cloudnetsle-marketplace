@@ -16,7 +16,7 @@ export class FrontendStack extends Construct {
 
     // S3 Bucket for hosting the React app
     this.websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
-      bucketName: `marketplace-frontend-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
+      bucketName: `marketplace-frontend-${Date.now()}`,
       websiteIndexDocument: 'index.html',
       websiteErrorDocument: 'index.html', // For SPA routing
       publicReadAccess: false, // We'll use CloudFront

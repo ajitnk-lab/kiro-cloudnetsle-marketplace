@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Solution, SearchCriteria } from '../types/solution'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_BASE_URL = ((import.meta as any).env.VITE_API_URL as string) || 'http://localhost:3001'
 
 const api = axios.create({
   baseURL: API_BASE_URL,

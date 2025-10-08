@@ -33,7 +33,10 @@ type RegisterFormData = z.infer<typeof registerSchema>
 export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const { register: registerUser, isLoading, error, clearError } = useAuth()
+  const [showVerification, setShowVerification] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
+  const { register: registerUser, confirmRegistration, isLoading, error, clearError } = useAuth()
   const navigate = useNavigate()
 
   const {
@@ -77,8 +80,26 @@ export function RegisterPage() {
     try {
       clearError()
       const { confirmPassword, agreeToTerms, ...registerData } = data
-      await registerUser(registerData)
-      navigate('/')
+      const result = await registerUser(registerData)
+      
+      if (result.needsVerification) {
+        setUserEmail(result.email)
+        setShowVerification(true)
+      }
+    } catch (error) {
+      // Error is handled by the auth context
+    }
+  }
+
+  const handleVerification = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      clearError()
+      await confirmRegistration(userEmail, verificationCode)
+      
+      // Show success and redirect to login
+      alert('Email verified successfully! Please login with your credentials.')
+      navigate('/login')
     } catch (error) {
       // Error is handled by the auth context
     }
@@ -125,7 +146,50 @@ export function RegisterPage() {
             </div>
           )}
 
-          {/* Registration Form */}
+          {/* Email Verification Form */}
+          {showVerification ? (
+            <form onSubmit={handleVerification} className="space-y-4">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Verify Your Email</h3>
+                <p className="text-sm text-gray-600 mt-2">
+                  We've sent a verification code to <strong>{userEmail}</strong>
+                </p>
+              </div>
+              
+              <div>
+                <label htmlFor="verificationCode" className="block text-sm font-medium text-gray-700 mb-1">
+                  Verification Code
+                </label>
+                <input
+                  id="verificationCode"
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  className="input"
+                  placeholder="Enter 6-digit code"
+                  maxLength={6}
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading || verificationCode.length !== 6}
+                className="btn btn-primary w-full"
+              >
+                {isLoading ? 'Verifying...' : 'Verify Email'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowVerification(false)}
+                className="btn btn-secondary w-full"
+              >
+                Back to Registration
+              </button>
+            </form>
+          ) : (
+            /* Registration Form */
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Account Type */}
             <div>
@@ -325,6 +389,7 @@ export function RegisterPage() {
               {isLoading ? 'Creating account...' : 'Create account'}
             </button>
           </form>
+          )}
         </div>
       </div>
     </div>
