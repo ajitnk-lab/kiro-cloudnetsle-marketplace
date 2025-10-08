@@ -70,7 +70,7 @@ export class AuthStack extends Construct {
       generateSecret: false,
       authFlows: {
         userSrp: true,
-        userPassword: false,
+        userPassword: true, // Enable USER_PASSWORD_AUTH
         adminUserPassword: false,
       },
       oAuth: {
@@ -96,6 +96,22 @@ export class AuthStack extends Construct {
       refreshTokenValidity: cdk.Duration.days(30),
       accessTokenValidity: cdk.Duration.hours(1),
       idTokenValidity: cdk.Duration.hours(1),
+      // Configure read/write attributes for ID token
+      readAttributes: new cognito.ClientAttributes()
+        .withStandardAttributes({
+          email: true,
+          givenName: true,
+          familyName: true,
+        })
+        .withCustomAttributes('role', 'company'),
+      writeAttributes: new cognito.ClientAttributes()
+        .withStandardAttributes({
+          email: true,
+          givenName: true,
+          familyName: true,
+        })
+        .withCustomAttributes('role', 'company'),
+    })
     })
 
     // Add Google Identity Provider
@@ -112,24 +128,8 @@ export class AuthStack extends Construct {
       },
     })
 
-    // Add GitHub Identity Provider
-    const githubProvider = new cognito.UserPoolIdentityProviderOidc(this, 'GitHubProvider', {
-      userPool: this.userPool,
-      name: 'GitHub',
-      clientId: 'GITHUB_CLIENT_ID', // Replace with actual GitHub OAuth app client ID
-      clientSecret: 'GITHUB_CLIENT_SECRET', // Replace with actual GitHub OAuth app client secret
-      issuerUrl: 'https://github.com',
-      scopes: ['user:email', 'read:user'],
-      attributeMapping: {
-        email: cognito.ProviderAttribute.other('email'),
-        givenName: cognito.ProviderAttribute.other('name'),
-        profilePicture: cognito.ProviderAttribute.other('avatar_url'),
-      },
-    })
-
     // Configure the client to use the identity providers
     this.userPoolClient.node.addDependency(googleProvider)
-    this.userPoolClient.node.addDependency(githubProvider)
 
     // Create User Pool Domain
     const userPoolDomain = new cognito.UserPoolDomain(this, 'MarketplaceUserPoolDomain', {

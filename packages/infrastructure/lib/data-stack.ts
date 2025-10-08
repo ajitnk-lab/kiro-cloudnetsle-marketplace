@@ -157,7 +157,7 @@ export class DataStack extends Construct {
 
     this.database = new rds.DatabaseInstance(this, 'MarketplaceDatabase', {
       engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_15_4,
+        version: rds.PostgresEngineVersion.VER_15_7,
       }),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
       vpc: this.vpc,
@@ -166,7 +166,7 @@ export class DataStack extends Construct {
       },
       securityGroups: [dbSecurityGroup],
       databaseName: 'marketplace',
-      credentials: rds.Credentials.fromGeneratedSecret('marketplace-admin', {
+      credentials: rds.Credentials.fromGeneratedSecret('marketplace_admin', {
         secretName: 'marketplace/database/credentials',
       }),
       backupRetention: cdk.Duration.days(7),

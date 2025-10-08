@@ -27,7 +27,10 @@ exports.handler = async (event) => {
 
     // This function is called after Cognito registration to create user profile
     const body = JSON.parse(event.body || '{}')
-    const { userId, email, role = 'customer', profile = {} } = body
+    const { userId, email, role, userType, profile = {} } = body
+    
+    // Use userType if provided, otherwise fall back to role, otherwise default to customer
+    const userRole = userType || role || 'customer'
 
     if (!userId || !email) {
       return {
@@ -41,7 +44,7 @@ exports.handler = async (event) => {
     const userProfile = {
       userId,
       email,
-      role,
+      role: userRole,
       profile: {
         name: profile.name || '',
         company: profile.company || '',

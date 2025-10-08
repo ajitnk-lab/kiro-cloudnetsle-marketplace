@@ -11,8 +11,8 @@ const env = {
   region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
 }
 
-// Create the main infrastructure stack
-new MarketplaceInfrastructureStack(app, 'MarketplaceInfrastructureStack', {
+// Create the main infrastructure stack with existing stack name
+new MarketplaceInfrastructureStack(app, 'MP-1759859484941', {
   env,
   description: 'Marketplace Platform - Main infrastructure stack',
   tags: {

@@ -1,5 +1,10 @@
 # Quick Reference - Kiro CloudNetsle Marketplace
 
+## 🚀 LIVE SYSTEM STATUS
+- **Frontend**: http://marketplace-frontend-20251007232833.s3-website-us-east-1.amazonaws.com
+- **API**: https://1d98dlxxhh.execute-api.us-east-1.amazonaws.com/prod/
+- **Stack**: MP-1759859484941
+
 ## Project Status
 - **Current Phase**: Phase 1 - Foundation & Customer Experience
 - **Current Task**: Task 6 - React Frontend for Marketplace Browsing
@@ -17,7 +22,18 @@ cd packages/infrastructure && npm run watch  # CDK watch mode
 ### Deployment
 ```bash
 npm run deploy                 # Deploy infrastructure to AWS
-cd packages/frontend && npm run deploy  # Deploy frontend to S3/CloudFront
+cd packages/frontend && npm run build && aws s3 sync dist/ s3://marketplace-frontend-20251007232833/ --delete  # Deploy frontend to live site
+```
+
+### Session Recovery (Critical)
+```bash
+# Find current infrastructure
+aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE | grep MP-
+aws s3 ls | grep marketplace-frontend
+
+# Test live systems
+curl https://1d98dlxxhh.execute-api.us-east-1.amazonaws.com/prod/catalog
+```
 ```
 
 ### Testing

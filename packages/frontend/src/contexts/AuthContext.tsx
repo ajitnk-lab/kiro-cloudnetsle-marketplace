@@ -85,6 +85,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       authService.setToken(token)
       authService.setStoredUser(user)
+      
+      // Small delay to ensure token is properly set
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       dispatch({ type: 'SET_USER', payload: user })
     } catch (error: any) {
       const message = error.response?.data?.error || 'Login failed'

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { User, LogOut, ShoppingBag, Search } from 'lucide-react'
+import { User, LogOut, ShoppingBag, Search, Briefcase } from 'lucide-react'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -31,6 +31,16 @@ export function Layout({ children }: LayoutProps) {
                 <Search className="h-4 w-4" />
                 <span>Browse Solutions</span>
               </Link>
+              
+              {!isAuthenticated && (
+                <Link
+                  to="/partners"
+                  className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  <Briefcase className="h-4 w-4" />
+                  <span>Become a Partner</span>
+                </Link>
+              )}
               
               {user?.role === 'partner' && (
                 <Link

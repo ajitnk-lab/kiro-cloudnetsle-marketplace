@@ -41,20 +41,22 @@ export const authService = {
       
       try {
         const currentSession = await fetchAuthSession()
-        if (currentSession.tokens?.idToken) {
+        if (currentSession.tokens?.accessToken) {
           console.log('👤 User already authenticated, using existing session')
-          const token = currentSession.tokens.idToken.toString()
+          const accessToken = currentSession.tokens.accessToken.toString()
           
           const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
             headers: { 
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${accessToken}`,
               'Content-Type': 'application/json'
             }
           })
           
           if (userResponse.ok) {
             const userData = await userResponse.json()
-            return { user: userData.user, token }
+            this.setToken(accessToken)
+            this.setStoredUser(userData.user)
+            return { user: userData.user, token: accessToken }
           } else {
             const userInfo = currentSession.tokens?.idToken?.payload
             if (userInfo) {
@@ -70,7 +72,9 @@ export const authService = {
                 updatedAt: new Date().toISOString(),
                 status: 'active'
               }
-              return { user, token }
+              this.setToken(accessToken)
+              this.setStoredUser(user)
+              return { user, token: accessToken }
             }
           }
         }
@@ -85,16 +89,19 @@ export const authService = {
 
       if (result.isSignedIn) {
         const session = await fetchAuthSession()
-        const token = session.tokens?.idToken?.toString()
+        const accessToken = session.tokens?.accessToken?.toString()
+        const idToken = session.tokens?.idToken?.toString()
         
-        if (token) {
+        if (accessToken && idToken) {
           const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': `Bearer ${idToken}` }
           })
           
           if (userResponse.ok) {
             const userData = await userResponse.json()
-            return { user: userData.user, token }
+            this.setToken(idToken)
+            this.setStoredUser(userData.user)
+            return { user: userData.user, token: idToken }
           } else {
             const userInfo = session.tokens?.idToken?.payload
             if (userInfo) {
@@ -110,7 +117,9 @@ export const authService = {
                 updatedAt: new Date().toISOString(),
                 status: 'active'
               }
-              return { user, token }
+              this.setToken(accessToken)
+              this.setStoredUser(user)
+              return { user, token: accessToken }
             }
           }
         }
@@ -140,6 +149,8 @@ export const authService = {
             
             if (userResponse.ok) {
               const userData = await userResponse.json()
+              this.setToken(token)
+              this.setStoredUser(userData.user)
               return { user: userData.user, token }
             } else {
               const userInfo = session.tokens?.idToken?.payload
@@ -156,6 +167,8 @@ export const authService = {
                   updatedAt: new Date().toISOString(),
                   status: 'active'
                 }
+                this.setToken(token)
+                this.setStoredUser(user)
                 return { user, token }
               }
             }
