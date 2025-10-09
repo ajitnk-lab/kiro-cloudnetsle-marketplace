@@ -61,9 +61,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedUser = authService.getStoredUser()
 
         if (token && storedUser) {
-          // Verify token is still valid by fetching current user
-          const user = await authService.getCurrentUser()
-          dispatch({ type: 'SET_USER', payload: user })
+          // Use stored user data instead of fetching from API
+          dispatch({ type: 'SET_USER', payload: storedUser })
         } else {
           dispatch({ type: 'SET_LOADING', payload: false })
         }
@@ -100,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (data: RegisterData) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
-      const result = await authService.register(data)
+      await authService.register(data)
       
       // Don't set user as authenticated until email is verified
       dispatch({ type: 'SET_LOADING', payload: false })

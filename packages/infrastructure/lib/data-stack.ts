@@ -42,7 +42,6 @@ export class DataStack extends Construct {
 
     // DynamoDB Tables
     this.userTable = new dynamodb.Table(this, 'UserTable', {
-      tableName: 'marketplace-users',
       partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -64,7 +63,6 @@ export class DataStack extends Construct {
     })
 
     this.solutionTable = new dynamodb.Table(this, 'SolutionTable', {
-      tableName: 'marketplace-solutions',
       partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -94,7 +92,6 @@ export class DataStack extends Construct {
     })
 
     this.sessionTable = new dynamodb.Table(this, 'SessionTable', {
-      tableName: 'marketplace-sessions',
       partitionKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -104,7 +101,6 @@ export class DataStack extends Construct {
 
     // Partner Application Table
     this.partnerApplicationTable = new dynamodb.Table(this, 'PartnerApplicationTable', {
-      tableName: 'marketplace-partner-applications',
       partitionKey: { name: 'applicationId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,

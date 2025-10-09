@@ -4,8 +4,8 @@ const { DynamoDBDocumentClient, ScanCommand, UpdateCommand } = require('@aws-sdk
 const dynamoClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
 
-const USERS_TABLE = process.env.USERS_TABLE;
-const SOLUTIONS_TABLE = process.env.SOLUTIONS_TABLE;
+const USERS_TABLE = process.env.USERS_TABLE || 'marketplace-users-1759859485186';
+const SOLUTIONS_TABLE = process.env.SOLUTIONS_TABLE || 'marketplace-solutions-1759859485186';
 
 exports.handler = async (event) => {
   const headers = {

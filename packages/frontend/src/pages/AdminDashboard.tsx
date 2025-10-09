@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Users, Package, CheckCircle, XCircle } from 'lucide-react'
 import { authService } from '../services/auth'
+import { fetchAuthSession } from 'aws-amplify/auth'
 
 export function AdminDashboard() {
   const [pendingApplications, setPendingApplications] = useState([])
@@ -15,7 +16,19 @@ export function AdminDashboard() {
     try {
       setLoading(true)
       
-      const token = authService.getToken()
+      let token = authService.getToken()
+      
+      if (!token) {
+        try {
+          const session = await fetchAuthSession()
+          token = session.tokens?.accessToken?.toString() || null  // Use access token for admin too
+          if (token) {
+            authService.setToken(token)
+          }
+        } catch (error) {
+          console.error('Failed to get session token:', error)
+        }
+      }
       
       if (!token) {
         console.error('No auth token found')
@@ -61,7 +74,19 @@ export function AdminDashboard() {
 
   const handleApplicationAction = async (applicationId: string, action: 'approve' | 'reject') => {
     try {
-      const token = authService.getToken()
+      let token = authService.getToken()
+      if (!token) {
+        try {
+          const session = await fetchAuthSession()
+          token = session.tokens?.accessToken?.toString() || null
+          if (token) {
+            authService.setToken(token)
+          }
+        } catch (error) {
+          console.error('Failed to get session token:', error)
+        }
+      }
+      
       if (!token) {
         console.error('No auth token found')
         return
@@ -88,7 +113,19 @@ export function AdminDashboard() {
 
   const handleSolutionAction = async (solutionId: string, action: 'approve' | 'reject') => {
     try {
-      const token = authService.getToken()
+      let token = authService.getToken()
+      if (!token) {
+        try {
+          const session = await fetchAuthSession()
+          token = session.tokens?.accessToken?.toString() || null
+          if (token) {
+            authService.setToken(token)
+          }
+        } catch (error) {
+          console.error('Failed to get session token:', error)
+        }
+      }
+      
       if (!token) {
         console.error('No auth token found')
         return

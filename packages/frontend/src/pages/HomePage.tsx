@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Search, ShoppingBag, Users, TrendingUp, Shield, Zap } from 'lucide-react'
@@ -21,10 +21,16 @@ export function HomePage() {
               Join thousands of customers and partners in our thriving marketplace.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/catalog" className="btn-primary bg-white text-blue-600 hover:bg-gray-100">
-                <Search className="h-5 w-5 mr-2" />
-                Browse Solutions
-              </Link>
+              {isAuthenticated ? (
+                <Link to="/catalog" className="btn-primary bg-white text-blue-600 hover:bg-gray-100">
+                  <Search className="h-5 w-5 mr-2" />
+                  Browse Solutions
+                </Link>
+              ) : (
+                <Link to="/login" className="btn-primary bg-white text-blue-600 hover:bg-gray-100">
+                  Sign In to Browse
+                </Link>
+              )}
               {!isAuthenticated && (
                 <Link to="/register" className="btn-outline border-white text-white hover:bg-white hover:text-blue-600">
                   Get Started Free
@@ -152,18 +158,18 @@ export function HomePage() {
                   Browse Solutions
                 </Link>
                 {user?.role === 'customer' && (
-                  <Link to="/register?role=partner" className="btn-outline border-white text-white hover:bg-white hover:text-blue-600">
+                  <Link to="/partners" className="btn-outline border-white text-white hover:bg-white hover:text-blue-600">
                     Become a Partner
                   </Link>
                 )}
               </>
             ) : (
               <>
-                <Link to="/register" className="btn-primary bg-white text-blue-600 hover:bg-gray-100">
-                  Sign Up Free
+                <Link to="/login" className="btn-primary bg-white text-blue-600 hover:bg-gray-100">
+                  Sign In to Browse
                 </Link>
-                <Link to="/catalog" className="btn-outline border-white text-white hover:bg-white hover:text-blue-600">
-                  Browse Solutions
+                <Link to="/register" className="btn-outline border-white text-white hover:bg-white hover:text-blue-600">
+                  Sign Up Free
                 </Link>
               </>
             )}

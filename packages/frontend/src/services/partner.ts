@@ -1,4 +1,3 @@
-import { authService } from './auth'
 import { fetchAuthSession } from 'aws-amplify/auth'
 
 const API_BASE_URL = (import.meta as any).env.VITE_API_URL as string
@@ -10,11 +9,54 @@ const getIdToken = async () => {
 }
 
 export const partnerService = {
+  // Check partner application status
+  async getPartnerStatus() {
+    const token = await getIdToken()
+    if (!token) {
+      throw new Error('Authentication required')
+    }
+
+    const response = await fetch(`${API_BASE_URL}/partner/status`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to get partner status')
+    }
+
+    return response.json()
+  },
+
   // Submit partner application
   async submitApplication(applicationData: any) {
     const token = await getIdToken()
     if (!token) {
       throw new Error('Authentication required')
+    }
+
+    // Transform frontend form data to backend expected format
+    const application = {
+      businessName: applicationData.company,
+      businessType: applicationData.businessType,
+      description: applicationData.description,
+      experience: applicationData.experience,
+      portfolio: applicationData.portfolio,
+      website: applicationData.website,
+      contactInfo: {
+        phone: applicationData.phone,
+        contactPerson: applicationData.contactPerson
+      },
+      businessAddress: {
+        address: applicationData.address,
+        city: applicationData.city,
+        country: applicationData.country
+      },
+      taxInfo: {
+        taxId: applicationData.taxId
+      }
     }
 
     const response = await fetch(`${API_BASE_URL}/partner/applications`, {
@@ -23,7 +65,7 @@ export const partnerService = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(applicationData)
+      body: JSON.stringify({ application })
     })
 
     if (!response.ok) {

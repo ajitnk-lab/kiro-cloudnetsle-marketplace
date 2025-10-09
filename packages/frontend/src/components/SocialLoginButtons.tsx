@@ -1,6 +1,4 @@
-import React from 'react'
 import { Github } from 'lucide-react'
-import { authService } from '../services/auth'
 
 interface SocialLoginButtonsProps {
   mode: 'login' | 'register'
@@ -8,8 +6,9 @@ interface SocialLoginButtonsProps {
 
 export function SocialLoginButtons({ mode }: SocialLoginButtonsProps) {
   const handleSocialLogin = (provider: 'google' | 'github') => {
-    const url = authService.getSocialLoginUrl(provider)
-    window.location.href = url
+    // Redirect to Cognito hosted UI for social login
+    const cognitoUrl = `https://us-east-1_5EpprbR5R.auth.us-east-1.amazoncognito.com/oauth2/authorize?identity_provider=${provider.toUpperCase()}&redirect_uri=${encodeURIComponent(window.location.origin + '/auth/callback')}&response_type=CODE&client_id=58u72aor8kf4f93pf93pdnqecu&scope=email+openid+profile`
+    window.location.href = cognitoUrl
   }
 
   return (

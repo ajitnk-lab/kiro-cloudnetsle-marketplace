@@ -29,5 +29,12 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.906.0",
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.12.2",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^24.23.0"
   }
 }

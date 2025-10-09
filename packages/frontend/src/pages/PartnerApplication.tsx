@@ -3,13 +3,20 @@ import { useAuth } from '../contexts/AuthContext'
 import { partnerService } from '../services/partner'
 
 export function PartnerApplication() {
-  const { user } = useAuth()
+  const { } = useAuth()
   const [formData, setFormData] = useState({
     company: '',
     website: '',
     description: '',
     experience: '',
-    portfolio: ''
+    portfolio: '',
+    businessType: '',
+    taxId: '',
+    contactPerson: '',
+    phone: '',
+    address: '',
+    city: '',
+    country: ''
   })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -143,6 +150,115 @@ export function PartnerApplication() {
               placeholder="Describe your previous projects and achievements"
               disabled={loading}
             />
+          </div>
+
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Business Information</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Business Type *
+                </label>
+                <select
+                  value={formData.businessType}
+                  onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
+                  className="input-field"
+                  required
+                  disabled={loading}
+                >
+                  <option value="">Select business type</option>
+                  <option value="individual">Individual/Freelancer</option>
+                  <option value="partnership">Partnership</option>
+                  <option value="corporation">Corporation</option>
+                  <option value="llc">LLC</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tax ID/Registration Number
+                </label>
+                <input
+                  type="text"
+                  value={formData.taxId}
+                  onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
+                  className="input-field"
+                  placeholder="Tax ID or business registration number"
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contact Person *
+                </label>
+                <input
+                  type="text"
+                  value={formData.contactPerson}
+                  onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+                  className="input-field"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="input-field"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Business Address *
+                </label>
+                <input
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  className="input-field"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  City *
+                </label>
+                <input
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  className="input-field"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Country *
+                </label>
+                <input
+                  type="text"
+                  value={formData.country}
+                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                  className="input-field"
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </div>
           </div>
 
           <button 

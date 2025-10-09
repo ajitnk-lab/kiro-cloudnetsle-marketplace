@@ -171,6 +171,8 @@ export class ApiStack extends Construct {
       environment: {
         USERS_TABLE: props.userTable.tableName,
         SOLUTIONS_TABLE: props.solutionTable.tableName,
+        PARTNER_APPLICATION_TABLE_NAME: props.partnerApplicationTable.tableName,
+        USER_TABLE_NAME: props.userTable.tableName,
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -228,6 +230,20 @@ export class ApiStack extends Construct {
     const adminApplicationsResource = adminApi.addResource('applications')
     adminApplicationsResource.addMethod('GET', new apigateway.LambdaIntegration(adminFunction), {
       authorizer: cognitoAuthorizer,
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+          },
+        },
+        {
+          statusCode: '401',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+          },
+        }
+      ]
     })
     adminApplicationsResource.addResource('{applicationId}').addMethod('PUT', new apigateway.LambdaIntegration(adminFunction), {
       authorizer: cognitoAuthorizer,
@@ -264,6 +280,20 @@ export class ApiStack extends Construct {
     const adminSolutionsResource = adminApi.addResource('solutions')
     adminSolutionsResource.addMethod('GET', new apigateway.LambdaIntegration(adminFunction), {
       authorizer: cognitoAuthorizer,
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+          },
+        },
+        {
+          statusCode: '401',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+          },
+        }
+      ]
     })
     const adminSolutionResource = adminSolutionsResource.addResource('{solutionId}')
     adminSolutionResource.addMethod('PUT', new apigateway.LambdaIntegration(adminFunction), {

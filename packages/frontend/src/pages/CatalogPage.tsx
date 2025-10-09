@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Search, Filter, Grid, List, Package, CheckCircle, XCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { authService } from '../services/auth'
+import { fetchAuthSession } from 'aws-amplify/auth'
 
 interface Solution {
   solutionId: string
@@ -33,21 +34,35 @@ export function CatalogPage() {
   const loadSolutions = async () => {
     try {
       setLoading(true)
+      setError(null)
       
       // Customers see approved solutions, admin sees all solutions
       const endpoint = isAdmin ? '/admin/solutions' : '/catalog'
+      const apiUrl = (import.meta as any).env.VITE_API_URL || 'https://1d98dlxxhh.execute-api.us-east-1.amazonaws.com/prod'
       
       const headers: any = {}
       if (isAdmin) {
-        const token = authService.getToken()
+        let token = authService.getToken()
+        if (!token) {
+          try {
+            const session = await fetchAuthSession()
+            token = session.tokens?.idToken?.toString() || null  // Use ID token for admin
+            if (token) {
+              authService.setToken(token)
+            }
+          } catch (error) {
+            console.error('Failed to get session token:', error)
+          }
+        }
+        
         if (token) {
           headers['Authorization'] = `Bearer ${token}`
         }
       }
       
-      console.log('Loading solutions from:', endpoint, 'with auth:', !!headers.Authorization)
+      console.log('Loading solutions from:', `${apiUrl}${endpoint}`, 'with auth:', !!headers.Authorization)
       
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}${endpoint}`, {
+      const response = await fetch(`${apiUrl}${endpoint}`, {
         headers
       })
       
@@ -72,7 +87,19 @@ export function CatalogPage() {
 
   const handleSolutionAction = async (solutionId: string, action: 'approve' | 'reject') => {
     try {
-      const token = authService.getToken()
+      let token = authService.getToken()
+      if (!token) {
+        try {
+          const session = await fetchAuthSession()
+          token = session.tokens?.accessToken?.toString() || null
+          if (token) {
+            authService.setToken(token)
+          }
+        } catch (error) {
+          console.error('Failed to get session token:', error)
+        }
+      }
+      
       if (!token) {
         console.error('No auth token found')
         return
@@ -88,8 +115,8 @@ export function CatalogPage() {
       })
       
       if (response.ok) {
-        loadSolutions() // Reload solutions after action
-        setSelectedSolution(null) // Close modal
+        loadSolutions()
+        setSelectedSolution(null)
       } else {
         console.error('Failed to update solution:', response.status, await response.text())
       }
@@ -202,7 +229,10 @@ export function CatalogPage() {
                   {solution.pricing.model === 'subscription' && <span className="text-sm font-normal">/month</span>}
                 </div>
                 <button 
-                  onClick={() => setSelectedSolution(solution)}
+                  onClick={() => {
+                    console.log('View Details clicked for:', solution.name)
+                    setSelectedSolution(solution)
+                  }}
                   className="btn-primary text-sm"
                 >
                   View Details
@@ -227,7 +257,10 @@ export function CatalogPage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">{selectedSolution.name}</h2>
                 <button 
-                  onClick={() => setSelectedSolution(null)}
+                  onClick={() => {
+                    console.log('Closing modal')
+                    setSelectedSolution(null)
+                  }}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   ✕

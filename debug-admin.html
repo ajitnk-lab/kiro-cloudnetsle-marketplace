@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Debug</title>
+</head>
+<body>
+    <h1>Admin Debug Test</h1>
+    <button onclick="testAPI()">Test API Call</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('result');
+            
+            try {
+                // Test without auth first
+                const response1 = await fetch('https://1d98dlxxhh.execute-api.us-east-1.amazonaws.com/prod/admin/solutions');
+                result.innerHTML += `<p>Without auth: ${response1.status}</p>`;
+                
+                // Test with mock token
+                const response2 = await fetch('https://1d98dlxxhh.execute-api.us-east-1.amazonaws.com/prod/admin/solutions', {
+                    headers: {
+                        'Authorization': 'Bearer mock-token',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                result.innerHTML += `<p>With mock token: ${response2.status}</p>`;
+                
+                // Test CORS
+                const response3 = await fetch('https://1d98dlxxhh.execute-api.us-east-1.amazonaws.com/prod/admin/solutions', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'http://marketplace-frontend-20251007232833.s3-website-us-east-1.amazonaws.com',
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'authorization'
+                    }
+                });
+                result.innerHTML += `<p>CORS preflight: ${response3.status}</p>`;
+                
+            } catch (error) {
+                result.innerHTML += `<p>Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -13,6 +13,7 @@ import { AddSolution } from './pages/AddSolution'
 import { PartnerAnalytics } from './pages/PartnerAnalytics'
 import { AuthCallback } from './components/AuthCallback'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { AdminDashboard } from './pages/AdminDashboard'
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/catalog" element={<CatalogPage />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/solutions/:id" element={<SolutionDetailPage />} />
           <Route path="/partners" element={<PartnerApplication />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
