@@ -1,12 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { partnerService } from '../services/partner'
-import { ArrowLeft, Upload } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { ArrowLeft, AlertCircle } from 'lucide-react'
 
 export function AddSolution() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [partnerStatus, setPartnerStatus] = useState<string | null>(null)
+  const [checkingStatus, setCheckingStatus] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -25,6 +29,28 @@ export function AddSolution() {
     },
     tags: ['']
   })
+
+  useEffect(() => {
+    checkPartnerStatus()
+  }, [])
+
+  const checkPartnerStatus = async () => {
+    try {
+      setCheckingStatus(true)
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/user/profile`, {
+        headers: {
+          'Authorization': `Bearer ${await (user as any)?.getIdToken()}`
+        }
+      })
+      const data = await response.json()
+      setPartnerStatus(data.user?.partnerStatus || null)
+    } catch (error) {
+      console.error('Failed to check partner status:', error)
+      setError('Failed to verify partner status')
+    } finally {
+      setCheckingStatus(false)
+    }
+  }
 
   const categories = [
     'Business Software',
@@ -119,15 +145,49 @@ export function AddSolution() {
         <p className="text-gray-600 mt-2">Create a new software solution for the marketplace</p>
       </div>
 
+      {checkingStatus && (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+          <p className="text-blue-600">Checking partner status...</p>
+        </div>
+      )}
+
+      {!checkingStatus && partnerStatus !== 'approved' && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
+            <div>
+              <h3 className="text-yellow-800 font-medium">Partner Approval Required</h3>
+              <p className="text-yellow-700 mt-1">
+                {partnerStatus === 'pending' 
+                  ? 'Your partner application is pending admin approval. You cannot create solutions until approved.'
+                  : partnerStatus === 'rejected'
+                  ? 'Your partner application was rejected. Please contact support.'
+                  : 'You must apply for partner status before creating solutions.'
+                }
+              </p>
+              {!partnerStatus && (
+                <button
+                  onClick={() => navigate('/partner/application')}
+                  className="mt-2 text-yellow-800 underline hover:text-yellow-900"
+                >
+                  Apply for Partner Status
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
           <p className="text-red-600">{error}</p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
+      {!checkingStatus && partnerStatus === 'approved' && (
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -373,6 +433,7 @@ export function AddSolution() {
           </button>
         </div>
       </form>
+      )}
     </div>
   )
 }

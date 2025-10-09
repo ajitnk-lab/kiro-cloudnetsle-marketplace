@@ -112,7 +112,6 @@ export class AuthStack extends Construct {
         })
         .withCustomAttributes('role', 'company'),
     })
-    })
 
     // Add Google Identity Provider
     const googleProvider = new cognito.UserPoolIdentityProviderGoogle(this, 'GoogleProvider', {

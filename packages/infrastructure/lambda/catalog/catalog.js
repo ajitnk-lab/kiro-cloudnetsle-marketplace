@@ -87,7 +87,22 @@ exports.handler = async (event) => {
       }
 
       if (httpMethod === 'POST') {
-        // Create new solution
+        // Create new solution - check partner status first
+        
+        // Check if partner is approved
+        const partnerResult = await docClient.send(new GetCommand({
+          TableName: process.env.USERS_TABLE_NAME,
+          Key: { userId: requesterId },
+        }))
+
+        if (!partnerResult.Item || partnerResult.Item.partnerStatus !== 'approved') {
+          return {
+            statusCode: 403,
+            headers,
+            body: JSON.stringify({ error: 'Partner must be approved before creating solutions' }),
+          }
+        }
+
         const body = JSON.parse(event.body || '{}')
         const { solution } = body
 
@@ -112,6 +127,7 @@ exports.handler = async (event) => {
         const newSolution = {
           solutionId,
           partnerId: requesterId,
+          partnerName: partnerResult.Item.companyName || partnerResult.Item.name,
           ...solution,
           status: 'pending',
           createdAt: new Date().toISOString(),
@@ -127,7 +143,7 @@ exports.handler = async (event) => {
           statusCode: 201,
           headers,
           body: JSON.stringify({
-            message: 'Solution created successfully',
+            message: 'Solution created successfully and is pending admin approval',
             solution: newSolution,
           }),
         }

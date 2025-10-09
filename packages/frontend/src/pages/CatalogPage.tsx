@@ -1,7 +1,114 @@
-import React from 'react'
-import { Search, Filter, Grid, List } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, Filter, Grid, List, Package, CheckCircle, XCircle } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { authService } from '../services/auth'
+
+interface Solution {
+  solutionId: string
+  name: string
+  description: string
+  category: string
+  pricing: {
+    model: string
+    amount: number
+    currency: string
+  }
+  partnerName?: string
+  status?: string
+}
 
 export function CatalogPage() {
+  const { user } = useAuth()
+  const [solutions, setSolutions] = useState<Solution[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null)
+
+  const isAdmin = user?.role === 'admin'
+
+  useEffect(() => {
+    loadSolutions()
+  }, [])
+
+  const loadSolutions = async () => {
+    try {
+      setLoading(true)
+      
+      // Customers see approved solutions, admin sees all solutions
+      const endpoint = isAdmin ? '/admin/solutions' : '/catalog'
+      
+      const headers: any = {}
+      if (isAdmin) {
+        const token = authService.getToken()
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
+        }
+      }
+      
+      console.log('Loading solutions from:', endpoint, 'with auth:', !!headers.Authorization)
+      
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}${endpoint}`, {
+        headers
+      })
+      
+      console.log('Response status:', response.status)
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Solutions data:', data)
+        setSolutions(data.solutions || [])
+      } else {
+        const errorText = await response.text()
+        console.error('API Error:', response.status, errorText)
+        setError(`Failed to load solutions: ${response.status}`)
+      }
+    } catch (error) {
+      console.error('Network error:', error)
+      setError('Network error loading solutions')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSolutionAction = async (solutionId: string, action: 'approve' | 'reject') => {
+    try {
+      const token = authService.getToken()
+      if (!token) {
+        console.error('No auth token found')
+        return
+      }
+      
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/admin/solutions/${solutionId}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ action })
+      })
+      
+      if (response.ok) {
+        loadSolutions() // Reload solutions after action
+        setSelectedSolution(null) // Close modal
+      } else {
+        console.error('Failed to update solution:', response.status, await response.text())
+      }
+    } catch (error) {
+      console.error('Failed to update solution:', error)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center py-16">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading solutions...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
@@ -39,22 +146,169 @@ export function CatalogPage() {
         </div>
       </div>
 
-      {/* Coming Soon Message */}
-      <div className="text-center py-16">
-        <div className="max-w-md mx-auto">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="h-8 w-8 text-blue-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Coming Soon</h2>
-          <p className="text-gray-600 mb-6">
-            We're working hard to bring you an amazing catalog of software solutions.
-            Check back soon!
-          </p>
-          <div className="text-sm text-gray-500">
-            This page will be implemented in the next development phase.
+      {/* Solutions Grid */}
+      {error ? (
+        <div className="text-center py-16">
+          <div className="max-w-md mx-auto">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Package className="h-8 w-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Solutions</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button 
+              onClick={loadSolutions}
+              className="btn-primary"
+            >
+              Try Again
+            </button>
           </div>
         </div>
-      </div>
+      ) : solutions.length === 0 ? (
+        <div className="text-center py-16">
+          <div className="max-w-md mx-auto">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Package className="h-8 w-8 text-gray-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Solutions Available</h2>
+            <p className="text-gray-600 mb-6">
+              There are currently no approved solutions in the catalog. Check back soon!
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {solutions.map((solution) => (
+            <div key={solution.solutionId} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900">{solution.name}</h3>
+                  {isAdmin && solution.status && (
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      solution.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      solution.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {solution.status}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-gray-600 mb-2">{solution.category}</p>
+                <p className="text-gray-700 text-sm line-clamp-3">{solution.description}</p>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-bold text-green-600">
+                  {solution.pricing.currency} {solution.pricing.amount}
+                  {solution.pricing.model === 'subscription' && <span className="text-sm font-normal">/month</span>}
+                </div>
+                <button 
+                  onClick={() => setSelectedSolution(solution)}
+                  className="btn-primary text-sm"
+                >
+                  View Details
+                </button>
+              </div>
+              
+              {solution.partnerName && (
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <p className="text-xs text-gray-500">by {solution.partnerName}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Solution Detail Modal */}
+      {selectedSolution && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-900">{selectedSolution.name}</h2>
+                <button 
+                  onClick={() => setSelectedSolution(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Category</h3>
+                  <p className="text-gray-700">{selectedSolution.category}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+                  <p className="text-gray-700">{selectedSolution.description}</p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Pricing</h3>
+                  <p className="text-gray-700">
+                    {selectedSolution.pricing.currency} {selectedSolution.pricing.amount}
+                    {selectedSolution.pricing.model === 'subscription' && ' per month'}
+                    {selectedSolution.pricing.model === 'upfront' && ' one-time'}
+                  </p>
+                </div>
+                
+                {selectedSolution.partnerName && (
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Partner</h3>
+                    <p className="text-gray-700">{selectedSolution.partnerName}</p>
+                  </div>
+                )}
+                
+                {isAdmin && selectedSolution.status && (
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Status</h3>
+                    <span className={`px-3 py-1 text-sm rounded-full ${
+                      selectedSolution.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      selectedSolution.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {selectedSolution.status}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
+                {isAdmin && selectedSolution.status === 'pending' ? (
+                  <>
+                    <button
+                      onClick={() => handleSolutionAction(selectedSolution.solutionId, 'approve')}
+                      className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleSolutionAction(selectedSolution.solutionId, 'reject')}
+                      className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Reject
+                    </button>
+                  </>
+                ) : (
+                  <button className="btn-primary">
+                    {selectedSolution.status === 'approved' ? 'Purchase' : 'Contact Partner'}
+                  </button>
+                )}
+                <button 
+                  onClick={() => setSelectedSolution(null)}
+                  className="btn-outline"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

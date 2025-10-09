@@ -141,6 +141,7 @@ export class ApiStack extends Construct {
       code: lambda.Code.fromAsset('lambda/catalog'),
       environment: {
         SOLUTION_TABLE_NAME: props.solutionTable.tableName,
+        USERS_TABLE_NAME: props.userTable.tableName,
         ASSETS_BUCKET_NAME: props.assetsBucket.bucketName,
       },
       role: lambdaRole,
@@ -157,6 +158,19 @@ export class ApiStack extends Construct {
         USER_TABLE_NAME: props.userTable.tableName,
         ASSETS_BUCKET_NAME: props.assetsBucket.bucketName,
         FROM_EMAIL: 'noreply@marketplace.com',
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Admin Lambda Function
+    const adminFunction = new lambda.Function(this, 'AdminFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'admin.handler',
+      code: lambda.Code.fromAsset('lambda/admin'),
+      environment: {
+        USERS_TABLE: props.userTable.tableName,
+        SOLUTIONS_TABLE: props.solutionTable.tableName,
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -212,10 +226,10 @@ export class ApiStack extends Construct {
 
     // Admin partner application routes
     const adminApplicationsResource = adminApi.addResource('applications')
-    adminApplicationsResource.addMethod('GET', new apigateway.LambdaIntegration(partnerApplicationFunction), {
+    adminApplicationsResource.addMethod('GET', new apigateway.LambdaIntegration(adminFunction), {
       authorizer: cognitoAuthorizer,
     })
-    adminApplicationsResource.addResource('{applicationId}').addMethod('PUT', new apigateway.LambdaIntegration(partnerApplicationFunction), {
+    adminApplicationsResource.addResource('{applicationId}').addMethod('PUT', new apigateway.LambdaIntegration(adminFunction), {
       authorizer: cognitoAuthorizer,
     })
 
@@ -248,14 +262,11 @@ export class ApiStack extends Construct {
 
     // Admin solution management routes (protected)
     const adminSolutionsResource = adminApi.addResource('solutions')
-    adminSolutionsResource.addMethod('GET', new apigateway.LambdaIntegration(solutionManagementFunction), {
+    adminSolutionsResource.addMethod('GET', new apigateway.LambdaIntegration(adminFunction), {
       authorizer: cognitoAuthorizer,
     })
     const adminSolutionResource = adminSolutionsResource.addResource('{solutionId}')
-    adminSolutionResource.addMethod('PUT', new apigateway.LambdaIntegration(solutionManagementFunction), {
-      authorizer: cognitoAuthorizer,
-    })
-    adminSolutionResource.addMethod('DELETE', new apigateway.LambdaIntegration(solutionManagementFunction), {
+    adminSolutionResource.addMethod('PUT', new apigateway.LambdaIntegration(adminFunction), {
       authorizer: cognitoAuthorizer,
     })
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Users, Package, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { Users, Package, CheckCircle, XCircle } from 'lucide-react'
+import { authService } from '../services/auth'
 
 export function AdminDashboard() {
   const [pendingApplications, setPendingApplications] = useState([])
@@ -13,13 +14,44 @@ export function AdminDashboard() {
   const loadAdminData = async () => {
     try {
       setLoading(true)
+      
+      const token = authService.getToken()
+      
+      if (!token) {
+        console.error('No auth token found')
+        return
+      }
+      
+      console.log('Loading admin data with token:', token ? 'present' : 'missing')
+      
       // Load pending partner applications and solutions
-      const [applications, solutions] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL}/admin/applications`).then(r => r.json()),
-        fetch(`${import.meta.env.VITE_API_URL}/admin/solutions`).then(r => r.json())
+      const [applicationsRes, solutionsRes] = await Promise.all([
+        fetch(`${(import.meta as any).env.VITE_API_URL}/admin/applications`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${(import.meta as any).env.VITE_API_URL}/admin/solutions`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
       ])
-      setPendingApplications(applications.applications || [])
-      setPendingSolutions(solutions.solutions || [])
+
+      console.log('Applications response:', applicationsRes.status)
+      console.log('Solutions response:', solutionsRes.status)
+
+      if (applicationsRes.ok) {
+        const applications = await applicationsRes.json()
+        console.log('Applications data:', applications)
+        setPendingApplications(applications.applications || [])
+      } else {
+        console.error('Failed to load applications:', applicationsRes.status, await applicationsRes.text())
+      }
+
+      if (solutionsRes.ok) {
+        const solutions = await solutionsRes.json()
+        console.log('Solutions data:', solutions)
+        setPendingSolutions(solutions.solutions || [])
+      } else {
+        console.error('Failed to load solutions:', solutionsRes.status, await solutionsRes.text())
+      }
     } catch (error) {
       console.error('Failed to load admin data:', error)
     } finally {
@@ -29,12 +61,26 @@ export function AdminDashboard() {
 
   const handleApplicationAction = async (applicationId: string, action: 'approve' | 'reject') => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/admin/applications/${applicationId}`, {
+      const token = authService.getToken()
+      if (!token) {
+        console.error('No auth token found')
+        return
+      }
+      
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/admin/applications/${applicationId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ action })
       })
-      loadAdminData()
+      
+      if (response.ok) {
+        loadAdminData()
+      } else {
+        console.error('Failed to update application:', response.status, await response.text())
+      }
     } catch (error) {
       console.error('Failed to update application:', error)
     }
@@ -42,12 +88,26 @@ export function AdminDashboard() {
 
   const handleSolutionAction = async (solutionId: string, action: 'approve' | 'reject') => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/admin/solutions/${solutionId}`, {
+      const token = authService.getToken()
+      if (!token) {
+        console.error('No auth token found')
+        return
+      }
+      
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/admin/solutions/${solutionId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ action })
       })
-      loadAdminData()
+      
+      if (response.ok) {
+        loadAdminData()
+      } else {
+        console.error('Failed to update solution:', response.status, await response.text())
+      }
     } catch (error) {
       console.error('Failed to update solution:', error)
     }
