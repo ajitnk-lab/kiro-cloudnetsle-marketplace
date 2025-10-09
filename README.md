@@ -295,7 +295,7 @@ curl -X GET https://your-api-gateway-url/catalog
 
 After deployment, you can test:
 
-1. **Frontend URL**: Check CloudFormation outputs for `WebsiteUrl`
+1. **Frontend URL**: `http://marketplace-frontend-20251007232833.s3-website-us-east-1.amazonaws.com` *(Note: CloudFront not working, using S3 direct)*
 2. **API Gateway**: Check CloudFormation outputs for `ApiGatewayUrl`
 3. **User Registration**: Test customer and partner registration
 4. **Authentication**: Test login with email/password
