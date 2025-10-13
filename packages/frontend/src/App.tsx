@@ -31,6 +31,11 @@ function App() {
               <PartnerApplication />
             </ProtectedRoute>
           } />
+          <Route path="/partner/application" element={
+            <ProtectedRoute>
+              <PartnerApplication />
+            </ProtectedRoute>
+          } />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
             path="/profile"

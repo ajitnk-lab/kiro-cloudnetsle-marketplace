@@ -1,6 +1,6 @@
 import { fetchAuthSession } from 'aws-amplify/auth'
 
-const API_BASE_URL = (import.meta as any).env.VITE_API_URL as string
+const API_BASE_URL = (import.meta as any).env.VITE_API_URL as string || 'https://1d98dlxxhh.execute-api.us-east-1.amazonaws.com/prod'
 
 // Helper to get access token for partner API calls
 const getAccessToken = async () => {
@@ -32,32 +32,42 @@ export const partnerService = {
 
   // Submit partner application
   async submitApplication(applicationData: any) {
+    console.log('Raw form data received:', applicationData)
+    
     const token = await getAccessToken()
+    console.log('Access token:', token ? 'Present' : 'Missing')
+    
     if (!token) {
       throw new Error('Authentication required')
     }
 
     // Transform frontend form data to backend expected format
     const application = {
-      businessName: applicationData.company,
-      businessType: applicationData.businessType,
-      description: applicationData.description,
-      experience: applicationData.experience,
-      portfolio: applicationData.portfolio,
-      website: applicationData.website,
+      businessName: applicationData.company || '',
+      businessType: applicationData.businessType || '',
+      description: applicationData.description || '',
+      experience: applicationData.experience || '',
+      portfolio: applicationData.portfolio || '',
+      website: applicationData.website || '',
       contactInfo: {
-        phone: applicationData.phone,
-        contactPerson: applicationData.contactPerson
+        phone: applicationData.phone || '',
+        contactPerson: applicationData.contactPerson || ''
       },
       businessAddress: {
-        address: applicationData.address,
-        city: applicationData.city,
-        country: applicationData.country
+        address: applicationData.address || '',
+        city: applicationData.city || '',
+        country: applicationData.country || ''
       },
       taxInfo: {
-        taxId: applicationData.taxId
+        taxId: applicationData.taxId || ''
       }
     }
+
+    console.log('Transformed application data:', application)
+    console.log('API URL:', API_BASE_URL)
+    
+    const requestBody = { application }
+    console.log('Request body:', JSON.stringify(requestBody, null, 2))
 
     const response = await fetch(`${API_BASE_URL}/partner/applications`, {
       method: 'POST',
@@ -65,15 +75,30 @@ export const partnerService = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ application })
+      body: JSON.stringify(requestBody)
     })
 
+    console.log('Response status:', response.status)
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+
     if (!response.ok) {
-      const error = await response.text()
-      throw new Error(error || 'Failed to submit application')
+      const responseText = await response.text()
+      console.error('Response text:', responseText)
+      
+      let errorData
+      try {
+        errorData = JSON.parse(responseText)
+      } catch {
+        errorData = { error: responseText || 'Unknown error' }
+      }
+      
+      console.error('Application submission failed:', errorData)
+      throw new Error(errorData.error || errorData.message || 'Failed to submit application')
     }
 
-    return response.json()
+    const result = await response.json()
+    console.log('Success response:', result)
+    return result
   },
 
   // Get partner applications

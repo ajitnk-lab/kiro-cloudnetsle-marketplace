@@ -101,9 +101,44 @@ exports.handler = async (event) => {
       }
 
       const body = JSON.parse(event.body || '{}')
-      const { application } = body
+      console.log('Received body:', JSON.stringify(body, null, 2))
+      console.log('Event body type:', typeof event.body)
+      console.log('Raw event body:', event.body)
+      
+      let { application } = body
+
+      // Handle case where raw form data might be sent directly
+      if (!application && body && typeof body === 'object') {
+        console.log('No application wrapper found, checking if body contains form data directly')
+        if (body.company || body.businessName) {
+          console.log('Converting raw form data to application format')
+          application = {
+            businessName: body.company || body.businessName || '',
+            businessType: body.businessType || '',
+            description: body.description || '',
+            experience: body.experience || '',
+            portfolio: body.portfolio || '',
+            website: body.website || '',
+            contactInfo: {
+              phone: body.phone || '',
+              contactPerson: body.contactPerson || ''
+            },
+            businessAddress: {
+              address: body.address || '',
+              city: body.city || '',
+              country: body.country || ''
+            },
+            taxInfo: {
+              taxId: body.taxId || ''
+            }
+          }
+          console.log('Converted application:', JSON.stringify(application, null, 2))
+        }
+      }
 
       if (!application) {
+        console.error('No application data in request body after all checks')
+        console.error('Body keys:', Object.keys(body))
         return {
           statusCode: 400,
           headers,

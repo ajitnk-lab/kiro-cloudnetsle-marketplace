@@ -157,7 +157,7 @@ export function AddSolution() {
                   ? 'Your partner application is pending admin approval. You cannot create solutions until approved.'
                   : partnerStatus === 'rejected'
                   ? 'Your partner application was rejected. Please contact support.'
-                  : 'You must apply for partner status before creating solutions.'
+                  : 'You must apply for marketplace status before creating solutions.'
                 }
               </p>
               {!partnerStatus && (
@@ -165,7 +165,7 @@ export function AddSolution() {
                   onClick={() => navigate('/partner/application')}
                   className="mt-2 text-yellow-800 underline hover:text-yellow-900"
                 >
-                  Apply for Partner Status
+                  Apply for Marketplace
                 </button>
               )}
             </div>

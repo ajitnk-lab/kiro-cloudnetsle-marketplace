@@ -47,10 +47,14 @@ export function PartnerApplication() {
     setLoading(true)
     setError('')
 
+    console.log('Form submission started with data:', formData)
+
     try {
-      await partnerService.submitApplication(formData)
+      const result = await partnerService.submitApplication(formData)
+      console.log('Application submitted successfully:', result)
       setSuccess(true)
     } catch (err: any) {
+      console.error('Application submission error:', err)
       setError(err.message || 'Failed to submit application')
     } finally {
       setLoading(false)
