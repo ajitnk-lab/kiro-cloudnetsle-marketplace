@@ -1,7 +1,15 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
-const { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb')
+const { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand, QueryCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb')
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses')
-const { v4: uuidv4 } = require('uuid')
+
+// Generate UUID without external dependency
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0
+    const v = c == 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
@@ -15,8 +23,8 @@ const validatePartnerApplication = (application) => {
     errors.push('Business name is required and must be at least 2 characters')
   }
   
-  if (!application.businessType || !['individual', 'company', 'organization'].includes(application.businessType)) {
-    errors.push('Valid business type is required (individual, company, organization)')
+  if (!application.businessType || !['individual', 'partnership', 'corporation', 'llc'].includes(application.businessType)) {
+    errors.push('Valid business type is required (individual, partnership, corporation, llc)')
   }
   
   if (!application.contactInfo || !application.contactInfo.phone) {
@@ -28,7 +36,8 @@ const validatePartnerApplication = (application) => {
   }
   
   if (!application.taxInfo || !application.taxInfo.taxId) {
-    errors.push('Tax ID is required')
+    // Tax ID is optional, just warn
+    console.log('Warning: Tax ID not provided')
   }
   
   return errors
@@ -111,7 +120,7 @@ exports.handler = async (event) => {
         }
       }
 
-      const applicationId = uuidv4()
+      const applicationId = generateUUID()
       const partnerApplication = {
         applicationId,
         userId: requesterId,

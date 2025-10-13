@@ -2,16 +2,16 @@ import { fetchAuthSession } from 'aws-amplify/auth'
 
 const API_BASE_URL = (import.meta as any).env.VITE_API_URL as string
 
-// Helper to get ID token for partner API calls
-const getIdToken = async () => {
+// Helper to get access token for partner API calls
+const getAccessToken = async () => {
   const session = await fetchAuthSession()
-  return session.tokens?.idToken?.toString()
+  return session.tokens?.accessToken?.toString()
 }
 
 export const partnerService = {
   // Check partner application status
   async getPartnerStatus() {
-    const token = await getIdToken()
+    const token = await getAccessToken()
     if (!token) {
       throw new Error('Authentication required')
     }
@@ -32,7 +32,7 @@ export const partnerService = {
 
   // Submit partner application
   async submitApplication(applicationData: any) {
-    const token = await getIdToken()
+    const token = await getAccessToken()
     if (!token) {
       throw new Error('Authentication required')
     }
@@ -78,7 +78,7 @@ export const partnerService = {
 
   // Get partner applications
   async getApplications() {
-    const token = await getIdToken()
+    const token = await getAccessToken()
     if (!token) {
       throw new Error('Authentication required')
     }
@@ -99,7 +99,7 @@ export const partnerService = {
 
   // Get partner solutions
   async getSolutions() {
-    const token = await getIdToken()
+    const token = await getAccessToken()
     if (!token) {
       // Return mock data for demo purposes
       return {
@@ -138,7 +138,7 @@ export const partnerService = {
 
   // Create new solution
   async createSolution(solutionData: any) {
-    const token = await getIdToken()
+    const token = await getAccessToken()
     if (!token) {
       throw new Error('Authentication required')
     }
