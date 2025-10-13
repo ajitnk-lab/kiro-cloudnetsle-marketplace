@@ -339,18 +339,14 @@ exports.handler = async (event) => {
         ReturnValues: 'ALL_NEW',
       }))
 
-      // If approved, update user role to partner
+      // If approved, update user marketplace status
       if (status === 'approved') {
         await docClient.send(new UpdateCommand({
           TableName: process.env.USER_TABLE_NAME,
           Key: { userId: getResult.Item.userId },
-          UpdateExpression: 'SET #role = :role, partnerStatus = :partnerStatus, updatedAt = :updatedAt',
-          ExpressionAttributeNames: {
-            '#role': 'role',
-          },
+          UpdateExpression: 'SET marketplaceStatus = :marketplaceStatus, updatedAt = :updatedAt',
           ExpressionAttributeValues: {
-            ':role': 'partner',
-            ':partnerStatus': 'active',
+            ':marketplaceStatus': 'active',
             ':updatedAt': new Date().toISOString(),
           },
         }))
@@ -364,30 +360,30 @@ exports.handler = async (event) => {
 
       if (userResult.Item?.email) {
         const emailSubject = status === 'approved' 
-          ? 'Partner Application Approved!' 
+          ? 'Marketplace Application Approved!' 
           : status === 'rejected' 
-          ? 'Partner Application Update' 
-          : 'Partner Application Under Review'
+          ? 'Marketplace Application Update' 
+          : 'Marketplace Application Under Review'
 
         const emailBody = status === 'approved'
           ? `
-            <h2>Congratulations! Your partner application has been approved.</h2>
-            <p>Welcome to our marketplace partner program!</p>
-            <p>You can now start adding your solutions to the marketplace.</p>
+            <h2>Congratulations! Your marketplace application has been approved.</h2>
+            <p>You can now start selling your solutions on our marketplace!</p>
+            <p>Login to your partner dashboard to add your first solution.</p>
             ${reviewNotes ? `<p><strong>Notes:</strong> ${reviewNotes}</p>` : ''}
             <p>Best regards,<br>Marketplace Team</p>
           `
           : status === 'rejected'
           ? `
-            <h2>Partner Application Update</h2>
-            <p>Thank you for your interest in becoming a partner. After careful review, we are unable to approve your application at this time.</p>
+            <h2>Marketplace Application Update</h2>
+            <p>Thank you for your interest in selling on our marketplace. After careful review, we are unable to approve your application at this time.</p>
             ${reviewNotes ? `<p><strong>Reason:</strong> ${reviewNotes}</p>` : ''}
             <p>You may reapply in the future if your circumstances change.</p>
             <p>Best regards,<br>Marketplace Team</p>
           `
           : `
-            <h2>Partner Application Update</h2>
-            <p>Your partner application is currently under review.</p>
+            <h2>Marketplace Application Update</h2>
+            <p>Your marketplace application is currently under review.</p>
             ${reviewNotes ? `<p><strong>Notes:</strong> ${reviewNotes}</p>` : ''}
             <p>We will notify you once the review is complete.</p>
             <p>Best regards,<br>Marketplace Team</p>

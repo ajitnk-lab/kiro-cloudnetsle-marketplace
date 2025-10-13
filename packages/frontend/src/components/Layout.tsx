@@ -32,13 +32,13 @@ export function Layout({ children }: LayoutProps) {
                 <span>Browse Solutions</span>
               </Link>
               
-              {!isAuthenticated && (
+              {user?.role === 'partner' && user?.marketplaceStatus !== 'active' && (
                 <Link
                   to="/partners"
                   className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors"
                 >
                   <Briefcase className="h-4 w-4" />
-                  <span>Become a Partner</span>
+                  <span>Apply for Marketplace</span>
                 </Link>
               )}
               
@@ -116,7 +116,7 @@ export function Layout({ children }: LayoutProps) {
                 </li>
                 <li>
                   <Link to="/partners" className="text-gray-600 hover:text-gray-900">
-                    Become a Partner
+                    Apply for Marketplace
                   </Link>
                 </li>
               </ul>

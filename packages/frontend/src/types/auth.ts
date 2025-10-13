@@ -10,6 +10,7 @@ export interface User {
   createdAt: string
   updatedAt: string
   status: 'active' | 'suspended' | 'pending'
+  marketplaceStatus?: 'pending' | 'active' | 'rejected' | 'none'
 }
 
 export interface AuthState {

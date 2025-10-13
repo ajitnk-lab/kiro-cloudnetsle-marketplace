@@ -326,9 +326,15 @@ export function CatalogPage() {
                       Reject
                     </button>
                   </>
-                ) : (
+                ) : user?.role === 'customer' ? (
                   <button className="btn-primary">
-                    {selectedSolution.status === 'approved' ? 'Purchase' : 'Contact Partner'}
+                    Purchase Solution
+                  </button>
+                ) : (
+                  <button className="btn-outline" disabled>
+                    {user?.role === 'partner' ? 'Partners cannot purchase' : 
+                     user?.role === 'admin' ? 'Admins cannot purchase' : 
+                     'Login to purchase'}
                   </button>
                 )}
                 <button 

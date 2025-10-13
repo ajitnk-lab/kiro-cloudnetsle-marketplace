@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { partnerService } from '../services/partner'
+import { useNavigate } from 'react-router-dom'
 
 export function PartnerApplication() {
-  const { } = useAuth()
+  const { user, isAuthenticated } = useAuth()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     company: '',
     website: '',
@@ -21,6 +23,24 @@ export function PartnerApplication() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+
+  // Check if user is authenticated and is a partner
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+    
+    if (user?.role !== 'partner') {
+      navigate('/')
+      return
+    }
+    
+    if (user?.marketplaceStatus === 'active') {
+      navigate('/partner/dashboard')
+      return
+    }
+  }, [isAuthenticated, user, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,9 +66,9 @@ export function PartnerApplication() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Application Submitted!</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Marketplace Application Submitted!</h1>
           <p className="text-gray-600 mb-6">
-            Thank you for your interest in becoming a partner. We'll review your application and get back to you within 2-3 business days.
+            Thank you for applying to sell on our marketplace. We'll review your application and get back to you within 2-3 business days.
           </p>
           <button 
             onClick={() => window.location.href = '/'}
@@ -64,9 +84,9 @@ export function PartnerApplication() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="bg-white rounded-lg shadow p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Become a Partner</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Marketplace Application</h1>
         <p className="text-gray-600 mb-8">
-          Join our marketplace as a solution provider and reach thousands of customers.
+          Apply to sell your solutions on our marketplace and start earning revenue from customers.
         </p>
 
         {error && (

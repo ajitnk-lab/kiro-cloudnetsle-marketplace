@@ -20,6 +20,7 @@ exports.handler = async (event) => {
         company: userAttributes['custom:company'] || '',
       },
       partnerStatus: userAttributes['custom:partnerStatus'] || 'none',
+      marketplaceStatus: userAttributes['custom:marketplaceStatus'] || (userAttributes['custom:role'] === 'partner' ? 'pending' : 'none'),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       status: 'active',

@@ -26,7 +26,11 @@ function App() {
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/solutions/:id" element={<SolutionDetailPage />} />
-          <Route path="/partners" element={<PartnerApplication />} />
+          <Route path="/partners" element={
+            <ProtectedRoute>
+              <PartnerApplication />
+            </ProtectedRoute>
+          } />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
             path="/profile"
