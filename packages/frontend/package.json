@@ -11,7 +11,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "deploy": "npm run build && aws s3 sync dist/ s3://$(aws cloudformation describe-stacks --stack-name MarketplaceInfrastructureStack --query 'Stacks[0].Outputs[?OutputKey==`WebsiteBucketName`].OutputValue' --output text) --delete",
+    "deploy": "npm run build && aws s3 sync dist/ s3://marketplace-frontend-20251007232833 --delete",
     "invalidate": "aws cloudfront create-invalidation --distribution-id $(aws cloudformation describe-stacks --stack-name MarketplaceInfrastructureStack --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontDistributionId`].OutputValue' --output text) --paths '/*'"
   },
   "dependencies": {

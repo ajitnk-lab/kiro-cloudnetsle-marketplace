@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export function SimpleAdmin() {
   const [solutions, setSolutions] = useState([])
@@ -31,7 +31,7 @@ export function SimpleAdmin() {
       }
     } catch (error) {
       console.error('Error:', error)
-      alert(`Network error: ${error.message}`)
+      alert(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { ArrowLeft, TrendingUp, DollarSign, Users, Eye } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export function PartnerAnalytics() {
   const navigate = useNavigate()
-  const [analytics, setAnalytics] = useState({
+  const [analytics] = useState({
     totalViews: 1250,
     totalSales: 45,
     totalRevenue: 125000,
@@ -89,7 +89,7 @@ export function PartnerAnalytics() {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Monthly Performance</h2>
           <div className="space-y-4">
-            {analytics.monthlyData.map((month, index) => (
+            {analytics.monthlyData.map((month) => (
               <div key={month.month} className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 text-sm font-medium text-gray-600">{month.month}</div>
@@ -118,7 +118,7 @@ export function PartnerAnalytics() {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Solutions</h2>
           <div className="space-y-4">
-            {analytics.topSolutions.map((solution, index) => (
+            {analytics.topSolutions.map((solution) => (
               <div key={solution.name} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <h3 className="font-medium text-gray-900">{solution.name}</h3>
