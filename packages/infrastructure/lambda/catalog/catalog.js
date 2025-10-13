@@ -2,7 +2,15 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
 const { DynamoDBDocumentClient, ScanCommand, GetCommand, QueryCommand, PutCommand, UpdateCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb')
 const { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3')
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner')
-const { v4: uuidv4 } = require('uuid')
+
+// Generate UUID without external dependency
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0
+    const v = c == 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
@@ -123,7 +131,7 @@ exports.handler = async (event) => {
           }
         }
 
-        const solutionId = uuidv4()
+        const solutionId = generateUUID()
         const newSolution = {
           solutionId,
           partnerId: requesterId,
@@ -290,7 +298,7 @@ exports.handler = async (event) => {
         }
       }
 
-      const imageKey = `solutions/${requesterId}/${uuidv4()}.jpg`
+      const imageKey = `solutions/${requesterId}/${generateUUID()}.jpg`
       const uploadUrl = await generatePresignedUrl(process.env.ASSETS_BUCKET_NAME, imageKey, 'putObject')
 
       return {
