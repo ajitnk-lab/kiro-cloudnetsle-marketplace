@@ -1,14 +1,26 @@
 import * as cdk from 'aws-cdk-lib'
 import * as cognito from 'aws-cdk-lib/aws-cognito'
+import * as lambda from 'aws-cdk-lib/aws-lambda'
 import { Construct } from 'constructs'
 
 export class AuthStack extends Construct {
   public readonly userPool: cognito.UserPool
   public readonly userPoolClient: cognito.UserPoolClient
   public readonly identityPool: cognito.CfnIdentityPool
+  public readonly postConfirmationFunction: lambda.Function
 
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props: { userTableName: string }) {
     super(scope, id)
+
+    // Create post-confirmation Lambda function
+    this.postConfirmationFunction = new lambda.Function(this, 'PostConfirmationFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'post-confirmation.handler',
+      code: lambda.Code.fromAsset('lambda/auth'),
+      environment: {
+        USER_TABLE_NAME: props.userTableName,
+      },
+    })
 
     // Create Cognito User Pool
     this.userPool = new cognito.UserPool(this, 'MarketplaceUserPool', {
@@ -20,6 +32,9 @@ export class AuthStack extends Construct {
       },
       autoVerify: {
         email: true,
+      },
+      lambdaTriggers: {
+        postConfirmation: this.postConfirmationFunction,
       },
       standardAttributes: {
         email: {
@@ -71,7 +86,7 @@ export class AuthStack extends Construct {
       authFlows: {
         userSrp: true,
         userPassword: true, // Enable USER_PASSWORD_AUTH
-        adminUserPassword: false,
+        adminUserPassword: true, // Enable ADMIN_USER_PASSWORD_AUTH
       },
       oAuth: {
         flows: {

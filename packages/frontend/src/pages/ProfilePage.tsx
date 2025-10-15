@@ -113,6 +113,20 @@ export function ProfilePage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Partner Status</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Marketplace Status</span>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    user.marketplaceStatus === 'approved' 
+                      ? 'bg-green-100 text-green-800'
+                      : user.marketplaceStatus === 'pending'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : user.marketplaceStatus === 'rejected'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {user.marketplaceStatus || 'Not Applied'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Partner Level</span>
                   <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
                     Basic

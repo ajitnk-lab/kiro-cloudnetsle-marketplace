@@ -44,19 +44,24 @@ export const authService = {
         if (currentSession.tokens?.accessToken) {
           console.log('👤 User already authenticated, using existing session')
           const accessToken = currentSession.tokens.accessToken.toString()
+          const idToken = currentSession.tokens.idToken?.toString()
+          
+          // For admin users, try ID token first, then access token
+          const isAdmin = credentials.email === 'admin@marketplace.com'
+          const tokenToTry = isAdmin && idToken ? idToken : accessToken
           
           const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
             headers: { 
-              'Authorization': `Bearer ${accessToken}`,
+              'Authorization': `Bearer ${tokenToTry}`,
               'Content-Type': 'application/json'
             }
           })
           
           if (userResponse.ok) {
             const userData = await userResponse.json()
-            this.setToken(accessToken)
+            this.setToken(isAdmin && idToken ? idToken : accessToken)
             this.setStoredUser(userData.user)
-            return { user: userData.user, token: accessToken }
+            return { user: userData.user, token: isAdmin && idToken ? idToken : accessToken }
           } else {
             const userInfo = currentSession.tokens?.idToken?.payload
             if (userInfo) {

@@ -16,13 +16,25 @@ export function PartnerDashboard() {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [partnerStatus, setPartnerStatus] = useState<string | null>(null)
 
   // Debug user role
   console.log('Partner Dashboard - User:', user)
 
   useEffect(() => {
     loadDashboardData()
+    checkPartnerStatus()
   }, [])
+
+  const checkPartnerStatus = async () => {
+    try {
+      const response = await partnerService.getPartnerStatus()
+      setPartnerStatus(response.status || null)
+    } catch (error) {
+      console.error('Failed to check partner status:', error)
+      setPartnerStatus(null)
+    }
+  }
 
   const loadDashboardData = async () => {
     try {
@@ -46,6 +58,10 @@ export function PartnerDashboard() {
   }
 
   const handleAddSolution = () => {
+    if (partnerStatus !== 'approved') {
+      setError('You must be approved before adding solutions')
+      return
+    }
     navigate('/partner/solutions/add')
   }
 
@@ -74,17 +90,45 @@ export function PartnerDashboard() {
         </div>
       )}
 
+      {partnerStatus !== 'approved' && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
+          <div className="flex items-center">
+            <div>
+              <h3 className="text-yellow-800 font-medium">Marketplace Approval Required</h3>
+              <p className="text-yellow-700 mt-1">
+                {partnerStatus === 'pending' 
+                  ? 'Your partner application is pending admin approval. You cannot manage solutions until approved.'
+                  : partnerStatus === null
+                  ? 'You must apply for marketplace status before managing solutions.'
+                  : 'Your partner application needs review.'
+                }
+              </p>
+              {!partnerStatus && (
+                <button
+                  onClick={() => navigate('/partner/application')}
+                  className="mt-2 text-yellow-800 underline hover:text-yellow-900"
+                >
+                  Apply for Marketplace
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-4 mb-8">
-        <button onClick={handleAddSolution} className="btn-primary flex items-center space-x-2">
-          <Plus className="h-4 w-4" />
-          <span>Add Solution</span>
-        </button>
-        <button onClick={handleViewAnalytics} className="btn-outline flex items-center space-x-2">
-          <BarChart3 className="h-4 w-4" />
-          <span>View Analytics</span>
-        </button>
-      </div>
+      {partnerStatus === 'approved' && (
+        <div className="flex flex-wrap gap-4 mb-8">
+          <button onClick={handleAddSolution} className="btn-primary flex items-center space-x-2">
+            <Plus className="h-4 w-4" />
+            <span>Add Solution</span>
+          </button>
+          <button onClick={handleViewAnalytics} className="btn-outline flex items-center space-x-2">
+            <BarChart3 className="h-4 w-4" />
+            <span>View Analytics</span>
+          </button>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

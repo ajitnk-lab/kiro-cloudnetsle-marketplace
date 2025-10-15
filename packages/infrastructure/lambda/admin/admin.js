@@ -1,11 +1,20 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, ScanCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, ScanCommand, UpdateCommand, GetCommand } = require('@aws-sdk/lib-dynamodb');
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
 
 const dynamoClient = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(dynamoClient);
+const sesClient = new SESClient({});
 
-const USERS_TABLE = process.env.USERS_TABLE || 'marketplace-users-1759859485186';
-const SOLUTIONS_TABLE = process.env.SOLUTIONS_TABLE || 'marketplace-solutions-1759859485186';
+const USERS_TABLE = process.env.USERS_TABLE;
+const SOLUTIONS_TABLE = process.env.SOLUTIONS_TABLE;
+const PARTNER_APPLICATION_TABLE = process.env.PARTNER_APPLICATION_TABLE_NAME;
+
+console.log('Environment variables:', {
+  USERS_TABLE,
+  SOLUTIONS_TABLE, 
+  PARTNER_APPLICATION_TABLE
+});
 
 exports.handler = async (event) => {
   const headers = {
@@ -64,15 +73,57 @@ exports.handler = async (event) => {
 };
 
 async function getPendingApplications() {
+  console.log('Getting pending applications from table:', PARTNER_APPLICATION_TABLE);
+  
   const command = new ScanCommand({
-    TableName: USERS_TABLE,
-    FilterExpression: 'partnerStatus = :status',
+    TableName: PARTNER_APPLICATION_TABLE,
+    FilterExpression: '#status = :status',
+    ExpressionAttributeNames: {
+      '#status': 'status'
+    },
     ExpressionAttributeValues: {
       ':status': 'pending'
     }
   });
 
   const result = await docClient.send(command);
+  console.log('Raw applications result:', JSON.stringify(result, null, 2));
+  
+  // Map database fields to UI expected fields and fetch user emails
+  const mappedApplications = await Promise.all(result.Items.map(async (item) => {
+    let userEmail = 'N/A';
+    
+    // Fetch user email from users table using userId
+    if (item.userId) {
+      try {
+        const userCommand = new GetCommand({
+          TableName: USERS_TABLE,
+          Key: { userId: item.userId }
+        });
+        const userResult = await docClient.send(userCommand);
+        if (userResult.Item) {
+          userEmail = userResult.Item.email || 'N/A';
+        }
+      } catch (error) {
+        console.error('Error fetching user email:', error);
+      }
+    }
+    
+    return {
+      applicationId: item.applicationId,
+      companyName: item.businessName,
+      email: userEmail,
+      createdAt: item.submittedAt,
+      businessType: item.businessType,
+      contactPerson: item.contactInfo?.contactPerson,
+      phone: item.contactInfo?.phone,
+      address: item.businessAddress,
+      website: item.website,
+      description: item.description
+    };
+  }));
+  
+  console.log('Mapped applications:', JSON.stringify(mappedApplications, null, 2));
   
   return {
     statusCode: 200,
@@ -81,12 +132,7 @@ async function getPendingApplications() {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      applications: result.Items.map(item => ({
-        applicationId: item.userId,
-        email: item.email,
-        companyName: item.companyName,
-        createdAt: item.createdAt
-      }))
+      applications: mappedApplications
     })
   };
 }
@@ -94,17 +140,104 @@ async function getPendingApplications() {
 async function updateApplication(applicationId, { action }) {
   const status = action === 'approve' ? 'approved' : 'rejected';
   
-  const command = new UpdateCommand({
-    TableName: USERS_TABLE,
-    Key: { userId: applicationId },
-    UpdateExpression: 'SET partnerStatus = :status, updatedAt = :updatedAt',
+  // Get the application to find userId
+  const getAppCommand = new GetCommand({
+    TableName: PARTNER_APPLICATION_TABLE,
+    Key: { applicationId }
+  });
+  
+  const appResult = await docClient.send(getAppCommand);
+  
+  if (!appResult.Item) {
+    return {
+      statusCode: 404,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ error: 'Application not found' })
+    };
+  }
+
+  // Update the partner application status
+  const updateAppCommand = new UpdateCommand({
+    TableName: PARTNER_APPLICATION_TABLE,
+    Key: { applicationId },
+    UpdateExpression: 'SET #status = :status, updatedAt = :updatedAt',
+    ExpressionAttributeNames: {
+      '#status': 'status'
+    },
     ExpressionAttributeValues: {
       ':status': status,
       ':updatedAt': new Date().toISOString()
     }
   });
 
-  await docClient.send(command);
+  await docClient.send(updateAppCommand);
+
+  // Get user details for email notification
+  let userEmail = null;
+  if (appResult.Item.userId) {
+    const getUserCommand = new GetCommand({
+      TableName: USERS_TABLE,
+      Key: { userId: appResult.Item.userId }
+    });
+    
+    const userResult = await docClient.send(getUserCommand);
+    userEmail = userResult.Item?.email;
+
+    // If approved, update user's partner status
+    if (status === 'approved') {
+      const updateUserCommand = new UpdateCommand({
+        TableName: USERS_TABLE,
+        Key: { userId: appResult.Item.userId },
+        UpdateExpression: 'SET partnerStatus = :status, marketplaceStatus = :status, updatedAt = :updatedAt',
+        ExpressionAttributeValues: {
+          ':status': 'approved',
+          ':updatedAt': new Date().toISOString()
+        }
+      });
+
+      await docClient.send(updateUserCommand);
+    }
+  }
+
+  // Send email notification
+  if (userEmail) {
+    try {
+      const subject = status === 'approved' 
+        ? 'Partner Application Approved!' 
+        : 'Partner Application Update';
+
+      const body = status === 'approved'
+        ? `
+          <h2>Congratulations! Your partner application has been approved.</h2>
+          <p>You can now start selling solutions on our marketplace!</p>
+          <p>Login to your partner dashboard to add your first solution.</p>
+          <p>Best regards,<br>Marketplace Team</p>
+        `
+        : `
+          <h2>Partner Application Update</h2>
+          <p>Thank you for your interest in becoming a partner. After review, we are unable to approve your application at this time.</p>
+          <p>You may reapply in the future if your circumstances change.</p>
+          <p>Best regards,<br>Marketplace Team</p>
+        `;
+
+      await sesClient.send(new SendEmailCommand({
+        Source: 'ajitnk2006+noreply@gmail.com',
+        Destination: {
+          ToAddresses: [userEmail],
+        },
+        Message: {
+          Subject: { Data: subject },
+          Body: { Html: { Data: body } },
+        },
+      }));
+    } catch (emailError) {
+      console.error('Failed to send email:', emailError);
+      // Don't fail the main operation if email fails
+    }
+  }
 
   return {
     statusCode: 200,
@@ -112,7 +245,7 @@ async function updateApplication(applicationId, { action }) {
       'Access-Control-Allow-Origin': '*',
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ success: true })
+    body: JSON.stringify({ success: true, status })
   };
 }
 

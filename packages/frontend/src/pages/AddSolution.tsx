@@ -37,11 +37,15 @@ export function AddSolution() {
   const checkPartnerStatus = async () => {
     try {
       setCheckingStatus(true)
-      // Skip profile check - user is already authenticated and in partner dashboard
-      setPartnerStatus('approved') // Assume approved if they can access this page
+      
+      // Check actual partner status from API
+      const response = await partnerService.getPartnerStatus()
+      setPartnerStatus(response.status || null)
+      
     } catch (error) {
       console.error('Failed to check partner status:', error)
       setError('Failed to verify partner status')
+      setPartnerStatus(null) // Default to not approved
     } finally {
       setCheckingStatus(false)
     }
@@ -151,7 +155,7 @@ export function AddSolution() {
           <div className="flex items-center">
             <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
             <div>
-              <h3 className="text-yellow-800 font-medium">Partner Approval Required</h3>
+              <h3 className="text-yellow-800 font-medium">Marketplace Approval Required</h3>
               <p className="text-yellow-700 mt-1">
                 {partnerStatus === 'pending' 
                   ? 'Your partner application is pending admin approval. You cannot create solutions until approved.'

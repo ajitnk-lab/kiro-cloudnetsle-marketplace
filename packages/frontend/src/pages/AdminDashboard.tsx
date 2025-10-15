@@ -7,6 +7,7 @@ export function AdminDashboard() {
   const [pendingApplications, setPendingApplications] = useState([])
   const [pendingSolutions, setPendingSolutions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [processingApplications, setProcessingApplications] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     loadAdminData()
@@ -74,6 +75,9 @@ export function AdminDashboard() {
 
   const handleApplicationAction = async (applicationId: string, action: 'approve' | 'reject') => {
     try {
+      // Add to processing set
+      setProcessingApplications(prev => new Set(prev).add(applicationId))
+      
       let token = authService.getToken()
       if (!token) {
         try {
@@ -102,12 +106,23 @@ export function AdminDashboard() {
       })
       
       if (response.ok) {
-        loadAdminData()
+        // Remove from pending applications list
+        setPendingApplications(prev => prev.filter((app: any) => app.applicationId !== applicationId))
+        alert(`Application ${action}d successfully!`)
       } else {
         console.error('Failed to update application:', response.status, await response.text())
+        alert(`Failed to ${action} application. Please try again.`)
       }
     } catch (error) {
       console.error('Failed to update application:', error)
+      alert(`Failed to ${action} application. Please try again.`)
+    } finally {
+      // Remove from processing set
+      setProcessingApplications(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(applicationId)
+        return newSet
+      })
     }
   }
 
@@ -185,18 +200,22 @@ export function AdminDashboard() {
                     <td className="px-6 py-4 whitespace-nowrap">{app.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{new Date(app.createdAt).toLocaleDateString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleApplicationAction(app.applicationId, 'approve')}
-                        className="text-green-600 hover:text-green-900 mr-4"
-                      >
-                        <CheckCircle className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleApplicationAction(app.applicationId, 'reject')}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <XCircle className="h-5 w-5" />
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleApplicationAction(app.applicationId, 'approve')}
+                          disabled={processingApplications.has(app.applicationId)}
+                          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm"
+                        >
+                          {processingApplications.has(app.applicationId) ? 'Processing...' : 'Approve'}
+                        </button>
+                        <button
+                          onClick={() => handleApplicationAction(app.applicationId, 'reject')}
+                          disabled={processingApplications.has(app.applicationId)}
+                          className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm"
+                        >
+                          {processingApplications.has(app.applicationId) ? 'Processing...' : 'Reject'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -139,7 +139,17 @@ export function CatalogPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Solution Catalog</h1>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-3xl font-bold text-gray-900">Solution Catalog</h1>
+          {user?.role === 'partner' && user?.marketplaceStatus === 'active' && (
+            <button
+              onClick={() => window.location.href = '/partner/solutions/add'}
+              className="btn-primary flex items-center space-x-2"
+            >
+              <span>Add Solution</span>
+            </button>
+          )}
+        </div>
         <p className="text-gray-600">
           Discover software solutions from our trusted partners
         </p>

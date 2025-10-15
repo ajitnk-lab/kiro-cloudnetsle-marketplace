@@ -32,7 +32,7 @@ export function Layout({ children }: LayoutProps) {
                 <span>Browse Solutions</span>
               </Link>
               
-              {user?.role === 'partner' && user?.marketplaceStatus !== 'active' && (
+              {user?.role === 'partner' && user?.marketplaceStatus !== 'approved' && (
                 <Link
                   to="/partners"
                   className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors"
@@ -70,7 +70,7 @@ export function Layout({ children }: LayoutProps) {
                     className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
                   >
                     <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">{user?.profile.name || user?.email}</span>
+                    <span className="hidden sm:inline">{user?.profile?.name || user?.email}</span>
                   </Link>
                   <button
                     onClick={logout}

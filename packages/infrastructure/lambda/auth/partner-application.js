@@ -238,11 +238,38 @@ exports.handler = async (event) => {
           
           const result = await docClient.send(new QueryCommand(params))
           
+          // Fetch user data for each application to get email
+          const applicationsWithUserData = await Promise.all(
+            (result.Items || []).map(async (app) => {
+              try {
+                const userResult = await docClient.send(new GetCommand({
+                  TableName: process.env.USER_TABLE_NAME,
+                  Key: { userId: app.userId },
+                }))
+                
+                return {
+                  ...app,
+                  email: userResult.Item?.email || 'N/A',
+                  companyName: app.businessName,
+                  createdAt: app.submittedAt
+                }
+              } catch (error) {
+                console.error('Error fetching user data for application:', app.applicationId, error)
+                return {
+                  ...app,
+                  email: 'N/A',
+                  companyName: app.businessName,
+                  createdAt: app.submittedAt
+                }
+              }
+            })
+          )
+          
           return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
-              applications: result.Items || [],
+              applications: applicationsWithUserData,
               count: result.Count || 0,
               lastKey: result.LastEvaluatedKey ? encodeURIComponent(JSON.stringify(result.LastEvaluatedKey)) : null,
             }),
@@ -250,11 +277,38 @@ exports.handler = async (event) => {
         } else {
           const result = await docClient.send(new ScanCommand(params))
           
+          // Fetch user data for each application to get email
+          const applicationsWithUserData = await Promise.all(
+            (result.Items || []).map(async (app) => {
+              try {
+                const userResult = await docClient.send(new GetCommand({
+                  TableName: process.env.USER_TABLE_NAME,
+                  Key: { userId: app.userId },
+                }))
+                
+                return {
+                  ...app,
+                  email: userResult.Item?.email || 'N/A',
+                  companyName: app.businessName,
+                  createdAt: app.submittedAt
+                }
+              } catch (error) {
+                console.error('Error fetching user data for application:', app.applicationId, error)
+                return {
+                  ...app,
+                  email: 'N/A',
+                  companyName: app.businessName,
+                  createdAt: app.submittedAt
+                }
+              }
+            })
+          )
+          
           return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
-              applications: result.Items || [],
+              applications: applicationsWithUserData,
               count: result.Count || 0,
               lastKey: result.LastEvaluatedKey ? encodeURIComponent(JSON.stringify(result.LastEvaluatedKey)) : null,
             }),
@@ -381,7 +435,7 @@ exports.handler = async (event) => {
           Key: { userId: getResult.Item.userId },
           UpdateExpression: 'SET marketplaceStatus = :marketplaceStatus, updatedAt = :updatedAt',
           ExpressionAttributeValues: {
-            ':marketplaceStatus': 'active',
+            ':marketplaceStatus': 'approved',
             ':updatedAt': new Date().toISOString(),
           },
         }))

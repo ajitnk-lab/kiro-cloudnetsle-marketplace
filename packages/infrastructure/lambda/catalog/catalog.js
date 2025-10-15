@@ -103,7 +103,7 @@ exports.handler = async (event) => {
           Key: { userId: requesterId },
         }))
 
-        if (!partnerResult.Item || partnerResult.Item.partnerStatus !== 'approved') {
+        if (!partnerResult.Item || (partnerResult.Item.marketplaceStatus !== 'approved' && partnerResult.Item.marketplaceStatus !== 'active')) {
           return {
             statusCode: 403,
             headers,
