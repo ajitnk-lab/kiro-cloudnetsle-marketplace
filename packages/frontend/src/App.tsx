@@ -14,6 +14,12 @@ import { PartnerAnalytics } from './pages/PartnerAnalytics'
 import { AuthCallback } from './components/AuthCallback'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminDashboard } from './pages/AdminDashboard'
+import { HelpCenter } from './pages/HelpCenter'
+import { ContactUs } from './pages/ContactUs'
+import { PrivacyPolicy } from './pages/PrivacyPolicy'
+import { TermsOfService } from './pages/TermsOfService'
+import { AboutUs } from './pages/AboutUs'
+import { Blog } from './pages/Blog'
 
 function App() {
   return (
@@ -69,6 +75,12 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/blog" element={<Blog />} />
         </Routes>
       </Layout>
     </AuthProvider>
