@@ -16,6 +16,9 @@ export function HomePage() {
               Your Gateway to
               <span className="block text-blue-200">Software Solutions</span>
             </h1>
+            <div className="text-sm text-blue-200 mb-4">
+              Last updated: {new Date().toLocaleString()}
+            </div>
             <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
               Discover, purchase, and manage software solutions from trusted partners.
               Join thousands of customers and partners in our thriving marketplace.
