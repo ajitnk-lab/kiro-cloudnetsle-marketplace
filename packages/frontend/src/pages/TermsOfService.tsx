@@ -48,8 +48,13 @@ export function TermsOfService() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">7. Contact Information</h2>
-          <p className="text-gray-700">If you have questions about these Terms of Service, please contact us at legal@marketplace.com</p>
+          <h2 className="text-2xl font-semibold mb-4">7. Refund Policy</h2>
+          <p className="text-gray-700 mb-4">As per our company policy, there will be no refund for any purchases under any circumstances.</p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">8. Contact Information</h2>
+          <p className="text-gray-700">If you have questions about these Terms of Service, please contact us at support@cloudnestle.com</p>
         </section>
       </div>
     </div>

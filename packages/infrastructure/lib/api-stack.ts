@@ -41,6 +41,16 @@ export class ApiStack extends Construct {
       },
     })
 
+    // Add CORS support for 401 responses
+    this.api.addGatewayResponse('Unauthorized', {
+      type: apigateway.ResponseType.UNAUTHORIZED,
+      responseHeaders: {
+        'Access-Control-Allow-Origin': "'*'",
+        'Access-Control-Allow-Headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
+      },
+    })
+
     // Create Cognito Authorizer
     const cognitoAuthorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'CognitoAuthorizer', {
       cognitoUserPools: [props.userPool],
@@ -172,7 +182,6 @@ export class ApiStack extends Construct {
         USERS_TABLE: props.userTable.tableName,
         SOLUTIONS_TABLE: props.solutionTable.tableName,
         PARTNER_APPLICATION_TABLE_NAME: props.partnerApplicationTable.tableName,
-        USER_TABLE_NAME: props.userTable.tableName,
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),

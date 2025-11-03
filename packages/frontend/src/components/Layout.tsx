@@ -114,11 +114,6 @@ export function Layout({ children }: LayoutProps) {
                     Browse Solutions
                   </Link>
                 </li>
-                <li>
-                  <Link to="/partners" className="text-gray-600 hover:text-gray-900">
-                    Apply for Marketplace
-                  </Link>
-                </li>
               </ul>
             </div>
             
@@ -166,11 +161,6 @@ export function Layout({ children }: LayoutProps) {
                 <li>
                   <Link to="/about" className="text-gray-600 hover:text-gray-900">
                     About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/blog" className="text-gray-600 hover:text-gray-900">
-                    Blog
                   </Link>
                 </li>
               </ul>

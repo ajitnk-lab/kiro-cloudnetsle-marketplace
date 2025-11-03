@@ -43,8 +43,13 @@ export function PrivacyPolicy() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">6. Contact Us</h2>
-          <p className="text-gray-700">If you have questions about this Privacy Policy, please contact us at privacy@marketplace.com</p>
+          <h2 className="text-2xl font-semibold mb-4">6. Refund Policy</h2>
+          <p className="text-gray-700 mb-4">As per our company policy, there will be no refund for any purchases under any circumstances.</p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">7. Contact Us</h2>
+          <p className="text-gray-700">If you have questions about this Privacy Policy, please contact us at support@cloudnestle.com</p>
         </section>
       </div>
     </div>
