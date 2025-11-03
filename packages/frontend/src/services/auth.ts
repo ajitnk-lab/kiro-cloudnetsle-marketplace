@@ -46,9 +46,8 @@ export const authService = {
           const accessToken = currentSession.tokens.accessToken.toString()
           const idToken = currentSession.tokens.idToken?.toString()
           
-          // For admin users, try ID token first, then access token
-          const isAdmin = credentials.email === 'admin@marketplace.com'
-          const tokenToTry = isAdmin && idToken ? idToken : accessToken
+          // Always use IdToken for API Gateway Cognito authorizer
+          const tokenToTry = idToken || accessToken
           
           const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
             headers: { 
@@ -59,9 +58,9 @@ export const authService = {
           
           if (userResponse.ok) {
             const userData = await userResponse.json()
-            this.setToken(isAdmin && idToken ? idToken : accessToken)
+            this.setToken(idToken || accessToken)
             this.setStoredUser(userData.user)
-            return { user: userData.user, token: isAdmin && idToken ? idToken : accessToken }
+            return { user: userData.user, token: idToken || accessToken }
           } else {
             const userInfo = currentSession.tokens?.idToken?.payload
             if (userInfo) {
@@ -122,9 +121,9 @@ export const authService = {
                 updatedAt: new Date().toISOString(),
                 status: 'active'
               }
-              this.setToken(accessToken)
+              this.setToken(idToken)
               this.setStoredUser(user)
-              return { user, token: accessToken }
+              return { user, token: idToken }
             }
           }
         }
@@ -286,6 +285,14 @@ export const authService = {
 
   setToken(token: string): void {
     localStorage.setItem('authToken', token)
+    // Also store in auth-session format for AdminDashboard
+    const session = {
+      tokens: {
+        idToken: token,
+        accessToken: token
+      }
+    }
+    localStorage.setItem('auth-session', JSON.stringify(session))
   },
 
   getStoredUser(): User | null {

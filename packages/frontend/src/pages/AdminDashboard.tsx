@@ -22,7 +22,7 @@ export function AdminDashboard() {
       if (!token) {
         try {
           const session = await fetchAuthSession()
-          token = session.tokens?.accessToken?.toString() || null  // Use access token for admin too
+          token = session.tokens?.idToken?.toString() || null  // Use ID token for API Gateway
           if (token) {
             authService.setToken(token)
           }
