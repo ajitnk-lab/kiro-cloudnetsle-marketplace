@@ -14,6 +14,7 @@ import { PartnerAnalytics } from './pages/PartnerAnalytics'
 import { AuthCallback } from './components/AuthCallback'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminDashboard } from './pages/AdminDashboard'
+import { PaymentSuccess } from './pages/PaymentSuccess'
 import { HelpCenter } from './pages/HelpCenter'
 import { ContactUs } from './pages/ContactUs'
 import { PrivacyPolicy } from './pages/PrivacyPolicy'
@@ -32,6 +33,7 @@ function App() {
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/solutions/:id" element={<SolutionDetailPage />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/partners" element={
             <ProtectedRoute>
               <PartnerApplication />

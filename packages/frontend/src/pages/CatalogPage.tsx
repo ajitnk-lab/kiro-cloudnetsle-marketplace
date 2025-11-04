@@ -125,6 +125,47 @@ export function CatalogPage() {
     }
   }
 
+  const handlePurchase = async (solution: Solution | null) => {
+    if (!solution || !user) return
+    
+    try {
+      const token = authService.getToken()
+      if (!token) {
+        console.error('No auth token found')
+        return
+      }
+
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/payments/initiate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          solutionId: solution.solutionId,
+          amount: solution.pricing.amount,
+          currency: solution.pricing.currency,
+          userId: user.userId,
+          userEmail: user.email,
+          userName: user.profile.name
+        })
+      })
+
+      const data = await response.json()
+      
+      if (data.success && data.redirectUrl) {
+        // Redirect to PhonePe payment page
+        window.location.href = data.redirectUrl
+      } else {
+        console.error('Payment initiation failed:', data.message)
+        alert('Payment initiation failed. Please try again.')
+      }
+    } catch (error) {
+      console.error('Payment error:', error)
+      alert('Payment initiation failed. Please try again.')
+    }
+  }
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -337,7 +378,10 @@ export function CatalogPage() {
                     </button>
                   </>
                 ) : user?.role === 'customer' ? (
-                  <button className="btn-primary">
+                  <button 
+                    className="btn-primary"
+                    onClick={() => handlePurchase(selectedSolution)}
+                  >
                     Purchase Solution
                   </button>
                 ) : (

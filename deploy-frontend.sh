@@ -20,15 +20,16 @@ npm run build
 
 # Deploy to S3
 echo "☁️ Deploying to S3..."
-aws s3 sync dist/ s3://marketplace-frontend-20251007232833 --delete
+aws s3 sync dist/ s3://marketplace-frontend-1762237441732 --delete
 
 # Invalidate CloudFront cache
 echo "🔄 Invalidating CloudFront cache..."
-aws cloudfront create-invalidation --distribution-id E1234567890123 --paths "/*" --region us-west-2 2>/dev/null || echo "CloudFront invalidation skipped (distribution ID needed)"
+aws cloudfront create-invalidation --distribution-id E3U4YKY2P0VVP7 --paths "/*" --region us-east-1 2>/dev/null || echo "CloudFront invalidation skipped (distribution ID needed)"
 
 echo "✅ Frontend deployed successfully!"
 echo ""
 echo "🌐 Access your frontend at:"
-echo "   CloudFront: https://d2o6hyhxlhxryo.cloudfront.net"
+echo "   CloudFront: https://d3uhuxbvqv0vtg.cloudfront.net"
+echo "   S3 Direct: http://marketplace-frontend-1762237441732.s3-website-us-east-1.amazonaws.com"
 echo ""
 echo "📝 Note: If CloudFront shows 403, the distribution may need configuration updates."

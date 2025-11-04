@@ -1,10 +1,48 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
 const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb')
 const { CognitoIdentityProviderClient, AdminGetUserCommand } = require('@aws-sdk/client-cognito-identity-provider')
+const https = require('https')
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
 const cognitoClient = new CognitoIdentityProviderClient({})
+
+// reCAPTCHA verification function
+const verifyRecaptcha = async (token) => {
+  const secretKey = '6LdKqgEsAAAAAAbNhlUVBhV9VZUVKzoMQuur-M5-'
+  
+  return new Promise((resolve, reject) => {
+    const postData = `secret=${secretKey}&response=${token}`
+    
+    const options = {
+      hostname: 'www.google.com',
+      port: 443,
+      path: '/recaptcha/api/siteverify',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    }
+    
+    const req = https.request(options, (res) => {
+      let data = ''
+      res.on('data', (chunk) => data += chunk)
+      res.on('end', () => {
+        try {
+          const result = JSON.parse(data)
+          resolve(result)
+        } catch (error) {
+          reject(error)
+        }
+      })
+    })
+    
+    req.on('error', reject)
+    req.write(postData)
+    req.end()
+  })
+}
 
 exports.handler = async (event) => {
   console.log('Register function called:', JSON.stringify(event, null, 2))
@@ -27,7 +65,28 @@ exports.handler = async (event) => {
 
     // This function is called after Cognito registration to create user profile
     const body = JSON.parse(event.body || '{}')
-    const { userId, email, role, userType, profile = {} } = body
+    const { userId, email, role, userType, profile = {}, recaptchaToken } = body
+    
+    // Verify reCAPTCHA if token is provided
+    if (recaptchaToken) {
+      try {
+        const recaptchaResult = await verifyRecaptcha(recaptchaToken)
+        if (!recaptchaResult.success) {
+          return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({ error: 'reCAPTCHA verification failed' }),
+          }
+        }
+      } catch (error) {
+        console.error('reCAPTCHA verification error:', error)
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: 'reCAPTCHA verification failed' }),
+        }
+      }
+    }
     
     // Use userType if provided, otherwise fall back to role, otherwise default to customer
     const userRole = userType || role || 'customer'

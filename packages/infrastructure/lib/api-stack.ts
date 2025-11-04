@@ -144,6 +144,30 @@ export class ApiStack extends Construct {
       timeout: cdk.Duration.seconds(30),
     })
 
+    // Payment Lambda Function
+    const paymentInitiateFunction = new lambda.Function(this, 'PaymentInitiateFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'initiate.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        USER_TABLE_NAME: props.userTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Payment Status Lambda Function
+    const paymentStatusFunction = new lambda.Function(this, 'PaymentStatusFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'status.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        USER_TABLE_NAME: props.userTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
     // Catalog Lambda Functions
     const catalogFunction = new lambda.Function(this, 'CatalogFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -193,6 +217,15 @@ export class ApiStack extends Construct {
     const userApi = this.api.root.addResource('user')
     const adminApi = this.api.root.addResource('admin')
     const partnerApi = this.api.root.addResource('partner')
+    const paymentsApi = this.api.root.addResource('payments')
+
+    // Payment routes
+    paymentsApi.addResource('initiate').addMethod('POST', new apigateway.LambdaIntegration(paymentInitiateFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    paymentsApi.addResource('status').addResource('{transactionId}').addMethod('GET', new apigateway.LambdaIntegration(paymentStatusFunction), {
+      authorizer: cognitoAuthorizer,
+    })
 
     // Auth routes
     authApi.addResource('register').addMethod('POST', new apigateway.LambdaIntegration(registerFunction))

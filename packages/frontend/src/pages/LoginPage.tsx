@@ -1,21 +1,24 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import ReCAPTCHA from 'react-google-recaptcha'
 import { useAuth } from '../contexts/AuthContext'
-import { SocialLoginButtons } from '../components/SocialLoginButtons'
 import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
+  recaptcha: z.string().min(1, 'Please complete the reCAPTCHA verification'),
 })
 
 type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  const recaptchaRef = useRef<ReCAPTCHA>(null)
   const { login, isLoading, error, clearError } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -26,6 +29,8 @@ export function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    clearErrors,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
@@ -33,10 +38,35 @@ export function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       clearError()
-      await login(data)
+      await login({ email: data.email, password: data.password, recaptchaToken })
+      
+      // Get user from auth context to check role
+      const storedUser = localStorage.getItem('user')
+      
+      if (storedUser) {
+        const user = JSON.parse(storedUser)
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard', { replace: true })
+          return
+        }
+      }
+      
       navigate(from, { replace: true })
     } catch (error) {
-      // Error is handled by the auth context
+      // Reset reCAPTCHA on error
+      recaptchaRef.current?.reset()
+      setRecaptchaToken(null)
+      setValue('recaptcha', '')
+    }
+  }
+
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token)
+    if (token) {
+      setValue('recaptcha', token)
+      clearErrors('recaptcha')
+    } else {
+      setValue('recaptcha', '')
     }
   }
 
@@ -59,19 +89,6 @@ export function LoginPage() {
         </div>
 
         <div className="card">
-          {/* Social Login */}
-          <div className="mb-6">
-            <SocialLoginButtons mode="login" />
-          </div>
-
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
-            </div>
-          </div>
 
           {/* Error Message */}
           {error && (
@@ -125,6 +142,20 @@ export function LoginPage() {
               </div>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              )}
+            </div>
+
+            {/* reCAPTCHA */}
+            <div>
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                onChange={handleRecaptchaChange}
+                onExpired={() => handleRecaptchaChange(null)}
+                onError={() => handleRecaptchaChange(null)}
+              />
+              {errors.recaptcha && (
+                <p className="mt-1 text-sm text-red-600">{errors.recaptcha.message}</p>
               )}
             </div>
 

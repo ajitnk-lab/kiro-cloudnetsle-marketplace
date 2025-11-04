@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import ReCAPTCHA from 'react-google-recaptcha'
 import { useAuth } from '../contexts/AuthContext'
-import { SocialLoginButtons } from '../components/SocialLoginButtons'
 import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 
 const registerSchema = z.object({
@@ -23,6 +23,7 @@ const registerSchema = z.object({
   agreeToTerms: z.boolean().refine((val) => val === true, {
     message: 'You must agree to the terms and conditions',
   }),
+  recaptcha: z.string().min(1, 'Please complete the reCAPTCHA verification'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -36,6 +37,8 @@ export function RegisterPage() {
   const [showVerification, setShowVerification] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  const recaptchaRef = useRef<ReCAPTCHA>(null)
   const { register: registerUser, confirmRegistration, isLoading, error, clearError } = useAuth()
   const navigate = useNavigate()
 
@@ -44,6 +47,8 @@ export function RegisterPage() {
     handleSubmit,
     watch,
     formState: { errors },
+    setValue,
+    clearErrors,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -79,15 +84,28 @@ export function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       clearError()
-      const { confirmPassword, agreeToTerms, ...registerData } = data
-      const result = await registerUser(registerData)
+      const { confirmPassword, agreeToTerms, recaptcha, ...registerData } = data
+      const result = await registerUser({ ...registerData, recaptchaToken })
       
       if (result.needsVerification) {
         setUserEmail(result.email)
         setShowVerification(true)
       }
     } catch (error) {
-      // Error is handled by the auth context
+      // Reset reCAPTCHA on error
+      recaptchaRef.current?.reset()
+      setRecaptchaToken(null)
+      setValue('recaptcha', '')
+    }
+  }
+
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token)
+    if (token) {
+      setValue('recaptcha', token)
+      clearErrors('recaptcha')
+    } else {
+      setValue('recaptcha', '')
     }
   }
 
@@ -124,19 +142,6 @@ export function RegisterPage() {
         </div>
 
         <div className="card">
-          {/* Social Login */}
-          <div className="mb-6">
-            <SocialLoginButtons mode="register" />
-          </div>
-
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
-            </div>
-          </div>
 
           {/* Error Message */}
           {error && (
@@ -379,6 +384,20 @@ export function RegisterPage() {
                   <p className="mt-1 text-red-600">{errors.agreeToTerms.message}</p>
                 )}
               </div>
+            </div>
+
+            {/* reCAPTCHA */}
+            <div>
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                onChange={handleRecaptchaChange}
+                onExpired={() => handleRecaptchaChange(null)}
+                onError={() => handleRecaptchaChange(null)}
+              />
+              {errors.recaptcha && (
+                <p className="mt-1 text-sm text-red-600">{errors.recaptcha.message}</p>
+              )}
             </div>
 
             <button

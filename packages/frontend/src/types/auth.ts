@@ -23,6 +23,7 @@ export interface AuthState {
 export interface LoginCredentials {
   email: string
   password: string
+  recaptchaToken?: string | null
 }
 
 export interface RegisterData {
@@ -31,4 +32,5 @@ export interface RegisterData {
   name: string
   company?: string
   role?: 'customer' | 'partner'
+  recaptchaToken?: string | null
 }
