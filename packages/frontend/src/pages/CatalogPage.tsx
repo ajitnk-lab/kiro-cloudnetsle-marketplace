@@ -16,6 +16,8 @@ interface Solution {
   }
   partnerName?: string
   status?: string
+  actionButtonText?: string
+  externalUrl?: string
 }
 
 export function CatalogPage() {
@@ -280,13 +282,31 @@ export function CatalogPage() {
                   {solution.pricing.model === 'subscription' && <span className="text-sm font-normal">/month</span>}
                 </div>
                 <button 
-                  onClick={() => {
-                    console.log('View Details clicked for:', solution.name)
-                    setSelectedSolution(solution)
+                  onClick={async () => {
+                    console.log('Button clicked for:', solution.name)
+                    if (solution.externalUrl) {
+                      // For AWS Solution Finder, pass marketplace authentication
+                      if (solution.externalUrl.includes('awssolutionfinder.solutions.cloudnestle.com')) {
+                        const token = authService.getToken()
+                        const url = new URL(solution.externalUrl)
+                        url.searchParams.set('marketplace', 'true')
+                        if (token) {
+                          url.searchParams.set('token', token)
+                        }
+                        if (user?.email) {
+                          url.searchParams.set('email', user.email)
+                        }
+                        window.open(url.toString(), '_blank')
+                      } else {
+                        window.open(solution.externalUrl, '_blank')
+                      }
+                    } else {
+                      setSelectedSolution(solution)
+                    }
                   }}
                   className="btn-primary text-sm"
                 >
-                  View Details
+                  {solution.actionButtonText || 'View Details'}
                 </button>
               </div>
               
