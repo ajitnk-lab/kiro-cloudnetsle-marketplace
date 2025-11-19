@@ -43,12 +43,17 @@ export function PrivacyPolicy() {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">6. Refund Policy</h2>
+          <h2 className="text-2xl font-semibold mb-4">6. Retention of Personal Information</h2>
+          <p className="text-gray-700 mb-4">We keep your personal information to enable your continued use of our Offerings, for as long as it is required in order to fulfill the relevant purposes described in this Privacy Notice, as may be required by law (including for tax and accounting purposes), or as otherwise communicated to you. How long we retain specific personal information varies depending on the purpose for its use, and we will delete your personal information in accordance with applicable law.</p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">7. Refund Policy</h2>
           <p className="text-gray-700 mb-4">As per our company policy, there will be no refund for any purchases under any circumstances.</p>
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">7. Contact Us</h2>
+          <h2 className="text-2xl font-semibold mb-4">8. Contact Us</h2>
           <p className="text-gray-700">If you have questions about this Privacy Policy, please contact us at support@cloudnestle.com</p>
         </section>
       </div>

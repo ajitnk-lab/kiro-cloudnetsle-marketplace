@@ -1,0 +1,722 @@
+{
+    "Items": [
+        {
+            "experience": {
+                "S": "3-5"
+            },
+            "website": {
+                "S": "http://Partner432company.com"
+            },
+            "portfolio": {
+                "S": "Partner432companyPartner432companyPartner432company"
+            },
+            "status": {
+                "S": "pending"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "bangalore"
+                    },
+                    "country": {
+                        "S": "India"
+                    },
+                    "address": {
+                        "S": "Flat 304 Mahaveer Springs Annex Block -2 15th"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "Partner432company"
+            },
+            "submittedAt": {
+                "S": "2025-10-15T06:23:11.764Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": ""
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "09591365000"
+                    },
+                    "contactPerson": {
+                        "S": "ajit n k"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "partnership"
+            },
+            "userId": {
+                "S": "84e8a4e8-c001-70d9-7ffa-a7a7db30c5b1"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T06:23:11.764Z"
+            },
+            "description": {
+                "S": "Partner432companyPartner432companyPartner432company"
+            },
+            "applicationId": {
+                "S": "859e4119-893f-4862-a42a-2bf96f1de337"
+            }
+        },
+        {
+            "experience": {
+                "S": "6-10"
+            },
+            "website": {
+                "S": "http://partner987.com"
+            },
+            "portfolio": {
+                "S": "partner987partner987partner987partner987"
+            },
+            "status": {
+                "S": "approved"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "bangalore"
+                    },
+                    "country": {
+                        "S": "India"
+                    },
+                    "address": {
+                        "S": "Flat 304 Mahaveer Springs Annex Block -2 15th"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "partner987-compnayapplication"
+            },
+            "submittedAt": {
+                "S": "2025-10-15T12:06:26.013Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": ""
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "09591365000"
+                    },
+                    "contactPerson": {
+                        "S": "ajit n k"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "corporation"
+            },
+            "userId": {
+                "S": "54c87418-3081-70dd-6337-a384e5bc41f6"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T12:07:12.525Z"
+            },
+            "description": {
+                "S": "partner987partner987partner987partner987partner987"
+            },
+            "applicationId": {
+                "S": "5e68c776-b577-4b5e-afde-5432d9e37ed3"
+            }
+        },
+        {
+            "experience": {
+                "S": "3-5"
+            },
+            "website": {
+                "S": "http://partner322.com"
+            },
+            "portfolio": {
+                "S": "partner322partner322partner322partner322"
+            },
+            "status": {
+                "S": "approved"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "bangalore"
+                    },
+                    "country": {
+                        "S": "India"
+                    },
+                    "address": {
+                        "S": "Flat 304 Mahaveer Springs Annex Block -2 15th"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "partner322-compnayapp"
+            },
+            "submittedAt": {
+                "S": "2025-10-15T12:32:47.745Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": ""
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "09591365000"
+                    },
+                    "contactPerson": {
+                        "S": "ajit n k"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "individual"
+            },
+            "userId": {
+                "S": "c4f8f488-40b1-7091-11f4-88e6f4a81012"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T12:34:03.675Z"
+            },
+            "description": {
+                "S": "partner322partner322partner322partner322"
+            },
+            "applicationId": {
+                "S": "b3aa160a-cdcf-4e2b-b6e9-b0f7137af755"
+            }
+        },
+        {
+            "experience": {
+                "S": "3-5"
+            },
+            "website": {
+                "S": "https://test.com"
+            },
+            "portfolio": {
+                "S": "Test portfolio"
+            },
+            "status": {
+                "S": "pending"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "Test City"
+                    },
+                    "country": {
+                        "S": "USA"
+                    },
+                    "address": {
+                        "S": "123 Test St"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "Test Company"
+            },
+            "submittedAt": {
+                "S": "2025-10-10T08:20:02.373Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": "123456789"
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "+1234567890"
+                    },
+                    "contactPerson": {
+                        "S": "John Doe"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "corporation"
+            },
+            "userId": {
+                "S": "test-user-id"
+            },
+            "updatedAt": {
+                "S": "2025-10-10T08:20:02.373Z"
+            },
+            "description": {
+                "S": "Test description"
+            },
+            "applicationId": {
+                "S": "129bb3e8-9d4b-491c-8a76-81731436f8ad"
+            }
+        },
+        {
+            "experience": {
+                "S": "3-5"
+            },
+            "website": {
+                "S": "https://test.com"
+            },
+            "portfolio": {
+                "S": "Test portfolio"
+            },
+            "status": {
+                "S": "pending"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "Test City"
+                    },
+                    "country": {
+                        "S": "USA"
+                    },
+                    "address": {
+                        "S": "123 Test St"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "Test Company"
+            },
+            "submittedAt": {
+                "S": "2025-10-10T08:24:32.491Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": "123456789"
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "+1234567890"
+                    },
+                    "contactPerson": {
+                        "S": "John Doe"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "corporation"
+            },
+            "userId": {
+                "S": "test-user-id"
+            },
+            "updatedAt": {
+                "S": "2025-10-10T08:24:32.491Z"
+            },
+            "description": {
+                "S": "Test description"
+            },
+            "applicationId": {
+                "S": "bf2ea273-0865-42e7-973d-5fc4f53ea87f"
+            }
+        },
+        {
+            "experience": {
+                "S": "3-5"
+            },
+            "website": {
+                "S": "http://partner420.com"
+            },
+            "portfolio": {
+                "S": "partner420partner420partner420"
+            },
+            "status": {
+                "S": "pending"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "bangalore"
+                    },
+                    "country": {
+                        "S": "India"
+                    },
+                    "address": {
+                        "S": "Flat 304 Mahaveer Springs Annex Block -2 15th"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "partner420"
+            },
+            "submittedAt": {
+                "S": "2025-10-14T10:44:20.343Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": ""
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "09591365000"
+                    },
+                    "contactPerson": {
+                        "S": "ajit n k"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "partnership"
+            },
+            "userId": {
+                "S": "54685478-20b1-708c-46c7-c35d3b57adad"
+            },
+            "updatedAt": {
+                "S": "2025-10-14T10:44:20.343Z"
+            },
+            "description": {
+                "S": "partner420partner420partner420partner420"
+            },
+            "applicationId": {
+                "S": "b6019c91-c985-4aeb-a352-c6deb1204079"
+            }
+        },
+        {
+            "experience": {
+                "S": "3-5"
+            },
+            "website": {
+                "S": "http://partner667.com"
+            },
+            "portfolio": {
+                "S": "sdds"
+            },
+            "status": {
+                "S": "pending"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "bangalore"
+                    },
+                    "country": {
+                        "S": "India"
+                    },
+                    "address": {
+                        "S": "Flat 304 Mahaveer Springs Annex Block -2 15th"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "partner667-compnay-app"
+            },
+            "submittedAt": {
+                "S": "2025-10-15T06:42:58.427Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": ""
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "09591365000"
+                    },
+                    "contactPerson": {
+                        "S": "ajit n k"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "partnership"
+            },
+            "userId": {
+                "S": "64588498-e0d1-7099-b74b-ee588f7a40fb"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T06:42:58.427Z"
+            },
+            "description": {
+                "S": "partner667partner667partner667partner667"
+            },
+            "applicationId": {
+                "S": "641ab2de-df70-4bb5-9d42-6369a91d20df"
+            }
+        },
+        {
+            "experience": {
+                "S": "6-10"
+            },
+            "website": {
+                "S": "http://partner579.com"
+            },
+            "portfolio": {
+                "S": "partner579partner579partner579partner579partner579"
+            },
+            "status": {
+                "S": "approved"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "bangalore"
+                    },
+                    "country": {
+                        "S": "India"
+                    },
+                    "address": {
+                        "S": "Flat 304 Mahaveer Springs Annex Block -2 15th"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "partner579"
+            },
+            "submittedAt": {
+                "S": "2025-10-15T11:36:09.452Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": ""
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "09591365000"
+                    },
+                    "contactPerson": {
+                        "S": "ajit n k"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "individual"
+            },
+            "userId": {
+                "S": "c42814e8-d0d1-705d-7003-5e4a4a5780f2"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T11:37:08.372Z"
+            },
+            "description": {
+                "S": "partner579partner579partner579partner579"
+            },
+            "applicationId": {
+                "S": "9c7c8c7b-1cad-4f3f-948c-c36a0d486305"
+            }
+        },
+        {
+            "experience": {
+                "S": "6-10"
+            },
+            "website": {
+                "S": "http://partner234.com"
+            },
+            "portfolio": {
+                "S": "partner234"
+            },
+            "status": {
+                "S": "approved"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "bangalore"
+                    },
+                    "country": {
+                        "S": "India"
+                    },
+                    "address": {
+                        "S": "Flat 304 Mahaveer Springs Annex Block -2 15th"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "partner234"
+            },
+            "submittedAt": {
+                "S": "2025-10-15T11:04:32.493Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": ""
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "09591365000"
+                    },
+                    "contactPerson": {
+                        "S": "ajit n k"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "partnership"
+            },
+            "userId": {
+                "S": "14f804c8-d0a1-7045-bb15-7e215739017e"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T11:22:35.520Z"
+            },
+            "description": {
+                "S": "partner234partner234partner234"
+            },
+            "applicationId": {
+                "S": "9d6d9107-c555-41b5-9b54-53c54c728249"
+            }
+        },
+        {
+            "experience": {
+                "S": "1-2"
+            },
+            "website": {
+                "S": "https://partner321.com"
+            },
+            "portfolio": {
+                "S": "partner321partner321partner321"
+            },
+            "status": {
+                "S": "pending"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "bangalore"
+                    },
+                    "country": {
+                        "S": "India"
+                    },
+                    "address": {
+                        "S": "Flat 304 Mahaveer Springs Annex Block -2 15th"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "partner321"
+            },
+            "submittedAt": {
+                "S": "2025-10-14T15:57:19.475Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": ""
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "09591365000"
+                    },
+                    "contactPerson": {
+                        "S": "ajit n k"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "individual"
+            },
+            "userId": {
+                "S": "549814b8-3011-70ed-edf9-bf6407812903"
+            },
+            "updatedAt": {
+                "S": "2025-10-14T15:57:19.475Z"
+            },
+            "description": {
+                "S": "partner321partner321partner321partner321partner321"
+            },
+            "applicationId": {
+                "S": "052af37b-33fa-440d-812f-c38a76d57372"
+            }
+        },
+        {
+            "experience": {
+                "S": "3-5"
+            },
+            "website": {
+                "S": "http://Partner678.com"
+            },
+            "portfolio": {
+                "S": "ajitnk2006+Partner678@gmail.comajitnk2006+Partner678@gmail.comajitnk2006+Partner678@gmail.com"
+            },
+            "status": {
+                "S": "pending"
+            },
+            "businessAddress": {
+                "M": {
+                    "city": {
+                        "S": "bangalore"
+                    },
+                    "country": {
+                        "S": "India"
+                    },
+                    "address": {
+                        "S": "Flat 304 Mahaveer Springs Annex Block -2 15th"
+                    }
+                }
+            },
+            "businessName": {
+                "S": "Partner678"
+            },
+            "submittedAt": {
+                "S": "2025-10-15T04:47:29.195Z"
+            },
+            "taxInfo": {
+                "M": {
+                    "taxId": {
+                        "S": ""
+                    }
+                }
+            },
+            "contactInfo": {
+                "M": {
+                    "phone": {
+                        "S": "09591365000"
+                    },
+                    "contactPerson": {
+                        "S": "ajit n k"
+                    }
+                }
+            },
+            "businessType": {
+                "S": "partnership"
+            },
+            "userId": {
+                "S": "6498a458-5081-7081-95f3-6529973fb723"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T04:47:29.195Z"
+            },
+            "description": {
+                "S": "ajitnk2006+Partner678@gmail.comajitnk2006+Partner678@gmail.comajitnk2006+Partner678@gmail.comajitnk2006+Partner678@gmail.com"
+            },
+            "applicationId": {
+                "S": "7bc9bb30-7d89-4091-a40a-8236113671f9"
+            }
+        }
+    ],
+    "Count": 11,
+    "ScannedCount": 11,
+    "ConsumedCapacity": null
+}

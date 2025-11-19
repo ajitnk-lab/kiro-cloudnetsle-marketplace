@@ -12,6 +12,11 @@ interface ApiStackProps {
   userTable: dynamodb.Table
   solutionTable: dynamodb.Table
   partnerApplicationTable: dynamodb.Table
+  tokenTable: dynamodb.Table
+  userSolutionEntitlementsTable: dynamodb.Table
+  paymentTransactionsTable: dynamodb.Table
+  userSessionsTable: dynamodb.Table // NEW: Analytics tables
+  apiMetricsTable: dynamodb.Table // NEW: Analytics tables
   assetsBucket: s3.Bucket
 }
 
@@ -70,6 +75,10 @@ export class ApiStack extends Construct {
     props.userTable.grantReadWriteData(lambdaRole)
     props.solutionTable.grantReadWriteData(lambdaRole)
     props.partnerApplicationTable.grantReadWriteData(lambdaRole)
+    props.tokenTable.grantReadWriteData(lambdaRole)
+    props.userSolutionEntitlementsTable.grantReadWriteData(lambdaRole)
+    props.paymentTransactionsTable.grantReadWriteData(lambdaRole)
+    props.userSessionsTable.grantReadWriteData(lambdaRole) // NEW: Analytics tables
     props.assetsBucket.grantReadWrite(lambdaRole)
 
     // Grant Cognito permissions for user management
@@ -84,6 +93,15 @@ export class ApiStack extends Construct {
       resources: [props.userPool.userPoolArn],
     }))
 
+    // Grant Secrets Manager permissions for PhonePe credentials
+    lambdaRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'secretsmanager:GetSecretValue',
+      ],
+      resources: ['*'], // Can be restricted to specific secret ARN if needed
+    }))
+
     // Grant SES permissions for email notifications
     lambdaRole.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
@@ -92,6 +110,16 @@ export class ApiStack extends Construct {
         'ses:SendRawEmail',
       ],
       resources: ['*'], // You might want to restrict this to specific email addresses
+    }))
+    
+    // Grant CloudWatch permissions for API metrics
+    lambdaRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'cloudwatch:GetMetricStatistics',
+        'cloudwatch:ListMetrics'
+      ],
+      resources: ['*'],
     }))
 
     // Auth Lambda Functions
@@ -102,6 +130,8 @@ export class ApiStack extends Construct {
       environment: {
         USER_TABLE_NAME: props.userTable.tableName,
         USER_POOL_ID: props.userPool.userPoolId,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        TOKEN_SECRET: 'marketplace-control-plane-secret-2025', // In production, use AWS Secrets Manager
       },
       role: lambdaRole,
     })
@@ -144,6 +174,32 @@ export class ApiStack extends Construct {
       timeout: cdk.Duration.seconds(30),
     })
 
+    // Generate Solution Token Lambda Function
+    const generateSolutionTokenFunction = new lambda.Function(this, 'GenerateSolutionTokenFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'solution-token-generator.handler',
+      code: lambda.Code.fromAsset('lambda/tokens'),
+      environment: {
+        TOKEN_TABLE: props.tokenTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Solution Token Validator Lambda Function
+    const validateTokenFunction = new lambda.Function(this, 'SolutionTokenValidatorFunction2', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'solution-token-validator.handler',
+      code: lambda.Code.fromAsset('lambda/auth'),
+      environment: {
+        USER_TABLE: props.userTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
     // Payment Lambda Function
     const paymentInitiateFunction = new lambda.Function(this, 'PaymentInitiateFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -163,6 +219,59 @@ export class ApiStack extends Construct {
       code: lambda.Code.fromAsset('lambda/payments'),
       environment: {
         USER_TABLE_NAME: props.userTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Upgrade to Pro Lambda Function
+    const upgradeToProFunction = new lambda.Function(this, 'UpgradeToProFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'upgrade-to-pro.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        USER_TABLE: props.userTable.tableName,
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Payment Callback Lambda Function
+    const paymentCallbackFunction = new lambda.Function(this, 'PaymentCallbackFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'payment-callback.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        USER_TABLE: props.userTable.tableName,
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Check User Limits Lambda Function
+    const checkUserLimitsFunction = new lambda.Function(this, 'CheckUserLimitsFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'check-user-limits.handler',
+      code: lambda.Code.fromAsset('lambda/auth'),
+      environment: {
+        USER_TABLE: props.userTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Increment Usage Lambda Function
+    const incrementUsageFunction = new lambda.Function(this, 'IncrementUsageFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'increment-usage.handler',
+      code: lambda.Code.fromAsset('lambda/auth'),
+      environment: {
+        USER_TABLE: props.userTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -211,13 +320,162 @@ export class ApiStack extends Construct {
       timeout: cdk.Duration.seconds(30),
     })
 
+    // Token Management Lambda Function
+    const tokenManagerFunction = new lambda.Function(this, 'TokenManagerFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'token-manager.handler',
+      code: lambda.Code.fromAsset('lambda/tokens'),
+      environment: {
+        TOKEN_TABLE_NAME: props.tokenTable.tableName,
+        USER_TABLE_NAME: props.userTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Control Plane Token Generation Lambda Function
+    const solutionTokenGeneratorFunction = new lambda.Function(this, 'SolutionTokenGeneratorFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'solution-token-generator.handler',
+      code: lambda.Code.fromAsset('lambda/tokens'),
+      environment: {
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        TOKEN_SECRET: 'marketplace-control-plane-secret-2025', // In production, use AWS Secrets Manager
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Control Plane Token Validation Lambda Function
+    const solutionTokenValidatorFunction = new lambda.Function(this, 'SolutionTokenValidatorFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'solution-token-validator.handler',
+      code: lambda.Code.fromAsset('lambda/tokens'),
+      environment: {
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        USER_SESSIONS_TABLE_NAME: props.userSessionsTable.tableName,
+        ENABLE_LOCATION_TRACKING: 'true',
+        IP_SALT: 'marketplace-location-salt-2025'
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // PhonePe Payment Functions
+    const phonePeWebhookFunction = new lambda.Function(this, 'PhonePeWebhookFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'phonepe-webhook.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        USER_TABLE: props.userTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        TOKEN_SECRET: 'marketplace-control-plane-secret-2025',
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    const paymentReconciliationFunction = new lambda.Function(this, 'PaymentReconciliationFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'payment-reconciliation.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        USER_TABLE: props.userTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(300), // 5 minutes for processing multiple payments
+    })
+
+    const phonePeReconciliationFunction = new lambda.Function(this, 'PhonePeReconciliationFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'phonepe-reconciliation.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        USER_TABLE: props.userTable.tableName,
+        PHONEPE_ENVIRONMENT: 'sandbox', // Change to 'production' for live
+        PHONEPE_AUTH_TOKEN: 'your-phonepe-auth-token', // Use AWS Secrets Manager in production
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(60),
+    })
+
+    // Analytics Lambda Functions
+    const businessMetricsFunction = new lambda.Function(this, 'BusinessMetricsFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'business-metrics.handler',
+      code: lambda.Code.fromAsset('lambda/analytics'),
+      environment: {
+        USER_TABLE: props.userTable.tableName,
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        USER_SESSIONS_TABLE: props.userSessionsTable.tableName
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    const geographicAnalyticsFunction = new lambda.Function(this, 'GeographicAnalyticsFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'geographic-analytics.handler',
+      code: lambda.Code.fromAsset('lambda/analytics'),
+      environment: {
+        USER_TABLE: props.userTable.tableName,
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        USER_SESSIONS_TABLE: props.userSessionsTable.tableName
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    const usageAnalyticsFunction = new lambda.Function(this, 'UsageAnalyticsFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'usage-analytics.handler',
+      code: lambda.Code.fromAsset('lambda/analytics'),
+      environment: {
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        USER_SESSIONS_TABLE: props.userSessionsTable.tableName
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
     // API Routes
     const authApi = this.api.root.addResource('auth')
     const catalogApi = this.api.root.addResource('catalog')
-    const userApi = this.api.root.addResource('user')
+    const userApi = this.api.root.addResource('user', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: [
+          'Content-Type',
+          'X-Amz-Date', 
+          'Authorization',
+          'X-Api-Key',
+          'X-Amz-Security-Token',
+        ],
+      },
+    })
     const adminApi = this.api.root.addResource('admin')
     const partnerApi = this.api.root.addResource('partner')
-    const paymentsApi = this.api.root.addResource('payments')
+    const paymentsApi = this.api.root.addResource('payments', {
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: [
+          'Content-Type',
+          'X-Amz-Date',
+          'Authorization',
+          'X-Api-Key',
+          'X-Amz-Security-Token',
+          'X-Amz-User-Agent'
+        ],
+      },
+    })
+    const apiResource = this.api.root.addResource('api')
 
     // Payment routes
     paymentsApi.addResource('initiate').addMethod('POST', new apigateway.LambdaIntegration(paymentInitiateFunction), {
@@ -226,9 +484,39 @@ export class ApiStack extends Construct {
     paymentsApi.addResource('status').addResource('{transactionId}').addMethod('GET', new apigateway.LambdaIntegration(paymentStatusFunction), {
       authorizer: cognitoAuthorizer,
     })
+    paymentsApi.addResource('upgrade-to-pro').addMethod('POST', new apigateway.LambdaIntegration(upgradeToProFunction))
+    
+    // PhonePe webhook route (no auth required)
+    const phonePeWebhookResource = paymentsApi.addResource('phonepe-webhook')
+    phonePeWebhookResource.addMethod('POST', new apigateway.LambdaIntegration(phonePeWebhookFunction), {
+      authorizationType: apigateway.AuthorizationType.NONE
+    })
+
+    // PhonePe reconciliation route (protected)
+    paymentsApi.addResource('reconciliation').addMethod('POST', new apigateway.LambdaIntegration(phonePeReconciliationFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+
+    // Payment callback - no auth required for webhooks
+    const callbackResource = paymentsApi.addResource('callback')
+    callbackResource.addMethod('GET', new apigateway.LambdaIntegration(paymentCallbackFunction), {
+      authorizationType: apigateway.AuthorizationType.NONE
+    }) // For direct callbacks
+    callbackResource.addMethod('POST', new apigateway.LambdaIntegration(paymentCallbackFunction), {
+      authorizationType: apigateway.AuthorizationType.NONE
+    }) // For PhonePe webhooks
+
+    // User limits and usage tracking routes (for FAISS integration)
+    apiResource.addResource('check-user-limits').addMethod('POST', new apigateway.LambdaIntegration(checkUserLimitsFunction))
+    apiResource.addResource('increment-usage').addMethod('POST', new apigateway.LambdaIntegration(incrementUsageFunction))
 
     // Auth routes
     authApi.addResource('register').addMethod('POST', new apigateway.LambdaIntegration(registerFunction))
+    
+    // Control Plane API routes
+    apiResource.addResource('generate-solution-token').addMethod('POST', new apigateway.LambdaIntegration(generateSolutionTokenFunction))
+    apiResource.addResource('generate-token').addMethod('POST', new apigateway.LambdaIntegration(generateSolutionTokenFunction)) // Frontend compatibility
+    apiResource.addResource('validate-solution-token').addMethod('POST', new apigateway.LambdaIntegration(solutionTokenValidatorFunction))
     
     // User routes (protected)
     const profileResource = userApi.addResource('profile')
@@ -339,6 +627,34 @@ export class ApiStack extends Construct {
     })
     const adminSolutionResource = adminSolutionsResource.addResource('{solutionId}')
     adminSolutionResource.addMethod('PUT', new apigateway.LambdaIntegration(adminFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    
+    // Admin migration routes
+    const adminMigrateResource = adminApi.addResource('migrate-user-countries')
+    adminMigrateResource.addMethod('POST', new apigateway.LambdaIntegration(adminFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+
+    // Token Management API Routes (for FAISS integration)
+    const trackUsageResource = apiResource.addResource('track-usage')
+    trackUsageResource.addMethod('POST', new apigateway.LambdaIntegration(tokenManagerFunction))
+
+    // Admin token management routes
+    const userTokensResource = apiResource.addResource('user-tokens').addResource('{userId}')
+    userTokensResource.addMethod('GET', new apigateway.LambdaIntegration(tokenManagerFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+
+    // Analytics API Routes (protected)
+    const analyticsApi = apiResource.addResource('analytics')
+    analyticsApi.addResource('business-metrics').addMethod('GET', new apigateway.LambdaIntegration(businessMetricsFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    analyticsApi.addResource('geographic').addMethod('GET', new apigateway.LambdaIntegration(geographicAnalyticsFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    analyticsApi.addResource('usage').addMethod('GET', new apigateway.LambdaIntegration(usageAnalyticsFunction), {
       authorizer: cognitoAuthorizer,
     })
 

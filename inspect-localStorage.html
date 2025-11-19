@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>localStorage Inspector</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .key { font-weight: bold; color: #0066cc; }
+        .value { background: #f5f5f5; padding: 10px; margin: 5px 0; white-space: pre-wrap; }
+        button { padding: 10px 20px; margin: 10px 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 localStorage Inspector</h1>
+    
+    <button onclick="inspectStorage()">Refresh Storage</button>
+    <button onclick="clearStorage()">Clear All</button>
+    <button onclick="testUserObject()">Test User Object</button>
+    
+    <div id="output"></div>
+    
+    <script>
+        function inspectStorage() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+            
+            const keys = ['authToken', 'user', 'auth-session', 'marketplace_token', 'marketplace_user_email', 'marketplace_tier'];
+            
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                const section = document.createElement('div');
+                section.className = 'section';
+                
+                section.innerHTML = `
+                    <div class="key">${key}:</div>
+                    <div class="value">${value || 'null'}</div>
+                `;
+                
+                output.appendChild(section);
+            });
+            
+            // Show all localStorage keys
+            const allKeys = Object.keys(localStorage);
+            if (allKeys.length > 0) {
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.innerHTML = `
+                    <div class="key">All localStorage keys:</div>
+                    <div class="value">${allKeys.join(', ')}</div>
+                `;
+                output.appendChild(section);
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            alert('localStorage cleared');
+            inspectStorage();
+        }
+        
+        function testUserObject() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) {
+                alert('No user object found');
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(userStr);
+                const output = document.getElementById('output');
+                
+                const section = document.createElement('div');
+                section.className = 'section';
+                section.innerHTML = `
+                    <div class="key">User Object Analysis:</div>
+                    <div class="value">
+user?.email: ${user?.email || 'undefined'}
+user?.profile?.email: ${user?.profile?.email || 'undefined'}
+user?.profile?.name: ${user?.profile?.name || 'undefined'}
+user?.role: ${user?.role || 'undefined'}
+user?.userId: ${user?.userId || 'undefined'}
+
+Condition Check:
+!user?.profile?.email && !user?.email = ${!user?.profile?.email && !user?.email}
+
+userEmail = user?.profile?.email || user?.email = ${user?.profile?.email || user?.email || 'undefined'}
+
+Full user object:
+${JSON.stringify(user, null, 2)}
+                    </div>
+                `;
+                
+                output.appendChild(section);
+            } catch (e) {
+                alert('Error parsing user object: ' + e.message);
+            }
+        }
+        
+        // Auto-inspect on load
+        inspectStorage();
+    </script>
+</body>
+</html>

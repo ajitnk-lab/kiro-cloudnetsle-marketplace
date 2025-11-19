@@ -3,6 +3,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as s3 from 'aws-cdk-lib/aws-s3'
 import * as rds from 'aws-cdk-lib/aws-rds'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { Construct } from 'constructs'
 
 export class DataStack extends Construct {
@@ -10,9 +11,15 @@ export class DataStack extends Construct {
   public readonly solutionTable: dynamodb.Table
   public readonly sessionTable: dynamodb.Table
   public readonly partnerApplicationTable: dynamodb.Table
+  public readonly tokenTable: dynamodb.Table
+  public readonly userSolutionEntitlementsTable: dynamodb.Table
+  public readonly paymentTransactionsTable: dynamodb.Table
+  public readonly userSessionsTable: dynamodb.Table // NEW: For location tracking
+  public readonly apiMetricsTable: dynamodb.Table // NEW: For API performance tracking
   public readonly assetsBucket: s3.Bucket
   public readonly vpc: ec2.Vpc
   public readonly database: rds.DatabaseInstance
+  public readonly phonepeSecret: secretsmanager.Secret
 
   constructor(scope: Construct, id: string) {
     super(scope, id)
@@ -40,8 +47,9 @@ export class DataStack extends Construct {
       ],
     })
 
-    // DynamoDB Tables
+    // DynamoDB Tables with fixed names to prevent drift
     this.userTable = new dynamodb.Table(this, 'UserTable', {
+      tableName: 'marketplace-users',
       partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -63,6 +71,7 @@ export class DataStack extends Construct {
     })
 
     this.solutionTable = new dynamodb.Table(this, 'SolutionTable', {
+      tableName: 'marketplace-solutions',
       partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -92,15 +101,18 @@ export class DataStack extends Construct {
     })
 
     this.sessionTable = new dynamodb.Table(this, 'SessionTable', {
+      tableName: 'marketplace-sessions',
       partitionKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       timeToLiveAttribute: 'expiresAt',
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      deletionProtection: true,
     })
 
     // Partner Application Table
     this.partnerApplicationTable = new dynamodb.Table(this, 'PartnerApplicationTable', {
+      tableName: 'marketplace-partner-applications',
       partitionKey: { name: 'applicationId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
@@ -120,6 +132,178 @@ export class DataStack extends Construct {
       indexName: 'StatusIndex',
       partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'submittedAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Marketplace Token Table for solution access
+    this.tokenTable = new dynamodb.Table(this, 'TokenTable', {
+      tableName: 'marketplace-tokens',
+      partitionKey: { name: 'tokenId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      timeToLiveAttribute: 'expiresAt',
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      deletionProtection: true,
+    })
+
+    // Add GSI for user token lookup
+    this.tokenTable.addGlobalSecondaryIndex({
+      indexName: 'UserIndex',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.NUMBER },
+    })
+
+    // Add GSI for solution token lookup
+    this.tokenTable.addGlobalSecondaryIndex({
+      indexName: 'SolutionIndex',
+      partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.NUMBER },
+    })
+
+    // User-Solution Entitlements Table for Control Plane
+    this.userSolutionEntitlementsTable = new dynamodb.Table(this, 'UserSolutionEntitlementsTable', {
+      tableName: 'marketplace-user-solution-entitlements',
+      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING }, // user#email@example.com
+      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING }, // solution#faiss
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    })
+
+    // Add GSI for token lookup
+    this.userSolutionEntitlementsTable.addGlobalSecondaryIndex({
+      indexName: 'TokenIndex',
+      partitionKey: { name: 'token', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for solution-based queries
+    this.userSolutionEntitlementsTable.addGlobalSecondaryIndex({
+      indexName: 'SolutionIndex',
+      partitionKey: { name: 'solution_id', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'created_at', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for user-based queries
+    this.userSolutionEntitlementsTable.addGlobalSecondaryIndex({
+      indexName: 'UserIndex',
+      partitionKey: { name: 'user_email', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'created_at', type: dynamodb.AttributeType.STRING },
+    })
+
+    // PhonePe Payment Credentials Secret
+    this.phonepeSecret = new secretsmanager.Secret(this, 'PhonePeSecret', {
+      secretName: 'marketplace/phonepe/credentials',
+      description: 'PhonePe payment gateway credentials',
+      generateSecretString: {
+        secretStringTemplate: JSON.stringify({
+          clientId: 'SU2511061810592518734397',
+          clientVersion: '1',
+          clientSecret: 'ca935a3d-2404-4e2a-a5a2-ea2d4a5bf3fd',
+          sandboxUrl: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
+          productionUrl: 'https://api.phonepe.com/apis/pg'
+        }),
+        generateStringKey: 'placeholder',
+        excludeCharacters: '"@/\\'
+      }
+    })
+
+    // Payment Transactions Table
+    this.paymentTransactionsTable = new dynamodb.Table(this, 'PaymentTransactionsTable', {
+      tableName: 'marketplace-payment-transactions',
+      partitionKey: { name: 'transactionId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    })
+
+    // Add GSI for user payment lookup
+    this.paymentTransactionsTable.addGlobalSecondaryIndex({
+      indexName: 'UserIndex',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for merchant order lookup
+    this.paymentTransactionsTable.addGlobalSecondaryIndex({
+      indexName: 'MerchantOrderIndex',
+      partitionKey: { name: 'merchantOrderId', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for PhonePe order lookup
+    this.paymentTransactionsTable.addGlobalSecondaryIndex({
+      indexName: 'PhonePeOrderIndex',
+      partitionKey: { name: 'phonepeOrderId', type: dynamodb.AttributeType.STRING },
+    })
+
+    // User Sessions Table for Location Tracking and Analytics
+    this.userSessionsTable = new dynamodb.Table(this, 'UserSessionsTable', {
+      tableName: 'marketplace-user-sessions',
+      partitionKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    })
+
+    // Add GSI for user-based session queries
+    this.userSessionsTable.addGlobalSecondaryIndex({
+      indexName: 'UserIndex',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for country-based analytics
+    this.userSessionsTable.addGlobalSecondaryIndex({
+      indexName: 'CountryIndex',
+      partitionKey: { name: 'countryCode', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for solution-based analytics
+    this.userSessionsTable.addGlobalSecondaryIndex({
+      indexName: 'SolutionIndex',
+      partitionKey: { name: 'solution_id', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for device-based analytics
+    this.userSessionsTable.addGlobalSecondaryIndex({
+      indexName: 'DeviceIndex',
+      partitionKey: { name: 'device', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // API Metrics Table for Performance Tracking
+    this.apiMetricsTable = new dynamodb.Table(this, 'ApiMetricsTable', {
+      tableName: 'marketplace-api-metrics',
+      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING }, // endpoint#/api/validate-solution-token
+      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING }, // timestamp#2025-11-13T07:00:00Z
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    })
+
+    // Add GSI for endpoint-based metrics
+    this.apiMetricsTable.addGlobalSecondaryIndex({
+      indexName: 'EndpointIndex',
+      partitionKey: { name: 'endpoint', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for user-based metrics
+    this.apiMetricsTable.addGlobalSecondaryIndex({
+      indexName: 'UserIndex',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for country-based performance metrics
+    this.apiMetricsTable.addGlobalSecondaryIndex({
+      indexName: 'CountryIndex',
+      partitionKey: { name: 'countryCode', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
     })
 
     // S3 Bucket for assets

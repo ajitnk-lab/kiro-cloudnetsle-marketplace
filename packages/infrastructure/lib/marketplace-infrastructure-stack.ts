@@ -15,10 +15,13 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
     // Create authentication layer (Cognito)
     const authStack = new AuthStack(this, 'AuthStack', {
       userTableName: dataStack.userTable.tableName,
+      userSolutionEntitlementsTableName: dataStack.userSolutionEntitlementsTable.tableName,
+      tokenSecret: 'marketplace-secret-key-2024', // In production, use AWS Secrets Manager
     })
 
     // Grant permissions
     dataStack.userTable.grantWriteData(authStack.postConfirmationFunction)
+    dataStack.userSolutionEntitlementsTable.grantWriteData(authStack.postConfirmationFunction)
 
     // Create API layer (API Gateway, Lambda functions)
     const apiStack = new ApiStack(this, 'ApiStack', {
@@ -26,6 +29,11 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
       userTable: dataStack.userTable,
       solutionTable: dataStack.solutionTable,
       partnerApplicationTable: dataStack.partnerApplicationTable,
+      tokenTable: dataStack.tokenTable,
+      userSolutionEntitlementsTable: dataStack.userSolutionEntitlementsTable,
+      paymentTransactionsTable: dataStack.paymentTransactionsTable,
+      userSessionsTable: dataStack.userSessionsTable, // NEW: Analytics tables
+      apiMetricsTable: dataStack.apiMetricsTable, // NEW: Analytics tables
       assetsBucket: dataStack.assetsBucket,
     })
 
@@ -66,6 +74,22 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'CloudFrontDistributionId', {
       value: frontendStack.distribution.distributionId,
       description: 'CloudFront Distribution ID',
+    })
+
+    // Export DynamoDB table names for FAISS integration
+    new cdk.CfnOutput(this, 'UserTableName', {
+      value: dataStack.userTable.tableName,
+      description: 'DynamoDB User Table Name',
+    })
+
+    new cdk.CfnOutput(this, 'EntitlementTableName', {
+      value: dataStack.userSolutionEntitlementsTable.tableName,
+      description: 'DynamoDB User Solution Entitlements Table Name',
+    })
+
+    new cdk.CfnOutput(this, 'SessionTableName', {
+      value: dataStack.sessionTable.tableName,
+      description: 'DynamoDB Session Table Name',
     })
   }
 }

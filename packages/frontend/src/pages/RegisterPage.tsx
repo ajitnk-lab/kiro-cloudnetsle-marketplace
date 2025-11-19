@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useState } from 'react' // useRef temporarily disabled
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import ReCAPTCHA from 'react-google-recaptcha'
+// import ReCAPTCHA from 'react-google-recaptcha' // TEMPORARILY DISABLED FOR TESTING
 import { useAuth } from '../contexts/AuthContext'
 import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 
@@ -23,7 +23,7 @@ const registerSchema = z.object({
   agreeToTerms: z.boolean().refine((val) => val === true, {
     message: 'You must agree to the terms and conditions',
   }),
-  recaptcha: z.string().min(1, 'Please complete the reCAPTCHA verification'),
+  recaptcha: z.string().optional(), // Made optional for testing
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -37,18 +37,26 @@ export function RegisterPage() {
   const [showVerification, setShowVerification] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
+  // TEMPORARILY DISABLED FOR TESTING
+  // const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  // const recaptchaRef = useRef<ReCAPTCHA>(null)
   const { register: registerUser, confirmRegistration, isLoading, error, clearError } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // Check for FAISS redirect parameters
+  const returnTo = searchParams.get('return_to')
+  const solutionId = searchParams.get('solution_id')
+  const isFaissRedirect = returnTo === 'faiss' || solutionId === 'aws-finder'
 
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-    setValue,
-    clearErrors,
+    // TEMPORARILY DISABLED FOR TESTING
+    // setValue,
+    // clearErrors,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -85,20 +93,22 @@ export function RegisterPage() {
     try {
       clearError()
       const { confirmPassword, agreeToTerms, recaptcha, ...registerData } = data
-      const result = await registerUser({ ...registerData, recaptchaToken })
+      const result = await registerUser({ ...registerData }) // recaptchaToken temporarily disabled
       
       if (result.needsVerification) {
         setUserEmail(result.email)
         setShowVerification(true)
       }
     } catch (error) {
-      // Reset reCAPTCHA on error
-      recaptchaRef.current?.reset()
-      setRecaptchaToken(null)
-      setValue('recaptcha', '')
+      // Reset reCAPTCHA on error - TEMPORARILY DISABLED
+      // recaptchaRef.current?.reset()
+      // setRecaptchaToken(null)
+      // setValue('recaptcha', '')
     }
   }
 
+  // TEMPORARILY DISABLED FOR TESTING
+  /*
   const handleRecaptchaChange = (token: string | null) => {
     setRecaptchaToken(token)
     if (token) {
@@ -108,6 +118,7 @@ export function RegisterPage() {
       setValue('recaptcha', '')
     }
   }
+  */
 
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -115,29 +126,74 @@ export function RegisterPage() {
       clearError()
       await confirmRegistration(userEmail, verificationCode)
       
-      // Show success and redirect to login
-      alert('Email verified successfully! Please login with your credentials.')
-      navigate('/login')
+      // If this is a solution redirect (has solution_id), redirect with token
+      if (solutionId) {
+        try {
+          // The registration already created the token and entitlement
+          // Just redirect to the solution with the token
+          const solutionUrls: Record<string, string> = {
+            'aws-solution-finder': 'https://awssolutionfinder.solutions.cloudnestle.com',
+            'faiss': 'https://awssolutionfinder.solutions.cloudnestle.com'
+          }
+          
+          const baseUrl = solutionUrls[solutionId] || `https://solution-${solutionId}.example.com`
+          
+          // Get the token from the registration response (stored in localStorage or context)
+          const token = localStorage.getItem(`solution_token_${solutionId}`)
+          
+          if (token) {
+            const redirectUrl = `${baseUrl}?token=${token}&user_email=${encodeURIComponent(userEmail)}&tier=registered`
+            window.location.href = redirectUrl
+            return
+          }
+        } catch (error) {
+          console.error('Error redirecting to solution:', error)
+        }
+      }
+      
+      // Default redirect to profile page
+      navigate('/profile')
     } catch (error) {
-      // Error is handled by the auth context
+      console.error('Verification error:', error)
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Background Image */}
+      <div className="fixed inset-0 pointer-events-none" style={{ opacity: 0.3, zIndex: -1 }}>
+        <img 
+          src="/homepage-image.png" 
+          alt="Marketplace Background" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-600/40 to-blue-800/40 pointer-events-none" style={{ zIndex: -1 }}></div>
+      
       <div className="max-w-md w-full space-y-8">
-        <div>
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-8">
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            Create your account
+            {isFaissRedirect ? 'Get 10 Free Daily Searches' : 'Create your account'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              to="/login"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              sign in to your existing account
-            </Link>
+            {isFaissRedirect ? (
+              <>
+                Register to unlock <strong>10 daily searches</strong> on AWS Solution Finder
+                <br />
+                <span className="text-blue-600 font-medium">Upgrade to Pro for unlimited access</span>
+              </>
+            ) : (
+              <>
+                Or{' '}
+                <Link
+                  to="/login"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  sign in to your existing account
+                </Link>
+              </>
+            )}
           </p>
         </div>
 
@@ -170,11 +226,13 @@ export function RegisterPage() {
                   type="text"
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
-                  className="input"
-                  placeholder="Enter 6-digit code"
+                  className="input border-2 border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-blue-50 text-center text-lg font-mono tracking-widest"
+                  placeholder="000000"
                   maxLength={6}
+                  autoFocus
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">Enter the 6-digit code sent to your email</p>
               </div>
 
               <button
@@ -386,7 +444,8 @@ export function RegisterPage() {
               </div>
             </div>
 
-            {/* reCAPTCHA */}
+            {/* reCAPTCHA - TEMPORARILY DISABLED FOR TESTING */}
+            {/* 
             <div>
               <ReCAPTCHA
                 ref={recaptchaRef}
@@ -399,6 +458,7 @@ export function RegisterPage() {
                 <p className="mt-1 text-sm text-red-600">{errors.recaptcha.message}</p>
               )}
             </div>
+            */}
 
             <button
               type="submit"

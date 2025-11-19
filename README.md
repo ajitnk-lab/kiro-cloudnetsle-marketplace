@@ -1,6 +1,14 @@
-# Kiro CloudNetsle Marketplace
+# CloudNetsle Marketplace
 
 A comprehensive self-service online marketplace platform similar to AWS Marketplace, enabling registered customers and partners to buy and sell software solutions.
+
+## 🎉 Latest Updates
+
+**Control Plane MVP - COMPLETED** ✅
+- Successfully implemented marketplace token validation system
+- Fixed AWS SDK v3 migration for Node.js 18 Lambda runtime compatibility  
+- FAISS backend integration fully operational with real-time API validation
+- Solution token generation and validation APIs working correctly
 
 ## Overview
 
@@ -211,6 +219,9 @@ npm run deploy
 - ✅ Admin user management
 - ✅ Email notifications
 - ✅ API endpoints with Postman/curl
+- ✅ Control Plane MVP with marketplace token validation
+- ✅ Solution token generation and validation APIs
+- ✅ FAISS backend integration with marketplace tokens
 
 ### 🚧 **After Task 5 (Solution Catalog Backend)**
 **Additional Backend Testing:**
@@ -295,7 +306,7 @@ curl -X GET https://your-api-gateway-url/catalog
 
 After deployment, you can test:
 
-1. **Frontend URL**: `http://marketplace-frontend-20251007232833.s3-website-us-east-1.amazonaws.com` *(Note: CloudFront not working, using S3 direct)*
+1. **Frontend URL**: `https://marketplace.cloudnestle.com` *(Production CloudFront + Route53)*
 2. **API Gateway**: Check CloudFormation outputs for `ApiGatewayUrl`
 3. **User Registration**: Test customer and partner registration
 4. **Authentication**: Test login with email/password

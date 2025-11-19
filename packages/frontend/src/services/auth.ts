@@ -284,6 +284,7 @@ export const authService = {
   },
 
   setToken(token: string): void {
+    console.log('🔐 AUTH SERVICE: Setting token in localStorage')
     localStorage.setItem('authToken', token)
     // Also store in auth-session format for AdminDashboard
     const session = {
@@ -293,15 +294,52 @@ export const authService = {
       }
     }
     localStorage.setItem('auth-session', JSON.stringify(session))
+    console.log('🔐 AUTH SERVICE: Token stored, dispatching auth-change event')
+    // Dispatch custom event to sync AuthContext
+    window.dispatchEvent(new CustomEvent('auth-change'))
+  },
+
+  async refreshUserProfile(): Promise<User | null> {
+    try {
+      const token = this.getToken()
+      if (!token) {
+        console.log('🔐 No token available for refresh')
+        return null
+      }
+
+      console.log('🔄 Refreshing user profile from API...')
+      const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      
+      if (userResponse.ok) {
+        const userData = await userResponse.json()
+        console.log('✅ User profile refreshed:', userData.user?.email, 'tier:', userData.user?.tier)
+        this.setStoredUser(userData.user)
+        return userData.user
+      } else {
+        console.error('❌ Failed to refresh user profile:', userResponse.status)
+        return null
+      }
+    } catch (error) {
+      console.error('💥 Error refreshing user profile:', error)
+      return null
+    }
   },
 
   getStoredUser(): User | null {
     const userStr = localStorage.getItem('user')
-    return userStr ? JSON.parse(userStr) : null
+    const user = userStr ? JSON.parse(userStr) : null
+    console.log('🔐 AUTH SERVICE: Getting stored user:', user?.email || 'null')
+    return user
   },
 
   setStoredUser(user: User): void {
+    console.log('🔐 AUTH SERVICE: Setting user in localStorage:', user.email)
     localStorage.setItem('user', JSON.stringify(user))
+    console.log('🔐 AUTH SERVICE: User stored, dispatching auth-change event')
+    // Dispatch custom event to sync AuthContext
+    window.dispatchEvent(new CustomEvent('auth-change'))
   },
 
   async logout(): Promise<void> {
@@ -312,6 +350,9 @@ export const authService = {
     } finally {
       localStorage.removeItem('authToken')
       localStorage.removeItem('user')
+      localStorage.removeItem('auth-session')
+      // Dispatch event to sync AuthContext
+      window.dispatchEvent(new CustomEvent('auth-change'))
     }
   },
 }

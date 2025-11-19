@@ -1,0 +1,369 @@
+# 🎯 CloudNetsle Marketplace Development Rules
+
+## ⚠️ CRITICAL GUIDELINES - MUST FOLLOW STRICTLY
+
+### 🔒 **Core Principles**
+- 🚨 **CLIENT APP PROTECTION**: Analytics enhancements MUST NOT impact client applications (AWS Solution Finder/FAISS app) - zero user experience degradation
+- ✅ **Incremental Development**: Build one feature at a time, test, validate before moving on
+- ✅ **No Hardcoding**: All data from real APIs and databases - ZERO dummy data
+- ✅ **No Fake Experience**: Never give fake/dummy responses to users
+- ✅ **CDK-First**: All infrastructure changes via CDK, no manual CLI commands
+- ✅ **Live System Protection**: Never break existing functionality
+- ✅ **Environment Agnostic**: Code must work in any AWS account/environment
+
+### 🚫 **NEVER DO**
+```bash
+# ❌ Manual AWS CLI commands
+aws dynamodb create-table --table-name analytics...
+aws lambda update-function-code...
+
+# ❌ Hardcoded values
+const dummyRevenue = 2397
+const fakeUsers = 68
+
+# ❌ Dummy API responses
+return { revenue: 1000, users: 50 } // fake data
+
+# ❌ Break client app functionality
+# - Never modify existing FAISS Lambda without testing
+# - Never change existing API response formats
+# - Never add required fields to existing APIs
+# - Never modify existing DynamoDB table schemas without migration
+```
+
+### ✅ **ALWAYS DO**
+```bash
+# ✅ CDK deployment only
+npm run deploy
+./deploy-full.sh
+
+# ✅ Real data from environment
+const revenue = await calculateRealRevenue(filters)
+const users = await getUserCount(filters)
+
+# ✅ Environment-driven config
+const TABLE_NAME = process.env.USER_TABLE_NAME
+
+# ✅ Protect client apps
+# - Test FAISS app functionality after every change
+# - Maintain backward compatibility in all APIs
+# - Add new fields as optional only
+# - Use feature flags for new functionality
+# - Monitor client app performance metrics
+```
+
+---
+
+## 📋 **Development Process**
+
+## 🛡️ **CLIENT APPLICATION PROTECTION PROTOCOL**
+
+### **FAISS App (AWS Solution Finder) Protection**
+The FAISS app at `https://awssolutionfinder.solutions.cloudnestle.com/search` is the primary revenue-generating application. ANY impact on its functionality is unacceptable.
+
+#### **Protected Functionality**
+- [ ] User can access search interface
+- [ ] Anonymous users get 3 free searches
+- [ ] Registered users get 10 searches/day
+- [ ] Pro users get unlimited searches
+- [ ] Token validation works correctly
+- [ ] Search results are accurate and fast
+- [ ] Payment upgrade flow works
+- [ ] All user tiers function properly
+
+#### **Mandatory Client App Testing**
+```bash
+# Before ANY deployment, test these user journeys:
+
+# 1. Anonymous User Journey
+curl "https://awssolutionfinder.solutions.cloudnestle.com/search"
+# - Should load successfully
+# - Should allow 3 searches
+# - Should prompt for registration after 3 searches
+
+# 2. Registered User Journey  
+# - Login with marketplace token
+# - Should allow 10 searches/day
+# - Should track usage correctly
+
+# 3. Pro User Journey
+# - Login with pro token
+# - Should allow unlimited searches
+# - Should not show upgrade prompts
+
+# 4. Payment Flow
+# - Upgrade to pro should work
+# - Payment processing should complete
+# - User tier should update correctly
+```
+
+#### **Performance Benchmarks**
+```javascript
+// FAISS app performance must maintain:
+const PERFORMANCE_REQUIREMENTS = {
+  searchResponseTime: '<3 seconds',
+  pageLoadTime: '<2 seconds',
+  tokenValidation: '<500ms',
+  errorRate: '<1%',
+  uptime: '>99.9%'
+}
+```
+
+#### **Backward Compatibility Rules**
+```javascript
+// When modifying FAISS Lambda or marketplace APIs:
+
+// ✅ SAFE: Add optional fields
+{
+  user_id: "existing_field",
+  search_count: "existing_field", 
+  country: "new_optional_field" // OK - optional
+}
+
+// ❌ DANGEROUS: Modify existing fields
+{
+  user_id: "existing_field",
+  search_count: "modified_format", // BREAKS CLIENT
+  required_new_field: "value" // BREAKS CLIENT
+}
+
+// ✅ SAFE: Add new API endpoints
+GET /api/analytics/new-endpoint // OK - doesn't affect existing
+
+// ❌ DANGEROUS: Modify existing API responses
+GET /api/validate-solution-token // Must maintain exact response format
+```
+
+---
+
+## 📋 **Development Process**
+
+### **Phase-Gate Approach**
+```
+Phase 1A → Test → Validate → Gate ✅ → Phase 1B
+Phase 1B → Test → Validate → Gate ✅ → Phase 2A
+Phase 2A → Test → Validate → Gate ✅ → Phase 2B
+```
+
+### **Feature Development Checklist**
+
+#### **Before Starting**
+- [ ] Create feature branch from main
+- [ ] Update CDK stack definition first
+- [ ] Add environment variables to CDK
+- [ ] Write unit tests first (TDD approach)
+- [ ] Plan rollback strategy
+- [ ] **CRITICAL**: Test current FAISS app functionality baseline
+
+#### **During Development**
+- [ ] Test each function individually
+- [ ] Validate data integrity at each step
+- [ ] Check existing functionality still works
+- [ ] No hardcoded values anywhere
+- [ ] All configuration from environment variables
+- [ ] **CRITICAL**: Continuously test FAISS app remains functional
+
+#### **Before Deployment**
+- [ ] Run full test suite (`npm test`)
+- [ ] Test in development environment first
+- [ ] Validate CDK diff shows expected changes only
+- [ ] Backup current state if needed
+- [ ] Deploy with feature flags disabled initially
+- [ ] **CRITICAL**: Full end-to-end test of FAISS app user journey
+
+#### **After Deployment**
+- [ ] Verify new resources created correctly
+- [ ] Test new functionality end-to-end
+- [ ] Monitor CloudWatch for errors/performance
+- [ ] Enable feature flags gradually
+- [ ] Document configuration changes
+- [ ] **CRITICAL**: Validate FAISS app performance and functionality
+
+---
+
+## 🧪 **Testing Requirements**
+
+### **Mandatory Tests**
+```javascript
+// Every function MUST have unit tests
+describe('Analytics Functions', () => {
+  test('returns real data only', async () => {
+    // Mock real AWS responses
+    mockDynamoDB.scan.mockResolvedValue({ Items: realTestData })
+    
+    const result = await analyticsFunction(event)
+    
+    expect(result).toHaveProperty('revenue')
+    expect(typeof result.revenue).toBe('number')
+  })
+})
+```
+
+### **Integration Tests Required**
+- API endpoints with real database calls
+- End-to-end user workflows
+- Cross-service integrations
+- Performance benchmarks
+
+---
+
+## 🚀 **Deployment Standards**
+
+### **CDK-Only Infrastructure**
+```typescript
+// All infrastructure via CDK stacks
+export class AnalyticsStack extends Stack {
+  constructor(scope: Construct, id: string, props?: StackProps) {
+    // Define all resources here
+    const table = new dynamodb.Table(this, 'AnalyticsTable', {
+      tableName: `${id}-analytics`,
+      // ... configuration
+    })
+  }
+}
+```
+
+### **Environment Variables**
+```javascript
+// All config from environment
+const CONFIG = {
+  USER_TABLE: process.env.USER_TABLE_NAME,
+  PAYMENT_TABLE: process.env.PAYMENT_TABLE_NAME,
+  REGION: process.env.AWS_REGION,
+  ENABLE_FEATURE_X: process.env.ENABLE_FEATURE_X === 'true'
+}
+```
+
+### **Feature Flags for Safe Rollout**
+```javascript
+// Gradual feature activation
+const FEATURES = {
+  LOCATION_TRACKING: process.env.ENABLE_LOCATION_TRACKING === 'true',
+  ANALYTICS_API: process.env.ENABLE_ANALYTICS_API === 'true'
+}
+
+if (FEATURES.LOCATION_TRACKING) {
+  await trackUserLocation(event, userId, solutionId)
+}
+```
+
+---
+
+## 🔍 **Quality Gates**
+
+### **Phase Completion Criteria**
+Each phase must pass ALL criteria before proceeding:
+
+#### **Infrastructure Phase**
+- [ ] CDK deployment successful
+- [ ] All resources created correctly
+- [ ] Environment variables configured
+- [ ] No manual CLI commands used
+- [ ] Rollback tested and working
+
+#### **API Development Phase**
+- [ ] All endpoints return real data
+- [ ] Response times < 500ms
+- [ ] Error handling implemented
+- [ ] Authentication/authorization working
+- [ ] No dummy/hardcoded responses
+
+#### **Dashboard Phase**
+- [ ] Real-time data integration
+- [ ] All charts show live data
+- [ ] Filters work correctly
+- [ ] No static/dummy content
+- [ ] Performance acceptable
+
+---
+
+## 📊 **Monitoring & Validation**
+
+### **Required CloudWatch Alarms**
+```typescript
+// Error rate monitoring
+const errorAlarm = new cloudwatch.Alarm(this, 'ErrorAlarm', {
+  metric: lambdaFunction.metricErrors(),
+  threshold: 5,
+  evaluationPeriods: 2
+})
+
+// Performance monitoring
+const latencyAlarm = new cloudwatch.Alarm(this, 'LatencyAlarm', {
+  metric: lambdaFunction.metricDuration(),
+  threshold: Duration.seconds(5)
+})
+```
+
+### **Data Integrity Checks**
+```javascript
+// Automated validation
+const validateData = async () => {
+  const revenue = await getRevenue()
+  assert(revenue >= 0, 'Revenue cannot be negative')
+  assert(typeof revenue === 'number', 'Revenue must be number')
+}
+```
+
+---
+
+## 🎯 **Success Metrics**
+
+### **Technical KPIs**
+- Zero downtime during deployments
+- 100% real data (no dummy content)
+- CDK manages all infrastructure
+- Test coverage > 90%
+- API response time < 500ms
+
+### **Quality Standards**
+- All features work in fresh AWS account
+- No manual setup required
+- Complete rollback capability
+- Comprehensive error handling
+- Production-ready security
+
+---
+
+## 🚨 **Violation Consequences**
+
+### **If Rules Are Broken**
+1. **Immediate rollback** to last known good state
+2. **Code review** of all changes
+3. **Additional testing** before next deployment
+4. **Documentation update** of lessons learned
+
+### **Emergency Procedures**
+```bash
+# If live system is impacted
+git checkout main
+./deploy-full.sh  # Rollback to stable state
+
+# Investigate issue
+# Fix in development environment
+# Follow full testing process before redeployment
+```
+
+---
+
+## 📞 **Escalation Path**
+
+### **When to Escalate**
+- Any production system impact
+- Data integrity concerns
+- Security vulnerabilities
+- Performance degradation
+- Deployment failures
+
+### **Contact Information**
+- Technical Lead: [Contact Info]
+- DevOps Team: [Contact Info]
+- Emergency Hotline: [Contact Info]
+
+---
+
+**These rules are non-negotiable. Every team member must follow them strictly to maintain system reliability and user trust.**
+
+**Last Updated**: 2025-11-13
+**Version**: 1.0
+**Next Review**: 2025-12-13

@@ -1,22 +1,38 @@
-// import React from 'react'
+import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { User, Mail, Building, Calendar, Shield } from 'lucide-react'
+import { BackgroundImage } from '../components/BackgroundImage'
+import { User, Mail, Building, Calendar, Shield, RefreshCw, Crown } from 'lucide-react'
 
 export function ProfilePage() {
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    try {
+      await refreshUser()
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
 
   if (!user) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <p className="text-gray-600">Loading profile...</p>
+      <div className="min-h-screen">
+        <BackgroundImage />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <p className="text-gray-600">Loading profile...</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen">
+      <BackgroundImage />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-40">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile</h1>
         <p className="text-gray-600">Manage your account information and preferences</p>
@@ -60,6 +76,30 @@ export function ProfilePage() {
                 <div>
                   <div className="text-sm font-medium text-gray-900">Account Type</div>
                   <div className="text-gray-600 capitalize">{user.role}</div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Crown className="h-5 w-5 text-gray-400" />
+                <div>
+                  <div className="text-sm font-medium text-gray-900">Subscription Tier</div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      user.tier === 'pro' 
+                        ? 'bg-purple-100 text-purple-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {user.tier === 'pro' ? 'Pro' : 'Registered'}
+                    </span>
+                    <button
+                      onClick={handleRefresh}
+                      disabled={isRefreshing}
+                      className="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                      title="Refresh subscription status"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -140,6 +180,7 @@ export function ProfilePage() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   )

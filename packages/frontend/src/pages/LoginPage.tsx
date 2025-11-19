@@ -1,36 +1,44 @@
-import { useState, useRef } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useState } from 'react' // useRef temporarily disabled
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import ReCAPTCHA from 'react-google-recaptcha'
+// import ReCAPTCHA from 'react-google-recaptcha' // TEMPORARILY DISABLED FOR TESTING
 import { useAuth } from '../contexts/AuthContext'
 import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
-  recaptcha: z.string().min(1, 'Please complete the reCAPTCHA verification'),
+  recaptcha: z.string().optional(), // Made optional for testing
 })
 
 type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
+  // TEMPORARILY DISABLED FOR TESTING
+  // const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
+  // const recaptchaRef = useRef<ReCAPTCHA>(null)
   const { login, isLoading, error, clearError } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
 
   const from = location.state?.from?.pathname || '/'
+  
+  // Check for FAISS redirect parameters
+  const returnTo = searchParams.get('return_to')
+  const solutionId = searchParams.get('solution_id')
+  const isFaissRedirect = returnTo === 'faiss' || solutionId === 'aws-finder'
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    clearErrors,
+    // TEMPORARILY DISABLED FOR TESTING
+    // setValue,
+    // clearErrors,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
@@ -38,13 +46,44 @@ export function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       clearError()
-      await login({ email: data.email, password: data.password, recaptchaToken })
+      await login({ email: data.email, password: data.password }) // recaptchaToken temporarily disabled
       
       // Get user from auth context to check role
       const storedUser = localStorage.getItem('user')
       
       if (storedUser) {
         const user = JSON.parse(storedUser)
+        
+        // Handle FAISS redirect for regular users
+        if (isFaissRedirect && user.role !== 'admin') {
+          try {
+            // Generate token for FAISS access
+            const response = await fetch(`${import.meta.env.VITE_API_URL}api/generate-solution-token`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+              },
+              body: JSON.stringify({
+                user_id: user.userId || user.email, // Send as user_id to match backend
+                solution_id: 'aws-solution-finder', // Use correct solution_id
+                access_tier: 'registered', // Use access_tier to match backend
+                return_url: 'https://awssolutionfinder.solutions.cloudnestle.com/search'
+              })
+            })
+
+            if (response.ok) {
+              const tokenData = await response.json()
+              // Redirect to FAISS with token
+              window.location.href = tokenData.redirect_url
+              return
+            }
+          } catch (tokenError) {
+            console.error('Error generating token:', tokenError)
+            // Fall back to normal flow
+          }
+        }
+        
         if (user.role === 'admin') {
           navigate('/admin/dashboard', { replace: true })
           return
@@ -53,13 +92,15 @@ export function LoginPage() {
       
       navigate(from, { replace: true })
     } catch (error) {
-      // Reset reCAPTCHA on error
-      recaptchaRef.current?.reset()
-      setRecaptchaToken(null)
-      setValue('recaptcha', '')
+      // Reset reCAPTCHA on error - TEMPORARILY DISABLED
+      // recaptchaRef.current?.reset()
+      // setRecaptchaToken(null)
+      // setValue('recaptcha', '')
     }
   }
 
+  // TEMPORARILY DISABLED FOR TESTING
+  /*
   const handleRecaptchaChange = (token: string | null) => {
     setRecaptchaToken(token)
     if (token) {
@@ -69,11 +110,23 @@ export function LoginPage() {
       setValue('recaptcha', '')
     }
   }
+  */
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Background Image */}
+      <div className="fixed inset-0 pointer-events-none" style={{ opacity: 0.6, zIndex: -1 }}>
+        <img 
+          src="/homepage-image.png" 
+          alt="Marketplace Background" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-600/40 to-blue-800/40 pointer-events-none" style={{ zIndex: -1 }}></div>
+      
       <div className="max-w-md w-full space-y-8">
-        <div>
+        <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-8">
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
             Sign in to your account
           </h2>
@@ -145,7 +198,8 @@ export function LoginPage() {
               )}
             </div>
 
-            {/* reCAPTCHA */}
+            {/* reCAPTCHA - TEMPORARILY DISABLED FOR TESTING */}
+            {/* 
             <div>
               <ReCAPTCHA
                 ref={recaptchaRef}
@@ -158,6 +212,7 @@ export function LoginPage() {
                 <p className="mt-1 text-sm text-red-600">{errors.recaptcha.message}</p>
               )}
             </div>
+            */}
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">

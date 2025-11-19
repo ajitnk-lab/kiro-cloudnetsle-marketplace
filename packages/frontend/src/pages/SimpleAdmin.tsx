@@ -1,13 +1,15 @@
 import { useState } from 'react'
+import { CustomPopup, usePopup } from '../components/CustomPopup'
 
 export function SimpleAdmin() {
+  const { popup, showPopup, closePopup } = usePopup()
   const [solutions, setSolutions] = useState([])
   const [token, setToken] = useState('')
   const [loading, setLoading] = useState(false)
 
   const testAdmin = async () => {
     if (!token) {
-      alert('Enter access token first')
+      showPopup('Enter access token first', 'info')
       return
     }
     
@@ -27,11 +29,11 @@ export function SimpleAdmin() {
       if (response.ok) {
         setSolutions(data.solutions || [])
       } else {
-        alert(`Error: ${response.status} - ${JSON.stringify(data)}`)
+        showPopup(`Error: ${response.status} - ${JSON.stringify(data)}`, 'error')
       }
     } catch (error) {
       console.error('Error:', error)
-      alert(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      showPopup(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error')
     } finally {
       setLoading(false)
     }
@@ -70,6 +72,13 @@ export function SimpleAdmin() {
           </div>
         ))}
       </div>
+      
+      <CustomPopup
+        message={popup.message}
+        type={popup.type}
+        isOpen={popup.isOpen}
+        onClose={closePopup}
+      />
     </div>
   )
 }

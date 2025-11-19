@@ -12,7 +12,7 @@ const env = {
 }
 
 // Create the main infrastructure stack with existing stack name
-new MarketplaceInfrastructureStack(app, 'MP-1759859484941', {
+new MarketplaceInfrastructureStack(app, 'MP-1762926799834', {
   env,
   description: 'Marketplace Platform - Main infrastructure stack',
   tags: {

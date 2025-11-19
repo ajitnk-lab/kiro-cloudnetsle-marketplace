@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudNetsle Marketplace - Founder Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; text-align: center; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .header p { opacity: 0.9; font-size: 1.1rem; }
+        .dashboard { max-width: 1400px; margin: -2rem auto 2rem; padding: 0 1rem; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .metric-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 4px solid; }
+        .metric-card.revenue { border-left-color: #10b981; }
+        .metric-card.users { border-left-color: #3b82f6; }
+        .metric-card.conversion { border-left-color: #f59e0b; }
+        .metric-card.transactions { border-left-color: #ef4444; }
+        .metric-value { font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .metric-label { color: #6b7280; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-change { font-size: 0.85rem; margin-top: 0.5rem; }
+        .positive { color: #10b981; }
+        .negative { color: #ef4444; }
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        .chart-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .chart-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #1f2937; }
+        .full-width { grid-column: 1 / -1; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-failed { background: #fee2e2; color: #991b1b; }
+        .status-initiated { background: #fef3c7; color: #92400e; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        .table th { background: #f9fafb; font-weight: 600; color: #374151; }
+        @media (max-width: 768px) { 
+            .charts-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 CloudNetsle Marketplace</h1>
+        <p>Founder Dashboard - Real-time Business Intelligence</p>
+        <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem;">Last Updated: November 12, 2025</p>
+    </div>
+
+    <div class="dashboard">
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card revenue">
+                <div class="metric-value">₹897</div>
+                <div class="metric-label">Total Revenue</div>
+                <div class="metric-change positive">+₹299 this week</div>
+            </div>
+            <div class="metric-card users">
+                <div class="metric-value">68</div>
+                <div class="metric-label">Total Users</div>
+                <div class="metric-change positive">+12 this week</div>
+            </div>
+            <div class="metric-card conversion">
+                <div class="metric-value">4.4%</div>
+                <div class="metric-label">Conversion Rate</div>
+                <div class="metric-change positive">3/68 users upgraded</div>
+            </div>
+            <div class="metric-card transactions">
+                <div class="metric-value">11</div>
+                <div class="metric-label">Total Transactions</div>
+                <div class="metric-change">3 completed, 2 failed, 6 pending</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">📊 Transaction Status Breakdown</h3>
+                <canvas id="transactionChart" width="400" height="300"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">👥 User Role Distribution</h3>
+                <canvas id="userChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3 class="chart-title">💰 Daily Revenue Trend</h3>
+                <canvas id="revenueChart" width="400" height="200"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3 class="chart-title">🔄 Conversion Funnel</h3>
+                <canvas id="funnelChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Transactions Table -->
+        <div class="chart-card full-width">
+            <h3 class="chart-title">💳 Recent Transactions</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Payment Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nov 12, 2025 16:32</td>
+                        <td>₹299</td>
+                        <td><span class="status-badge status-failed">Failed</span></td>
+                        <td>PhonePe</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 12, 2025 15:48</td>
+                        <td>₹299</td>
+                        <td><span class="status-badge status-completed">Completed</span></td>
+                        <td>PhonePe</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 12, 2025 13:04</td>
+                        <td>₹299</td>
+                        <td><span class="status-badge status-failed">Failed</span></td>
+                        <td>PhonePe</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 12, 2025 12:03</td>
+                        <td>₹299</td>
+                        <td><span class="status-badge status-completed">Completed</span></td>
+                        <td>PhonePe</td>
+                    </tr>
+                    <tr>
+                        <td>Nov 11, 2025 17:35</td>
+                        <td>₹299</td>
+                        <td><span class="status-badge status-completed">Completed</span></td>
+                        <td>PhonePe</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Key Insights -->
+        <div class="chart-card full-width">
+            <h3 class="chart-title">🎯 Key Business Insights</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                <div>
+                    <h4 style="color: #10b981; margin-bottom: 0.5rem;">✅ Strengths</h4>
+                    <ul style="color: #374151; line-height: 1.6;">
+                        <li>Strong user acquisition (68 total users)</li>
+                        <li>Healthy conversion rate (4.4%)</li>
+                        <li>Consistent Pro upgrades (₹299 each)</li>
+                        <li>Active partner ecosystem (17 partners)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: #f59e0b; margin-bottom: 0.5rem;">⚠️ Areas for Improvement</h4>
+                    <ul style="color: #374151; line-height: 1.6;">
+                        <li>Payment failure rate: 18% (2/11 transactions)</li>
+                        <li>6 pending transactions need follow-up</li>
+                        <li>Only 3 Pro users from 51 customers (5.9%)</li>
+                        <li>Revenue concentration risk (single price point)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: #3b82f6; margin-bottom: 0.5rem;">🚀 Growth Opportunities</h4>
+                    <ul style="color: #374141; line-height: 1.6;">
+                        <li>Implement payment retry mechanisms</li>
+                        <li>Add multiple pricing tiers</li>
+                        <li>Partner revenue sharing program</li>
+                        <li>Automated conversion campaigns</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Transaction Status Chart
+        const transactionCtx = document.getElementById('transactionChart').getContext('2d');
+        new Chart(transactionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Failed', 'Pending'],
+                datasets: [{
+                    data: [3, 2, 6],
+                    backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // User Role Chart
+        const userCtx = document.getElementById('userChart').getContext('2d');
+        new Chart(userCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Customers', 'Partners', 'Admins'],
+                datasets: [{
+                    data: [51, 17, 2],
+                    backgroundColor: ['#3b82f6', '#8b5cf6', '#06b6d4'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Revenue Trend Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: ['Nov 8', 'Nov 9', 'Nov 10', 'Nov 11', 'Nov 12'],
+                datasets: [{
+                    label: 'Daily Revenue (₹)',
+                    data: [0, 0, 0, 299, 598],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Conversion Funnel Chart
+        const funnelCtx = document.getElementById('funnelChart').getContext('2d');
+        new Chart(funnelCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Visitors', 'Registered', 'Pro Users'],
+                datasets: [{
+                    label: 'Users',
+                    data: [200, 68, 3],
+                    backgroundColor: ['#e5e7eb', '#3b82f6', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

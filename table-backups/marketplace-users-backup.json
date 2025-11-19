@@ -1,0 +1,2372 @@
+{
+    "Items": [
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "54c87418-3081-70dd-6337-a384e5bc41f6"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T12:07:12.660Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner987 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+partner987@gmail.com"
+                    },
+                    "company": {
+                        "S": "partner987-company"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-15T12:04:34.153Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner987@gmail.com"
+            },
+            "partnerStatus": {
+                "S": "approved"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "partner-002"
+            },
+            "updatedAt": {
+                "S": "2025-10-07T18:02:12.761Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "BusinessFlow Solutions"
+                    },
+                    "company": {
+                        "S": "BusinessFlow Solutions"
+                    },
+                    "givenName": {
+                        "S": "Business"
+                    },
+                    "familyName": {
+                        "S": "Flow"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-07T18:02:12.761Z"
+            },
+            "email": {
+                "S": "partner2@businessflow.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "4498f498-8081-7029-3c2b-06d3ca0b3add"
+            },
+            "updatedAt": {
+                "S": "2025-10-07T19:24:29.702Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner999 User"
+                    },
+                    "company": {
+                        "S": "partner999"
+                    },
+                    "givenName": {
+                        "S": "partner999"
+                    },
+                    "familyName": {
+                        "S": "User"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-07T19:24:29.702Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner999@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "dailyUsage": {
+                "M": {
+                    "date": {
+                        "S": "2025-11-11"
+                    },
+                    "searchCount": {
+                        "N": "12"
+                    }
+                }
+            },
+            "role": {
+                "S": "customer"
+            },
+            "updatedAt": {
+                "S": "2025-11-11T10:29:27.355Z"
+            },
+            "userId": {
+                "S": "a4f8c468-f031-7059-0c19-6723abf65549"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg789 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg789@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T07:20:49.101Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg789@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "dailyUsage": {
+                "M": {
+                    "date": {
+                        "S": "2025-11-11"
+                    },
+                    "searchCount": {
+                        "N": "13"
+                    }
+                }
+            },
+            "role": {
+                "S": "customer"
+            },
+            "updatedAt": {
+                "S": "2025-11-11T17:50:52.676Z"
+            },
+            "userId": {
+                "S": "644884c8-40c1-701d-2334-3218cd4f8133"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer600 Name"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "givenName": {
+                        "S": "customer600"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "tier": {
+                "S": "pro"
+            },
+            "createdAt": {
+                "S": "2025-10-08T08:43:54.892Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer600@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "d4984438-c031-70df-4ee2-8b71275c2589"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T09:45:19.412Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg654 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg654@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T09:45:19.412Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg654@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "94d83478-80a1-7085-5556-5bf8b64c075c"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T15:37:16.754Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg899 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg899@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T15:37:16.754Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg899@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "b4a8a428-8081-7095-b060-633be15a38ed"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T18:53:02.938Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg11112025-16 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg11112025-16@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T18:53:02.938Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg11112025-16@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "9488e498-80f1-7059-e8ef-b45b595de13a"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T15:06:37.706Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg777 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg777@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T15:06:37.706Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg777@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "74c8a488-e011-7059-8a88-2aa14177aad7"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T11:56:28.387Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerred10112025-12 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerred10112025-12@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T11:56:28.387Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerred10112025-12@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "customer345-fix-001"
+            },
+            "updatedAt": {
+                "S": "2025-11-07T17:16:00.000Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "Customer345 User"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customer345@gmail.com"
+                    },
+                    "givenName": {
+                        "S": "Customer345"
+                    },
+                    "familyName": {
+                        "S": "User"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-07T17:16:00.000Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer345@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "84b85478-e0e1-70f8-0d57-00baf3bf40d3"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T07:41:33.550Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "custmerreg456 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+custmerreg456@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T07:41:33.550Z"
+            },
+            "email": {
+                "S": "ajitnk2006+custmerreg456@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "44484438-5021-703a-c26a-0d77586fa7d1"
+            },
+            "updatedAt": {
+                "S": "2025-10-07T18:58:47.041Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "Test User"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "givenName": {
+                        "S": "Test"
+                    },
+                    "familyName": {
+                        "S": "User"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-07T18:58:47.041Z"
+            },
+            "email": {
+                "S": "testuser456@example.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "admin"
+            },
+            "userId": {
+                "S": "a4281458-9061-7049-8138-39bf0adcdf50"
+            },
+            "updatedAt": {
+                "S": "2025-10-09T18:42:00.000Z"
+            },
+            "permissions": {
+                "L": [
+                    {
+                        "S": "admin:read"
+                    },
+                    {
+                        "S": "admin:write"
+                    },
+                    {
+                        "S": "admin:delete"
+                    },
+                    {
+                        "S": "users:manage"
+                    },
+                    {
+                        "S": "partners:manage"
+                    },
+                    {
+                        "S": "solutions:moderate"
+                    },
+                    {
+                        "S": "platform:configure"
+                    }
+                ]
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "System Administrator"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+admin@gmail.com"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-09T18:42:00.000Z"
+            },
+            "email": {
+                "S": "ajitnk2006+admin@gmail.com"
+            }
+        },
+        {
+            "role": {
+                "S": "partner"
+            },
+            "companyName": {
+                "S": "Test Company"
+            },
+            "userId": {
+                "S": "test-partner-123"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T13:24:39.070Z"
+            },
+            "createdAt": {
+                "S": "2025-10-08T13:22:01.347Z"
+            },
+            "email": {
+                "S": "testpartner@example.com"
+            },
+            "name": {
+                "S": "Test Partner"
+            },
+            "partnerStatus": {
+                "S": "approved"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "e4686468-8021-7027-a162-e7b8b2241159"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T06:25:48.074Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer930 Name"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "givenName": {
+                        "S": "customer930"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T06:25:48.074Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer930@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "64588498-e0d1-7099-b74b-ee588f7a40fb"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T06:52:00.000Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner667 Name"
+                    },
+                    "company": {
+                        "S": "partner667-company"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+partner667@gmail.com"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-15T06:41:09.913Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner667@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "54386468-1081-7021-759e-7e86c25eefa2"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T06:47:42.811Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer50 Name"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "givenName": {
+                        "S": "customer50"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T06:47:42.811Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer50@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "647854c8-6001-70c3-9b88-ea253cae13dd"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T11:30:40.244Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerred10112025-09 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerred10112025-09@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T11:30:40.244Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerred10112025-09@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "b4485498-d031-7067-2e08-88814c1a83e0"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T07:57:02.298Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer324 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customer324@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T07:57:02.297Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer324@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "partner"
+            },
+            "marketplaceStatus": {
+                "S": "approved"
+            },
+            "userId": {
+                "S": "c42814e8-d0d1-705d-7003-5e4a4a5780f2"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T11:37:08.570Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner579 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+partner579@gmail.com"
+                    },
+                    "company": {
+                        "S": "partner579-company"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-15T11:34:13.150Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner579@gmail.com"
+            },
+            "partnerStatus": {
+                "S": "approved"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "7438f468-10b1-7087-a38b-f44a72deb1f9"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T17:02:45.781Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg999 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg999@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T17:02:45.781Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg999@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "b4086408-8041-7056-7c74-b55d78c73bc5"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T06:18:20.408Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer915 Name"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "givenName": {
+                        "S": "customer915"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T06:18:20.408Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer915@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "e4b81408-c091-70c7-53ff-a6e42a73defb"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T17:14:48.236Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg555 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg555@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T17:14:48.236Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg555@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "a4d84408-a091-701d-0742-fa4c66de32bb"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T17:05:29.442Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg345 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg345@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T17:05:29.442Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg345@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "7468e498-4041-7065-cedb-3b63cdd12ded"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T06:42:13.968Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer930 Name"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "givenName": {
+                        "S": "customer930"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T06:42:13.968Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer931@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "549814b8-3011-70ed-edf9-bf6407812903"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T06:25:00.000Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner321 Name"
+                    },
+                    "company": {
+                        "S": "partner321"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+partner321@gmail.com"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-14T15:54:32.535Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner321@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "c4e82428-50f1-701e-fea5-d1dd35b3e89f"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T08:45:32.613Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner600 Name"
+                    },
+                    "company": {
+                        "S": "partner600"
+                    },
+                    "givenName": {
+                        "S": "partner600"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T08:45:32.613Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner600@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "945854e8-90d1-70e8-b949-ed264de3f386"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T16:52:54.581Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg897 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg897@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T16:52:54.581Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg897@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "customer455-fix-001"
+            },
+            "updatedAt": {
+                "S": "2025-11-07T17:24:00.000Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "Customer455 User"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customer455@gmail.com"
+                    },
+                    "givenName": {
+                        "S": "Customer455"
+                    },
+                    "familyName": {
+                        "S": "User"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-07T17:24:00.000Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer455@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "partner-003"
+            },
+            "updatedAt": {
+                "S": "2025-10-07T18:02:12.761Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "CloudOps Technologies"
+                    },
+                    "company": {
+                        "S": "CloudOps Technologies"
+                    },
+                    "givenName": {
+                        "S": "CloudOps"
+                    },
+                    "familyName": {
+                        "S": "Tech"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-07T18:02:12.761Z"
+            },
+            "email": {
+                "S": "partner3@cloudops.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "14286428-00a1-7026-1fe9-5a89f5aeb932"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T13:32:27.157Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg09112025-04 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg09112025-04@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T13:32:27.157Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg09112025-04@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "04385418-e081-7068-0245-400a35dd6f87"
+            },
+            "updatedAt": {
+                "S": "2025-11-07T17:48:53.074Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer567 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customer567@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-07T17:48:53.074Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer567@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "54785408-2021-702f-a6fe-e9634cf7474e"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T13:16:14.201Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg09112025-03 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg09112025-03@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T13:16:14.201Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg09112025-03@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "940844f8-9071-7080-411b-3db5689b6b8f"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T17:24:21.013Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg111 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg111@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T17:24:21.013Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg111@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "44a8a4d8-6091-7030-bedd-cf6f39752f02"
+            },
+            "updatedAt": {
+                "S": "2025-11-11T17:54:44.499Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg11112025-20 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg11112025-20@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-11T17:54:44.499Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg11112025-20@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "14a844d8-0011-701c-931d-cd9ff18c7301"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T15:19:52.788Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg876 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg876@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T15:19:52.788Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg876@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "947884a8-60c1-70ce-c72d-7a9ef5005033"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T17:10:56.177Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg865 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg865@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T17:10:56.177Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg865@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "34484448-6091-701f-ec47-9469c2074bd2"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T12:01:08.687Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg10112025-13 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg10112025-13@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T12:01:08.687Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg10112025-13@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "d48894e8-10f1-70dd-cb88-fca12767561b"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T16:46:24.992Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg888 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg888@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T16:46:24.992Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg888@gmail.com"
+            }
+        },
+        {
+            "userId": {
+                "S": "9d6d9107-c555-41b5-9b54-53c54c728249"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T11:11:15.931Z"
+            },
+            "partnerStatus": {
+                "S": "rejected"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "34683448-0091-70eb-3379-d1f0d93f85b9"
+            },
+            "updatedAt": {
+                "S": "2025-10-07T19:21:31.464Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer999 User"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "givenName": {
+                        "S": "customer999"
+                    },
+                    "familyName": {
+                        "S": "User"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-07T19:21:31.464Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer999@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "a4e8b4b8-b0a1-7026-2237-d80a8d9c3fbc"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T16:03:03.524Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg10112025-14 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg10112025-14@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T16:03:03.524Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg10112025-14@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "54685478-20b1-708c-46c7-c35d3b57adad"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T06:25:00.000Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner420 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+partner420@gmail.com"
+                    },
+                    "company": {
+                        "S": "partner420"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-14T07:51:15.938Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner420@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "b438c4b8-8001-708d-eb76-67ae228fa407"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T07:01:36.891Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer635 Name"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "givenName": {
+                        "S": "customer635"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T07:01:36.873Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer635@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "c4881408-f0b1-7060-43f8-2ae3a58f2445"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T09:14:05.753Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner800 Name"
+                    },
+                    "company": {
+                        "S": "partner800"
+                    },
+                    "givenName": {
+                        "S": "partner800"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T09:14:05.753Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner800@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "6498a458-5081-7081-95f3-6529973fb723"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T06:05:00.000Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "Partner678 User"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+Partner678@gmail.com"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-15T04:47:29.195Z"
+            },
+            "email": {
+                "S": "ajitnk2006+Partner678@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "partner"
+            },
+            "marketplaceStatus": {
+                "S": "approved"
+            },
+            "userId": {
+                "S": "c4f8f488-40b1-7091-11f4-88e6f4a81012"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T12:34:03.795Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner322 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+partner322@gmail.com"
+                    },
+                    "company": {
+                        "S": "partner322-company"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-15T12:31:08.361Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner322@gmail.com"
+            },
+            "partnerStatus": {
+                "S": "approved"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "c4589498-0081-70e5-d40a-dc14514daa8e"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T11:03:19.114Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg10112025-07 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg10112025-07@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T11:03:19.114Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg10112025-07@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "d418f4b8-b0c1-7020-42d8-7396c3d949a7"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T07:03:26.293Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner635 Name"
+                    },
+                    "company": {
+                        "S": "partner635"
+                    },
+                    "givenName": {
+                        "S": "partner635"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T07:03:26.293Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner635@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "a4b864c8-c0a1-70a1-67f6-fa25aab77ad2"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T08:57:02.667Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner700 Name"
+                    },
+                    "company": {
+                        "S": "partner700"
+                    },
+                    "givenName": {
+                        "S": "partner700"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T08:57:02.667Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner700@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "64b834e8-e071-70bc-3cf0-cbfdb69e534e"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T06:42:17.871Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg670 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg670@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T06:42:17.871Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg670@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "partner"
+            },
+            "marketplaceStatus": {
+                "S": "approved"
+            },
+            "userId": {
+                "S": "14f804c8-d0a1-7045-bb15-7e215739017e"
+            },
+            "updatedAt": {
+                "S": "2025-10-15T11:22:35.678Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "partner234 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+partner234@gmail.com"
+                    },
+                    "company": {
+                        "S": "partner234-compnay"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-15T08:33:13.081Z"
+            },
+            "email": {
+                "S": "ajitnk2006+partner234@gmail.com"
+            },
+            "partnerStatus": {
+                "S": "approved"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "9488e4b8-b071-709b-2671-d7cc803abddc"
+            },
+            "updatedAt": {
+                "S": "2025-10-08T06:35:32.174Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customer925 Name"
+                    },
+                    "company": {
+                        "S": ""
+                    },
+                    "givenName": {
+                        "S": "customer925"
+                    },
+                    "familyName": {
+                        "S": "Name"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-08T06:35:32.174Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customer925@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "74384418-50a1-7021-8ce5-900dcdf670f5"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T12:11:53.211Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg11nov01a Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg11nov01a@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T12:11:53.211Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg11nov01a@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "344884e8-a041-706c-645f-7ddb68980e99"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T15:56:02.141Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg222 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg222@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T15:56:02.141Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg222@gmail.com"
+            }
+        },
+        {
+            "cognitoStatus": {
+                "S": "confirmed"
+            },
+            "role": {
+                "S": "partner"
+            },
+            "userId": {
+                "S": "partner-001"
+            },
+            "updatedAt": {
+                "S": "2025-10-07T18:02:12.761Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "TechSolutions Inc"
+                    },
+                    "company": {
+                        "S": "TechSolutions Inc"
+                    },
+                    "givenName": {
+                        "S": "Tech"
+                    },
+                    "familyName": {
+                        "S": "Solutions"
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-10-07T18:02:12.761Z"
+            },
+            "email": {
+                "S": "partner1@techsolutions.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "c4f82448-5091-7029-e285-dd5568a45cb4"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T09:56:47.740Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg887 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg887@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T09:56:47.740Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg887@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "24c884e8-0051-70d5-7c40-a29725868d06"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T11:50:35.715Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg10112025-11 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg10112025-11@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T11:50:35.715Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg10112025-11@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "94482468-2021-7082-0b43-57d13936a241"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T11:41:58.457Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg10112025 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg10112025@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T11:41:58.457Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg10112025@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "f4685468-80e1-70e1-4345-fde402c0d74c"
+            },
+            "updatedAt": {
+                "S": "2025-11-09T12:33:25.925Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg09112015-02 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg09112015-02@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-09T12:33:25.925Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg09112015-02@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "74d81448-2041-7078-fc20-ea9a661a8564"
+            },
+            "updatedAt": {
+                "S": "2025-11-11T08:48:32.900Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerreg11112025-01 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerreg11112025-01@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-11T08:48:32.900Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerreg11112025-01@gmail.com"
+            }
+        },
+        {
+            "emailVerified": {
+                "BOOL": true
+            },
+            "role": {
+                "S": "customer"
+            },
+            "userId": {
+                "S": "b4583478-00f1-70cc-a875-db2588b35f5c"
+            },
+            "updatedAt": {
+                "S": "2025-11-10T10:15:45.395Z"
+            },
+            "profile": {
+                "M": {
+                    "name": {
+                        "S": "customerregy710112025-1 Name"
+                    },
+                    "email": {
+                        "S": "ajitnk2006+customerregy710112025-1@gmail.com"
+                    },
+                    "company": {
+                        "S": ""
+                    }
+                }
+            },
+            "status": {
+                "S": "active"
+            },
+            "createdAt": {
+                "S": "2025-11-10T10:15:45.395Z"
+            },
+            "email": {
+                "S": "ajitnk2006+customerregy710112025-1@gmail.com"
+            }
+        }
+    ],
+    "Count": 63,
+    "ScannedCount": 63,
+    "ConsumedCapacity": null
+}

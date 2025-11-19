@@ -1,0 +1,191 @@
+{
+    "Items": [
+        {
+            "partnerId": {
+                "S": "54081498-d0d1-70e7-8be1-dd53e2c9aa63"
+            },
+            "solutionId": {
+                "S": "aws-solution-finder-001"
+            },
+            "requirements": {
+                "M": {
+                    "users": {
+                        "S": "developers"
+                    },
+                    "system": {
+                        "S": "web-based"
+                    },
+                    "storage": {
+                        "S": "cloud"
+                    }
+                }
+            },
+            "status": {
+                "S": "approved"
+            },
+            "createdAt": {
+                "S": "2025-11-07T12:00:00.000Z"
+            },
+            "accessType": {
+                "S": "external_link"
+            },
+            "name": {
+                "S": "AWS Solution Finder"
+            },
+            "features": {
+                "L": [
+                    {
+                        "S": "Search 10,000+ AWS repositories"
+                    },
+                    {
+                        "S": "AI-powered semantic search"
+                    },
+                    {
+                        "S": "Quality scoring"
+                    }
+                ]
+            },
+            "actionButtonText": {
+                "S": "Start Free Trial"
+            },
+            "externalUrl": {
+                "S": "https://awssolutionfinder.solutions.cloudnestle.com/search"
+            },
+            "updatedAt": {
+                "S": "2025-11-08T13:58:00.000Z"
+            },
+            "category": {
+                "S": "Developer Tools"
+            },
+            "description": {
+                "S": "AI-powered search across 10,000+ AWS repositories"
+            },
+            "pricing": {
+                "M": {
+                    "proTier": {
+                        "M": {
+                            "features": {
+                                "L": [
+                                    {
+                                        "S": "Unlimited searches"
+                                    },
+                                    {
+                                        "S": "Priority support"
+                                    },
+                                    {
+                                        "S": "Export results"
+                                    }
+                                ]
+                            },
+                            "amount": {
+                                "N": "749"
+                            },
+                            "currency": {
+                                "S": "INR"
+                            },
+                            "billingCycle": {
+                                "S": "month"
+                            }
+                        }
+                    },
+                    "amount": {
+                        "N": "0"
+                    },
+                    "currency": {
+                        "S": "USD"
+                    },
+                    "model": {
+                        "S": "freemium"
+                    },
+                    "billingCycle": {
+                        "S": "month"
+                    }
+                }
+            },
+            "tags": {
+                "L": [
+                    {
+                        "S": "aws"
+                    },
+                    {
+                        "S": "search"
+                    },
+                    {
+                        "S": "developer-tools"
+                    }
+                ]
+            }
+        },
+        {
+            "partnerId": {
+                "S": "54081498-d0d1-70e7-8be1-dd53e2c9aa63"
+            },
+            "solutionId": {
+                "S": "c9d470d3-0ea8-4fb3-acd9-6d90ed987aaf"
+            },
+            "requirements": {
+                "M": {
+                    "users": {
+                        "S": "xx"
+                    },
+                    "system": {
+                        "S": "zz"
+                    },
+                    "storage": {
+                        "S": "dd"
+                    }
+                }
+            },
+            "updatedAt": {
+                "S": "2025-11-03T13:14:40.438Z"
+            },
+            "status": {
+                "S": "approved"
+            },
+            "category": {
+                "S": "Business Software"
+            },
+            "createdAt": {
+                "S": "2025-11-03T13:08:26.016Z"
+            },
+            "description": {
+                "S": "partner453-solution"
+            },
+            "pricing": {
+                "M": {
+                    "model": {
+                        "S": "upfront"
+                    },
+                    "amount": {
+                        "N": "99"
+                    },
+                    "currency": {
+                        "S": "INR"
+                    },
+                    "billingCycle": {
+                        "S": "month"
+                    }
+                }
+            },
+            "name": {
+                "S": "partner453-solution"
+            },
+            "tags": {
+                "L": []
+            },
+            "features": {
+                "L": [
+                    {
+                        "S": "feature1"
+                    },
+                    {
+                        "S": "feature2"
+                    }
+                ]
+            }
+        }
+    ],
+    "Count": 2,
+    "ScannedCount": 2,
+    "ConsumedCapacity": null
+}

@@ -1,0 +1,953 @@
+{
+    "Items": [
+        {
+            "updated_at": {
+                "S": "2025-11-09T13:16:14.919Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T13:16:14.919Z"
+            },
+            "token": {
+                "S": "tok_perm_b7e9daf77b6865ffc70c54de2e0268a4"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg09112025-03@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg09112025-03@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T15:37:17.515Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T15:37:17.515Z"
+            },
+            "token": {
+                "S": "tok_perm_0ee8def5f0c4f3bff043ec1dea8ceff2"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg899@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg899@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-11T08:48:33.621Z"
+            },
+            "created_at": {
+                "S": "2025-11-11T08:48:33.621Z"
+            },
+            "token": {
+                "S": "tok_perm_635dfa676eeceb5e7e7d0266cb7c8403"
+            },
+            "usage_2025_11_11": {
+                "N": "10"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg11112025-01@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "last_request": {
+                "S": "2025-11-11T09:01:16.267Z"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg11112025-01@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T07:41:34.230Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T07:41:34.230Z"
+            },
+            "token": {
+                "S": "tok_perm_3d3eeb7bf2a2fe70afe64b34d36037a3"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+custmerreg456@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+custmerreg456@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T09:45:20.112Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T09:45:20.112Z"
+            },
+            "token": {
+                "S": "tok_perm_1349f8a4a69333d54cb466d7e8db7aac"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg654@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg654@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T11:30:40.926Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T11:30:40.926Z"
+            },
+            "token": {
+                "S": "tok_perm_5641797b0d394360ccedf6b585047b25"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerred10112025-09@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerred10112025-09@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T17:10:56.916Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T17:10:56.916Z"
+            },
+            "token": {
+                "S": "tok_perm_80bca0315cb5f881928c82849d1973a8"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg865@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg865@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T12:01:09.228Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T12:01:09.228Z"
+            },
+            "token": {
+                "S": "tok_perm_d517eb8b331f78a0c98adbd6effd79a7"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg10112025-13@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg10112025-13@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T17:05:29.758Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T17:05:29.758Z"
+            },
+            "token": {
+                "S": "tok_perm_f20caa44f99707669094d56d83e5310d"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg345@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg345@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T16:46:25.675Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T16:46:25.675Z"
+            },
+            "token": {
+                "S": "tok_perm_99b64facabce2f37fbd7468c691f74f1"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg888@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg888@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T15:34:35.000Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T15:19:53.487Z"
+            },
+            "token": {
+                "S": "tok_perm_0eb2279a7084bdaf3337364f95f7f7c4"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg876@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg876@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T14:50:19.775Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T14:50:19.775Z"
+            },
+            "token": {
+                "S": "tok_perm_408dc4066c111c958b13c27489b17c1c"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "test@example.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#test@example.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T07:20:49.762Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T07:20:49.762Z"
+            },
+            "token": {
+                "S": "tok_perm_fb8c1e4f106774e9cc67ebddff630db3"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg789@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg789@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T17:24:21.732Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T17:24:21.732Z"
+            },
+            "token": {
+                "S": "tok_perm_bd323c4176cc58439f608bd9d484ef2d"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg111@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg111@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T17:02:46.482Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T17:02:46.482Z"
+            },
+            "token": {
+                "S": "tok_perm_c7a7fe10ac9e503dfa39699ea218b4b6"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg999@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg999@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T11:50:36.424Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T11:50:36.424Z"
+            },
+            "token": {
+                "S": "tok_perm_2cdee2e38d78afe61388b3caf1256762"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg10112025-11@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg10112025-11@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T07:57:02.997Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T07:57:02.997Z"
+            },
+            "token": {
+                "S": "tok_perm_a564be089e1f3fe6afe70dbacbb1b1d9"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customer324@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customer324@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T10:15:46.076Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T10:15:46.076Z"
+            },
+            "token": {
+                "S": "tok_perm_f7c0d73498a1c96fbb3b851cf0fcef93"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerregy710112025-1@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerregy710112025-1@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T13:32:27.788Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T13:32:27.788Z"
+            },
+            "token": {
+                "S": "tok_perm_fd28f5b8a48ed9305c5b400aa8165c6c"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg09112025-04@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg09112025-04@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T09:56:48.401Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T09:56:48.401Z"
+            },
+            "token": {
+                "S": "tok_perm_c30c8f3b35158d0c69eed93bfbf57e63"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg887@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg887@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T06:42:18.515Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T06:42:18.515Z"
+            },
+            "token": {
+                "S": "tok_perm_6bb321386b10aa8360817ca3c5b6139d"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg670@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg670@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T12:15:00.000Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T12:15:00.000Z"
+            },
+            "token": {
+                "S": "tok_perm_a1b2c3d4e5f6789012345678901234ab"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg11nov01a@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg11nov01a@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T17:14:48.536Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T17:14:48.536Z"
+            },
+            "token": {
+                "S": "tok_perm_2378ebc76ac03c2ac9a3446979396b33"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg555@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg555@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T11:41:59.176Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T11:41:59.176Z"
+            },
+            "token": {
+                "S": "tok_perm_7ab0cfdb02ffe9be239a627502cee69e"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg10112025@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg10112025@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T11:56:28.710Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T11:56:28.710Z"
+            },
+            "token": {
+                "S": "tok_perm_3bd31be767bcd8f13ce1202d217a7387"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerred10112025-12@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerred10112025-12@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T18:53:03.701Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T18:53:03.701Z"
+            },
+            "token": {
+                "S": "tok_perm_7be0eabe9b769f37132fb0e037a21ebd"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg11112025-16@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "last_request": {
+                "S": "2025-11-10T19:01:36.794Z"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg11112025-16@gmail.com"
+            },
+            "usage_2025_11_10": {
+                "N": "3"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T15:56:02.821Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T15:56:02.821Z"
+            },
+            "token": {
+                "S": "tok_perm_7d1d8a6660f940c330d8756e47632abe"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg222@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg222@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T11:03:19.814Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T11:03:19.814Z"
+            },
+            "token": {
+                "S": "tok_perm_23177003f2fa91dbb5ef1d988dadf566"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg10112025-07@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg10112025-07@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T15:06:38.427Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T15:06:38.427Z"
+            },
+            "token": {
+                "S": "tok_perm_474ced0f50821483094198085e95ae70"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg777@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg777@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-10T16:03:04.225Z"
+            },
+            "created_at": {
+                "S": "2025-11-10T16:03:04.225Z"
+            },
+            "token": {
+                "S": "tok_perm_3d2ca82f6dc6328aae1601833598f4e8"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg10112025-14@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "last_request": {
+                "S": "2025-11-10T18:03:37.780Z"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg10112025-14@gmail.com"
+            },
+            "usage_2025_11_10": {
+                "N": "10"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-11T17:54:45.161Z"
+            },
+            "created_at": {
+                "S": "2025-11-11T17:54:45.161Z"
+            },
+            "token": {
+                "S": "tok_perm_4d8b46fac7c90703eb9ba3e52a7731a5"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg11112025-20@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg11112025-20@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder"
+            }
+        },
+        {
+            "updated_at": {
+                "S": "2025-11-09T16:52:55.260Z"
+            },
+            "created_at": {
+                "S": "2025-11-09T16:52:55.260Z"
+            },
+            "token": {
+                "S": "tok_perm_39ab737a9aef99e1279257c2f6a1103f"
+            },
+            "access_tier": {
+                "S": "registered"
+            },
+            "user_email": {
+                "S": "ajitnk2006+customerreg897@gmail.com"
+            },
+            "status": {
+                "S": "active"
+            },
+            "sk": {
+                "S": "solution#aws-solution-finder-001"
+            },
+            "pk": {
+                "S": "user#ajitnk2006+customerreg897@gmail.com"
+            },
+            "solution_id": {
+                "S": "aws-solution-finder-001"
+            }
+        }
+    ],
+    "Count": 32,
+    "ScannedCount": 32,
+    "ConsumedCapacity": null
+}

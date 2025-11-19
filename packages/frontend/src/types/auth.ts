@@ -2,6 +2,7 @@ export interface User {
   userId: string
   email: string
   role: 'customer' | 'partner' | 'admin'
+  tier?: 'registered' | 'pro'
   profile: {
     name: string
     company?: string

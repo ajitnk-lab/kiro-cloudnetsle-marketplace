@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace APIs for Data Plane/Solution Apps</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1e293b;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        h2 {
+            color: #475569;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #64748b;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        th {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        .method {
+            background: #10b981;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .method.post { background: #10b981; }
+        .method.get { background: #3b82f6; }
+        .endpoint {
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        .code {
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        .tier {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .tier.registered {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .tier.pro {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+        .status.success { background: #10b981; }
+        .status.error { background: #ef4444; }
+        .status.warning { background: #f59e0b; }
+        .flow-diagram {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+        }
+        .json-example {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .highlight {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+            margin: 20px 0;
+        }
+        .security-badge {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Marketplace APIs for Data Plane/Solution Apps</h1>
+        
+        <div class="highlight">
+            <strong>📋 Overview:</strong> This documentation covers all marketplace APIs that are called by data plane/solution applications like AWS Solution Finder for authentication, token validation, and usage tracking.
+        </div>
+
+        <h2>🎫 Token Management APIs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>API Endpoint</th>
+                    <th>Method</th>
+                    <th>Purpose</th>
+                    <th>Input Parameters</th>
+                    <th>Output Data</th>
+                    <th>Schema</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="endpoint">/api/generate-solution-token</span></td>
+                    <td><span class="method post">POST</span></td>
+                    <td>Generate permanent solution access token for authenticated users</td>
+                    <td>
+                        <span class="code">user_email</span> (string)<br>
+                        <span class="code">solution_id</span> (string)<br>
+                        <span class="code">access_tier</span> (string: "registered"|"pro")
+                    </td>
+                    <td>
+                        <span class="code">token</span> (string)<br>
+                        <span class="code">expires_at</span> (null)<br>
+                        <span class="code">redirect_url</span> (string)<br>
+                        <span class="code">access_tier</span> (string)<br>
+                        <span class="code">user_email</span> (string)
+                    </td>
+                    <td>JSON</td>
+                </tr>
+                <tr>
+                    <td><span class="endpoint">/api/validate-solution-token</span></td>
+                    <td><span class="method post">POST</span></td>
+                    <td>Validate token and check/track usage quotas</td>
+                    <td>
+                        <span class="code">token</span> (string)<br>
+                        <span class="code">action</span> (string)<br>
+                        <span class="code">solution_id</span> (string)<br>
+                        <span class="code">check_only</span> (boolean, optional)
+                    </td>
+                    <td>
+                        <span class="code">allowed</span> (boolean)<br>
+                        <span class="code">user_email</span> (string)<br>
+                        <span class="code">access_tier</span> (string)<br>
+                        <span class="code">quota_remaining</span> (number|-1)<br>
+                        <span class="code">quota_resets_at</span> (ISO string|null)<br>
+                        <span class="code">message</span> (string, optional)
+                    </td>
+                    <td>JSON</td>
+                </tr>
+                <tr>
+                    <td><span class="endpoint">/api/generate-token</span></td>
+                    <td><span class="method post">POST</span></td>
+                    <td>Legacy token generation (frontend compatibility)</td>
+                    <td>
+                        <span class="code">user_id</span> (string)<br>
+                        <span class="code">solution_id</span> (string)<br>
+                        <span class="code">tier</span> (string)<br>
+                        <span class="code">return_url</span> (string, optional)
+                    </td>
+                    <td>
+                        <span class="code">token</span> (string)<br>
+                        <span class="code">tokenId</span> (string)<br>
+                        <span class="code">redirect_url</span> (string)<br>
+                        <span class="code">expires_at</span> (ISO string)<br>
+                        <span class="code">tier</span> (string)<br>
+                        <span class="code">usage_remaining</span> (number)
+                    </td>
+                    <td>JSON</td>
+                </tr>
+                <tr>
+                    <td><span class="endpoint">/api/validate-token</span></td>
+                    <td><span class="method post">POST</span></td>
+                    <td>Legacy token validation</td>
+                    <td>
+                        <span class="code">token</span> (string)<br>
+                        <span class="code">solution_id</span> (string)
+                    </td>
+                    <td>
+                        <span class="code">valid</span> (boolean)<br>
+                        <span class="code">user_id</span> (string)<br>
+                        <span class="code">tier</span> (string)<br>
+                        <span class="code">usage_remaining</span> (number|"unlimited")<br>
+                        <span class="code">expires_at</span> (ISO string)<br>
+                        <span class="code">token_id</span> (string)
+                    </td>
+                    <td>JSON</td>
+                </tr>
+                <tr>
+                    <td><span class="endpoint">/api/track-usage</span></td>
+                    <td><span class="method post">POST</span></td>
+                    <td>Track API usage and enforce quotas</td>
+                    <td>
+                        <span class="code">token</span> (string)<br>
+                        <span class="code">solution_id</span> (string)<br>
+                        <span class="code">action</span> (string, optional)
+                    </td>
+                    <td>
+                        <span class="code">success</span> (boolean)<br>
+                        <span class="code">usage_remaining</span> (number|"unlimited")<br>
+                        <span class="code">tier</span> (string)<br>
+                        <span class="code">upgrade_needed</span> (boolean)<br>
+                        <span class="code">error</span> (string, optional)
+                    </td>
+                    <td>JSON</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>👤 User Management APIs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>API Endpoint</th>
+                    <th>Method</th>
+                    <th>Purpose</th>
+                    <th>Input Parameters</th>
+                    <th>Output Data</th>
+                    <th>Schema</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="endpoint">/api/user-tokens/{userId}</span></td>
+                    <td><span class="method get">GET</span></td>
+                    <td>Get user's active tokens (admin/debug)</td>
+                    <td><span class="code">userId</span> (path parameter, string)</td>
+                    <td>
+                        <span class="code">tokens</span> (array of token objects)<br>
+                        <span class="code">count</span> (number)
+                    </td>
+                    <td>JSON</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>🔄 Integration Flow</h2>
+        
+        <h3>1. Token Generation Flow</h3>
+        <div class="flow-diagram">
+Marketplace Frontend → /api/generate-solution-token → Solution App
+        </div>
+
+        <h3>2. Token Validation Flow</h3>
+        <div class="flow-diagram">
+Solution App → /api/validate-solution-token → Marketplace Backend
+        </div>
+
+        <h3>3. Usage Tracking Flow</h3>
+        <div class="flow-diagram">
+Solution App → /api/validate-solution-token (check_only=false) → Usage Increment
+        </div>
+
+        <h2>🎯 Access Tiers & Quotas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tier</th>
+                    <th>Daily Limit</th>
+                    <th>Monthly Limit</th>
+                    <th>Features</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="tier registered">registered</span></td>
+                    <td>10 requests</td>
+                    <td>300 requests</td>
+                    <td>Basic access</td>
+                </tr>
+                <tr>
+                    <td><span class="tier pro">pro</span></td>
+                    <td>Unlimited (-1)</td>
+                    <td>Unlimited (-1)</td>
+                    <td>Full access</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>❌ Error Responses</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Status Code</th>
+                    <th>Condition</th>
+                    <th>Response Body</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="status error">400</span></td>
+                    <td>Missing required fields</td>
+                    <td><span class="code">{"error": "Missing required fields: ..."}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="status error">401</span></td>
+                    <td>Invalid/expired token</td>
+                    <td><span class="code">{"allowed": false, "error": "Invalid token"}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="status warning">429</span></td>
+                    <td>Quota exceeded</td>
+                    <td><span class="code">{"success": false, "error": "Usage limit exceeded", "upgrade_needed": true}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="status error">500</span></td>
+                    <td>Server error</td>
+                    <td><span class="code">{"error": "Internal server error", "message": "..."}</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>🔧 Solution App Integration Example</h2>
+        <p><strong>AWS Solution Finder</strong> calls marketplace APIs as follows:</p>
+
+        <h3>1. Token Validation Request</h3>
+        <div class="json-example">
+POST /api/validate-solution-token
+{
+  "token": "tok_perm_abc123...",
+  "action": "search", 
+  "solution_id": "aws-solution-finder",
+  "check_only": false
+}
+        </div>
+
+        <h3>2. Response Processing</h3>
+        <div class="json-example">
+{
+  "allowed": true,
+  "user_email": "user@example.com",
+  "access_tier": "registered", 
+  "quota_remaining": 9,
+  "quota_resets_at": "2025-11-12T00:00:00.000Z"
+}
+        </div>
+
+        <h2>🔒 Security Features</h2>
+        <div style="margin: 20px 0;">
+            <span class="security-badge">CORS Enabled</span>
+            <span class="security-badge">Permanent Tokens</span>
+            <span class="security-badge">SHA256 Hashing</span>
+            <span class="security-badge">Daily Quota Reset</span>
+            <span class="security-badge">Token-based Auth</span>
+            <span class="security-badge">Solution-specific Access</span>
+        </div>
+
+        <ul>
+            <li><strong>CORS enabled</strong> for cross-origin requests</li>
+            <li><strong>Permanent tokens</strong> using SHA256 hash of user:solution:secret</li>
+            <li><strong>Daily quota reset</strong> at midnight UTC</li>
+            <li><strong>Token-based authentication</strong> without exposing user credentials</li>
+            <li><strong>Solution-specific tokens</strong> prevent cross-solution access</li>
+        </ul>
+
+        <div class="highlight">
+            <strong>🎯 Integration Summary:</strong> This API design enables secure, quota-managed access to solution apps while maintaining user identity and usage tracking across the marketplace ecosystem.
+        </div>
+
+        <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; color: #64748b; font-size: 0.9rem;">
+            <p>Generated on: <strong>November 11, 2025</strong> | Marketplace Platform Documentation</p>
+        </footer>
+    </div>
+</body>
+</html>

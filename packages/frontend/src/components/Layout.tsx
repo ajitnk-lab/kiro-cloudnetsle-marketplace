@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { User, LogOut, ShoppingBag, Search, Briefcase } from 'lucide-react'
+import { User, LogOut, ShoppingBag, Search, Briefcase, ExternalLink } from 'lucide-react'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -11,9 +11,9 @@ export function Layout({ children }: LayoutProps) {
   const { user, isAuthenticated, logout } = useAuth()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-gray-200 relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -24,6 +24,15 @@ export function Layout({ children }: LayoutProps) {
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
+              <a
+                href="https://www.cloudnestle.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 transition-colors px-3 py-2 rounded-lg font-semibold border border-blue-200"
+              >
+                <ExternalLink className="h-4 w-4" />
+                <span>CloudNestle</span>
+              </a>
               <Link
                 to="/catalog"
                 className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors"
@@ -57,6 +66,15 @@ export function Layout({ children }: LayoutProps) {
                   className="text-gray-700 hover:text-blue-600 transition-colors"
                 >
                   Admin Dashboard
+                </Link>
+              )}
+
+              {user?.role === 'admin' && (
+                <Link
+                  to="/founder-dashboard"
+                  className="text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  📊 Founder Dashboard
                 </Link>
               )}
             </nav>
@@ -101,7 +119,7 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-auto">
+      <footer className="bg-white border-t border-gray-200 mt-auto relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>

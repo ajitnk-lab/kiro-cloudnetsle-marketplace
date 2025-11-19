@@ -55,6 +55,10 @@ exports.handler = async (event) => {
     if (resource === '/admin/solutions/{solutionId}' && httpMethod === 'PUT') {
       return await updateSolution(pathParameters.solutionId, JSON.parse(event.body));
     }
+    
+    if (resource === '/admin/migrate-user-countries' && httpMethod === 'POST') {
+      return await migrateUserCountries();
+    }
 
     return {
       statusCode: 404,
@@ -301,4 +305,73 @@ async function updateSolution(solutionId, { action }) {
     },
     body: JSON.stringify({ success: true })
   };
+}
+
+async function migrateUserCountries() {
+  try {
+    console.log('Starting user country migration...');
+    
+    // Get all users without country field
+    const scanCommand = new ScanCommand({
+      TableName: USERS_TABLE,
+      FilterExpression: 'attribute_not_exists(country) OR country = :empty',
+      ExpressionAttributeValues: {
+        ':empty': ''
+      }
+    });
+    
+    const result = await docClient.send(scanCommand);
+    console.log(`Found ${result.Items.length} users without country data`);
+    
+    let updated = 0;
+    for (const user of result.Items) {
+      try {
+        // Default to India for existing users (since most are expected to be from India)
+        const country = 'India';
+        
+        const updateCommand = new UpdateCommand({
+          TableName: USERS_TABLE,
+          Key: { userId: user.userId },
+          UpdateExpression: 'SET country = :country, #profile.country = :country, updatedAt = :updatedAt',
+          ExpressionAttributeNames: {
+            '#profile': 'profile'
+          },
+          ExpressionAttributeValues: {
+            ':country': country,
+            ':updatedAt': new Date().toISOString()
+          }
+        });
+        
+        await docClient.send(updateCommand);
+        updated++;
+        console.log(`Updated user ${user.userId} with country: ${country}`);
+      } catch (error) {
+        console.error(`Error updating user ${user.userId}:`, error);
+      }
+    }
+    
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ 
+        success: true, 
+        message: `Updated ${updated} users with country data`,
+        totalFound: result.Items.length,
+        updated: updated
+      })
+    };
+  } catch (error) {
+    console.error('Error in user country migration:', error);
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ error: 'Migration failed', details: error.message })
+    };
+  }
 }

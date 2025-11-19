@@ -67,8 +67,11 @@ export function AboutUs() {
 
 
       <div className="text-center">
-        <p className="text-gray-600">
+        <p className="text-gray-600 mb-4">
           Professional AWS cloud consulting and migration services through our comprehensive marketplace platform.
+        </p>
+        <p className="text-gray-600">
+          Visit our main website: <a href="https://www.cloudnestle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">www.cloudnestle.com</a>
         </p>
       </div>
     </div>

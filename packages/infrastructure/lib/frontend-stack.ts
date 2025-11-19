@@ -17,9 +17,7 @@ export class FrontendStack extends Construct {
     // S3 Bucket for hosting the React app
     this.websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
       bucketName: `marketplace-frontend-${Date.now()}`,
-      websiteIndexDocument: 'index.html',
-      websiteErrorDocument: 'index.html', // For SPA routing
-      publicReadAccess: false, // We'll use CloudFront
+      publicReadAccess: false, // We'll use CloudFront OAI
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // For development
       autoDeleteObjects: true, // For development
@@ -39,6 +37,21 @@ export class FrontendStack extends Construct {
       })
     )
 
+    // Origin Request Policy for geographic headers
+    const geoOriginRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'GeoOriginRequestPolicy', {
+      originRequestPolicyName: `marketplace-geo-policy-${Date.now()}`,
+      comment: 'Policy to forward geographic headers for location tracking',
+      headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList(
+        'CloudFront-Viewer-Country',
+        'CloudFront-Viewer-Country-Name',
+        'CloudFront-Viewer-City',
+        'CloudFront-Viewer-Time-Zone',
+        'User-Agent'
+      ),
+      queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
+      cookieBehavior: cloudfront.OriginRequestCookieBehavior.none(),
+    })
+
     // CloudFront Distribution
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
@@ -50,6 +63,7 @@ export class FrontendStack extends Construct {
         cachedMethods: cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
         compress: true,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        originRequestPolicy: geoOriginRequestPolicy, // Add geographic headers
       },
       additionalBehaviors: {
         '/api/*': {
@@ -57,7 +71,7 @@ export class FrontendStack extends Construct {
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
           cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-          originRequestPolicy: cloudfront.OriginRequestPolicy.CORS_S3_ORIGIN,
+          originRequestPolicy: geoOriginRequestPolicy, // Use same policy for API calls
         },
       },
       defaultRootObject: 'index.html',
@@ -82,14 +96,12 @@ export class FrontendStack extends Construct {
     this.websiteUrl = `https://${this.distribution.distributionDomainName}`
 
     // Deploy the frontend build to S3 (this will be done manually or via CI/CD)
-    // Uncomment this when you have a build directory
-    /*
+    // Deploy frontend build to S3
     new s3deploy.BucketDeployment(this, 'DeployWebsite', {
       sources: [s3deploy.Source.asset('../frontend/dist')],
       destinationBucket: this.websiteBucket,
       distribution: this.distribution,
       distributionPaths: ['/*'],
     })
-    */
   }
 }

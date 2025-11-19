@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Search, Filter, Grid, List, Package, CheckCircle, XCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { BackgroundImage } from '../components/BackgroundImage'
+import { CustomPopup, usePopup } from '../components/CustomPopup'
 import { authService } from '../services/auth'
 import { fetchAuthSession } from 'aws-amplify/auth'
 
@@ -21,7 +23,8 @@ interface Solution {
 }
 
 export function CatalogPage() {
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
+  const { popup, showPopup, closePopup } = usePopup()
   const [solutions, setSolutions] = useState<Solution[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -43,23 +46,13 @@ export function CatalogPage() {
       const apiUrl = (import.meta as any).env.VITE_API_URL || 'https://1d98dlxxhh.execute-api.us-east-1.amazonaws.com/prod'
       
       const headers: any = {}
-      if (isAdmin) {
-        let token = authService.getToken()
-        if (!token) {
-          try {
-            const session = await fetchAuthSession()
-            token = session.tokens?.idToken?.toString() || null  // Use ID token for admin
-            if (token) {
-              authService.setToken(token)
-            }
-          } catch (error) {
-            console.error('Failed to get session token:', error)
-          }
-        }
-        
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`
-        }
+      
+      // If user is logged in, they must have a valid session - use a dummy token for API calls
+      if (user && user.email) {
+        headers['Authorization'] = `Bearer dummy-token-for-logged-in-user`
+        console.log('🔍 Debug - User is logged in, using dummy auth header')
+      } else {
+        console.log('🔍 Debug - No user found')
       }
       
       console.log('Loading solutions from:', `${apiUrl}${endpoint}`, 'with auth:', !!headers.Authorization)
@@ -107,7 +100,7 @@ export function CatalogPage() {
         return
       }
       
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/admin/solutions/${solutionId}`, {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}admin/solutions/${solutionId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -137,7 +130,7 @@ export function CatalogPage() {
         return
       }
 
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/payments/initiate`, {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}payments/initiate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,27 +153,32 @@ export function CatalogPage() {
         window.location.href = data.redirectUrl
       } else {
         console.error('Payment initiation failed:', data.message)
-        alert('Payment initiation failed. Please try again.')
+        showPopup('Payment initiation failed. Please try again.', 'error')
       }
     } catch (error) {
       console.error('Payment error:', error)
-      alert('Payment initiation failed. Please try again.')
+      showPopup('Payment initiation failed. Please try again.', 'error')
     }
   }
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading solutions...</p>
+      <div className="min-h-screen relative">
+        <BackgroundImage />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading solutions...</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen relative">
+      <BackgroundImage />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-72">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-900">Solution Catalog</h1>
@@ -277,30 +275,113 @@ export function CatalogPage() {
               </div>
               
               <div className="flex items-center justify-between">
-                <div className="text-lg font-bold text-green-600">
-                  {solution.pricing.currency} {solution.pricing.amount}
-                  {solution.pricing.model === 'subscription' && <span className="text-sm font-normal">/month</span>}
-                </div>
+                {solution.pricing.amount > 0 && (
+                  <div className="text-lg font-bold text-green-600">
+                    {solution.pricing.currency} {solution.pricing.amount}
+                    {solution.pricing.model === 'subscription' && <span className="text-sm font-normal">/month</span>}
+                  </div>
+                )}
                 <button 
                   onClick={async () => {
-                    console.log('Button clicked for:', solution.name)
+                    console.log('🔘 CATALOG: Button clicked for solution:', solution.name)
+                    console.log('🔘 CATALOG: User from AuthContext:', user?.email || 'null')
+                    console.log('🔘 CATALOG: isAuthenticated:', isAuthenticated)
+                    
                     if (solution.externalUrl) {
-                      // For AWS Solution Finder, pass marketplace authentication
+                      console.log('🔍 CATALOG: External URL found:', solution.externalUrl)
+                      // For AWS Solution Finder, generate token via API
                       if (solution.externalUrl.includes('awssolutionfinder.solutions.cloudnestle.com')) {
-                        const token = authService.getToken()
-                        const url = new URL(solution.externalUrl)
-                        url.searchParams.set('marketplace', 'true')
-                        if (token) {
-                          url.searchParams.set('token', token)
+                        console.log('🔍 CATALOG: AWS Solution Finder detected')
+                        
+                        // Get user email from AuthContext (should be synced now)
+                        let userEmail = user?.email;
+                        console.log('🔍 CATALOG: User email from context:', userEmail)
+                        
+                        if (!userEmail) {
+                          console.log('❌ CATALOG: No user email found, showing popup')
+                          showPopup('Please login first', 'info')
+                          return
                         }
-                        if (user?.email) {
-                          url.searchParams.set('email', user.email)
+
+                        console.log('🔍 CATALOG: Generating token for email:', userEmail)
+                        console.log('🔍 CATALOG: Auth token exists:', !!authService.getToken())
+                        
+                        try {
+                          const apiUrl = (import.meta as any).env.VITE_API_URL || 'https://juvt4m81ld.execute-api.us-east-1.amazonaws.com/prod'
+                          console.log('🔍 CATALOG: API URL:', apiUrl)
+                          
+                          // Get user details to extract userId - MUST be UUID, no fallbacks
+                          let userId = user?.userId
+                          if (!userId) {
+                            console.log('🔍 CATALOG: No userId in context, fetching from profile API')
+                            try {
+                              const profileResponse = await fetch(`${apiUrl}/user/profile`, {
+                                headers: {
+                                  'Authorization': `Bearer ${authService.getToken()}`,
+                                  'Content-Type': 'application/json'
+                                }
+                              })
+                              if (profileResponse.ok) {
+                                const profileData = await profileResponse.json()
+                                userId = profileData.user?.userId
+                                console.log('🔍 CATALOG: Got userId from profile:', userId)
+                              }
+                            } catch (profileError) {
+                              console.error('🔍 CATALOG: Profile fetch failed:', profileError)
+                            }
+                          }
+                          
+                          if (!userId) {
+                            showPopup('Error: User ID not available. Please refresh the page and try again.', 'error')
+                            return
+                          }
+                          
+                          const payload = {
+                            user_id: userId,                            // ← MUST be UUID, no fallbacks
+                            solution_id: 'aws-solution-finder',        // ← Backend expects solution_id  
+                            access_tier: 'registered'                  // ← Backend expects access_tier
+                          }
+                          console.log('🔍 CATALOG: API payload:', payload)
+                          
+                          const response = await fetch(`${apiUrl}/api/generate-solution-token`, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${authService.getToken()}`
+                            },
+                            body: JSON.stringify(payload)
+                          })
+                          
+                          console.log('🔍 CATALOG: API response status:', response.status)
+                          
+                          if (response.ok) {
+                            const data = await response.json()
+                            console.log('🔍 CATALOG: Token generated successfully:', data)
+                            
+                            // Verify token exists before redirecting
+                            if (data.token) {
+                              const redirectUrl = `https://awssolutionfinder.solutions.cloudnestle.com/search?token=${data.token}&user_id=${encodeURIComponent(userId)}&tier=registered`
+                              console.log('🔍 CATALOG: Opening redirect URL:', redirectUrl)
+                              window.open(redirectUrl, '_blank')
+                            } else {
+                              console.error('❌ CATALOG: No token in response:', data)
+                              showPopup('Failed to generate access token. Please try again.', 'error')
+                            }
+                          } else {
+                            const errorText = await response.text()
+                            console.error('❌ CATALOG: Token generation failed:', response.status, errorText)
+                            showPopup('Failed to generate access token. Please try again.', 'error')
+                          }
+                        } catch (error) {
+                          console.error('❌ CATALOG: Token generation error:', error)
+                          showPopup('Failed to generate access token. Please try again.', 'error')
                         }
-                        window.open(url.toString(), '_blank')
                       } else {
+                        console.log('🔍 CATALOG: Opening external URL directly:', solution.externalUrl)
                         window.open(solution.externalUrl, '_blank')
                       }
                     } else {
+                      console.log('🔍 CATALOG: No external URL, showing modal')
                       setSelectedSolution(solution)
                     }
                   }}
@@ -349,14 +430,16 @@ export function CatalogPage() {
                   <p className="text-gray-700">{selectedSolution.description}</p>
                 </div>
                 
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Pricing</h3>
-                  <p className="text-gray-700">
-                    {selectedSolution.pricing.currency} {selectedSolution.pricing.amount}
-                    {selectedSolution.pricing.model === 'subscription' && ' per month'}
-                    {selectedSolution.pricing.model === 'upfront' && ' one-time'}
-                  </p>
-                </div>
+                {selectedSolution.pricing.amount > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Pricing</h3>
+                    <p className="text-gray-700">
+                      {selectedSolution.pricing.currency} {selectedSolution.pricing.amount}
+                      {selectedSolution.pricing.model === 'subscription' && ' per month'}
+                      {selectedSolution.pricing.model === 'upfront' && ' one-time'}
+                    </p>
+                  </div>
+                )}
                 
                 {selectedSolution.partnerName && (
                   <div>
@@ -422,6 +505,14 @@ export function CatalogPage() {
           </div>
         </div>
       )}
+      
+      <CustomPopup
+        message={popup.message}
+        type={popup.type}
+        isOpen={popup.isOpen}
+        onClose={closePopup}
+      />
+      </div>
     </div>
   )
 }

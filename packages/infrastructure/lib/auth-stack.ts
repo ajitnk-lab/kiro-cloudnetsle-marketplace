@@ -9,7 +9,11 @@ export class AuthStack extends Construct {
   public readonly identityPool: cognito.CfnIdentityPool
   public readonly postConfirmationFunction: lambda.Function
 
-  constructor(scope: Construct, id: string, props: { userTableName: string }) {
+  constructor(scope: Construct, id: string, props: { 
+    userTableName: string
+    userSolutionEntitlementsTableName: string
+    tokenSecret: string
+  }) {
     super(scope, id)
 
     // Create post-confirmation Lambda function
@@ -19,6 +23,8 @@ export class AuthStack extends Construct {
       code: lambda.Code.fromAsset('lambda/auth'),
       environment: {
         USER_TABLE_NAME: props.userTableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTableName,
+        TOKEN_SECRET: props.tokenSecret,
       },
     })
 

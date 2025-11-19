@@ -12,7 +12,7 @@
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
     "format": "prettier --write .",
-    "deploy": "npm run deploy --workspace=packages/infrastructure",
+    "deploy": "npm run deploy --workspace=packages/infrastructure && npm run build --workspace=packages/frontend",
     "destroy": "npm run destroy --workspace=packages/infrastructure"
   },
   "devDependencies": {

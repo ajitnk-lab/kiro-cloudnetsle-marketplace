@@ -1,10 +1,11 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
-const { DynamoDBDocumentClient, GetCommand } = require('@aws-sdk/lib-dynamodb')
+const { DynamoDBDocumentClient, GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb')
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
 
-const USER_TABLE_NAME = process.env.USER_TABLE_NAME || 'marketplace-users-1759859485186'
+const USER_TABLE_NAME = process.env.USER_TABLE_NAME
+const USER_SOLUTION_ENTITLEMENTS_TABLE = process.env.USER_SOLUTION_ENTITLEMENTS_TABLE
 
 exports.handler = async (event) => {
   console.log('Profile function called:', JSON.stringify(event, null, 2))
@@ -49,10 +50,31 @@ exports.handler = async (event) => {
       }
 
       console.log('User found:', result.Item)
+      
+      // Also fetch user's entitlements
+      let entitlements = []
+      if (USER_SOLUTION_ENTITLEMENTS_TABLE && result.Item.email) {
+        try {
+          const entitlementResult = await docClient.send(new QueryCommand({
+            TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
+            KeyConditionExpression: 'pk = :pk',
+            ExpressionAttributeValues: {
+              ':pk': `user#${result.Item.email}`
+            }
+          }))
+          entitlements = entitlementResult.Items || []
+        } catch (error) {
+          console.error('Error fetching entitlements:', error)
+        }
+      }
+
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ user: result.Item }),
+        body: JSON.stringify({ 
+          user: result.Item,
+          entitlements: entitlements
+        }),
       }
     }
 

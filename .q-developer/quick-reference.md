@@ -22,7 +22,7 @@ cd packages/infrastructure && npm run watch  # CDK watch mode
 ### Deployment
 ```bash
 npm run deploy                 # Deploy infrastructure to AWS
-cd packages/frontend && npm run build && aws s3 sync dist/ s3://marketplace-frontend-20251007232833/ --delete  # Deploy frontend to live site
+cd packages/frontend && npm run build && aws s3 sync dist/ s3://marketplace.cloudnestle.com/ --delete  # Deploy frontend to live site
 ```
 
 ### Session Recovery (Critical)

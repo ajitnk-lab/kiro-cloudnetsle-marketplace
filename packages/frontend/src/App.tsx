@@ -14,10 +14,12 @@ import { PartnerAnalytics } from './pages/PartnerAnalytics'
 import { AuthCallback } from './components/AuthCallback'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminDashboard } from './pages/AdminDashboard'
+import { FounderDashboard } from './pages/FounderDashboard'
 import { PaymentSuccess } from './pages/PaymentSuccess'
 import { HelpCenter } from './pages/HelpCenter'
 import { ContactUs } from './pages/ContactUs'
 import { PrivacyPolicy } from './pages/PrivacyPolicy'
+import UpgradePage from './pages/UpgradePage'
 import { TermsOfService } from './pages/TermsOfService'
 import { AboutUs } from './pages/AboutUs'
 import { Blog } from './pages/Blog'
@@ -32,6 +34,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/founder-dashboard" element={<FounderDashboard />} />
           <Route path="/solutions/:id" element={<SolutionDetailPage />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/partners" element={
@@ -77,6 +80,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/upgrade" element={<UpgradePage />} />
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />

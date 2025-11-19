@@ -1,29 +1,83 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { UserDebug } from '../components/UserDebug'
+import { BackgroundImage } from '../components/BackgroundImage'
+import { CustomPopup, usePopup } from '../components/CustomPopup'
+import { generateSolutionUrl } from '../utils/solutionUrls'
 
 export function SolutionDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth()
+  const { popup, showPopup, closePopup } = usePopup()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [hasAccess, setHasAccess] = useState(false)
+  const [solutionToken, setSolutionToken] = useState<string | null>(null)
 
   // Mock solution data - replace with actual API call
   const solution = {
     id,
-    name: 'Advanced Analytics Dashboard',
-    description: 'Comprehensive analytics solution with real-time reporting and data visualization.',
-    price: 2999,
+    name: 'AWS Solution Finder',
+    description: 'AI-powered search engine for AWS repositories with FAISS vector search and Bedrock integration.',
+    price: 0, // Free tier available
     currency: 'INR',
-    category: 'Analytics',
-    vendor: 'TechCorp Solutions',
+    category: 'Developer Tools',
+    vendor: 'CloudNetsle',
     features: [
-      'Real-time data processing',
-      'Interactive dashboards',
-      'Custom reporting',
-      '24/7 support'
-    ]
+      'Semantic search across 8,500+ AWS repositories',
+      'FAISS vector search with embeddings',
+      'Amazon Bedrock Nova Pro integration',
+      'Real-time repository discovery',
+      'Free tier: 10 searches/day',
+      'Pro tier: Unlimited searches'
+    ],
+    solutionId: 'aws-solution-finder'
+  }
+
+  // Check if user has access to this solution
+  useEffect(() => {
+    const checkAccess = async () => {
+      if (!isAuthenticated || !user) return
+
+      try {
+        // Check if user has a token for this solution
+        const response = await fetch(`${import.meta.env.VITE_API_URL}api/validate-token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: localStorage.getItem(`solution_token_${solution.solutionId}`),
+            userId: user.email
+          })
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.valid) {
+            setHasAccess(true)
+            setSolutionToken(data.token)
+          }
+        }
+      } catch (error) {
+        console.error('Error checking solution access:', error)
+      }
+    }
+
+    checkAccess()
+  }, [isAuthenticated, user, solution.solutionId])
+
+  const handleAccessSolution = () => {
+    if (hasAccess && solutionToken && user) {
+      const solutionUrl = generateSolutionUrl({
+        solutionId: solution.solutionId,
+        token: solutionToken,
+        userEmail: user.email,
+        tier: 'registered'
+      })
+      window.open(solutionUrl, '_blank')
+    }
   }
 
   const handlePurchase = async () => {
@@ -36,7 +90,7 @@ export function SolutionDetailPage() {
     
     try {
       // Create payment order
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/payments/initiate`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}payments/initiate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,14 +116,16 @@ export function SolutionDetailPage() {
       }
     } catch (error) {
       console.error('Payment error:', error)
-      alert('Payment initiation failed. Please try again.')
+      showPopup('Payment initiation failed. Please try again.', 'error')
     } finally {
       setIsProcessing(false)
     }
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen">
+      <BackgroundImage />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <UserDebug />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Solution Image */}
@@ -115,8 +171,21 @@ export function SolutionDetailPage() {
               </div>
             </div>
 
-            {/* Purchase Button - Only for customers */}
-            {isAuthenticated && user?.role === 'customer' && (
+            {/* Access/Purchase Buttons */}
+            {isAuthenticated && hasAccess && (
+              <button
+                onClick={handleAccessSolution}
+                className="w-full mt-6 bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                <span>Access Solution</span>
+              </button>
+            )}
+
+            {/* Purchase Button - Only for customers without access */}
+            {isAuthenticated && user?.role === 'customer' && !hasAccess && solution.price > 0 && (
               <button
                 onClick={handlePurchase}
                 disabled={isProcessing}
@@ -126,9 +195,19 @@ export function SolutionDetailPage() {
               </button>
             )}
 
+            {/* Free Registration Button */}
+            {isAuthenticated && user?.role === 'customer' && !hasAccess && solution.price === 0 && (
+              <button
+                onClick={() => window.location.href = `https://marketplace.cloudnestle.com/register?solution_id=${solution.solutionId}`}
+                className="w-full mt-6 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Get Free Access
+              </button>
+            )}
+
             {isAuthenticated && user?.role !== 'customer' && (
               <div className="w-full mt-6 bg-gray-100 text-gray-600 py-3 px-6 rounded-lg text-center">
-                Purchase available for customers only
+                Access available for customers only
               </div>
             )}
 
@@ -138,15 +217,23 @@ export function SolutionDetailPage() {
                   onClick={() => navigate('/login', { state: { from: { pathname: `/solutions/${id}` } } })}
                   className="w-full mt-6 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  Login to Purchase
+                  Login to Access
                 </button>
                 <p className="text-sm text-gray-600 mt-2 text-center">
-                  Please <button onClick={() => navigate('/login')} className="text-blue-600 hover:underline">login</button> as a customer to purchase
+                  Please <button onClick={() => navigate('/login')} className="text-blue-600 hover:underline">login</button> as a customer to access
                 </p>
               </>
             )}
           </div>
         </div>
+      </div>
+      
+      <CustomPopup
+        message={popup.message}
+        type={popup.type}
+        isOpen={popup.isOpen}
+        onClose={closePopup}
+      />
       </div>
     </div>
   )

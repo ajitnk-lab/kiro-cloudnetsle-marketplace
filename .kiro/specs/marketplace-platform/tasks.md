@@ -229,3 +229,20 @@
   - Add performance optimization and CDN configuration
   - Implement backup and disaster recovery procedures
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
+## Control Plane MVP (Completed)
+
+- [x] **Control Plane Architecture MVP** - Transform FAISS-Marketplace integration into proper control plane model
+  - [x] Create user-solution-entitlements DynamoDB table schema with GSIs
+  - [x] Build token generation Lambda function for permanent tokens
+  - [x] Build token validation Lambda function with real-time quota checks
+  - [x] Update registration Lambda to handle solution_id parameter
+  - [x] Implement FAISS frontend integration with marketplace tokens
+  - [x] Add localStorage permanent token caching and validation
+  - [x] Update registration/upgrade flows with solution_id parameter
+  - [x] Deploy complete control plane architecture
+  - [x] **AWS SDK v3 Migration** - Fixed Node.js 18 compatibility issues
+    - [x] Updated generate-solution-token.js from AWS SDK v2 to v3 syntax
+    - [x] Fixed timestamp format for DynamoDB indexes (string to number)
+    - [x] Aligned database schema with pk/sk composite keys
+    - [x] Verified API functionality with successful token generation
+  - **Status**: ✅ **COMPLETE** - Control Plane MVP fully operational with FAISS backend integration

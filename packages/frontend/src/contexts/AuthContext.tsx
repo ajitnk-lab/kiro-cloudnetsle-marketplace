@@ -8,6 +8,7 @@ interface AuthContextType extends AuthState {
   confirmRegistration: (email: string, code: string) => Promise<void>
   logout: () => void
   updateProfile: (profile: Partial<User['profile']>) => Promise<void>
+  refreshUser: () => Promise<void>
   clearError: () => void
 }
 
@@ -51,23 +52,32 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  console.log('🔍 AUTH DEBUG: AuthProvider rendering...')
   const [state, dispatch] = useReducer(authReducer, initialState)
+  console.log('🔍 AUTH DEBUG: Initial state:', state)
 
   // Initialize auth state on app load
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log('🔍 AUTH DEBUG: Initializing auth context...')
         const token = authService.getToken()
         const storedUser = authService.getStoredUser()
+        
+        console.log('🔍 AUTH DEBUG: Token exists:', !!token)
+        console.log('🔍 AUTH DEBUG: Stored user exists:', !!storedUser)
+        console.log('🔍 AUTH DEBUG: Stored user:', storedUser)
 
         if (token && storedUser) {
+          console.log('🔍 AUTH DEBUG: Setting user in context')
           // Use stored user data instead of fetching from API
           dispatch({ type: 'SET_USER', payload: storedUser })
         } else {
+          console.log('🔍 AUTH DEBUG: No token or user, setting loading false')
           dispatch({ type: 'SET_LOADING', payload: false })
         }
       } catch (error) {
-        console.error('Auth initialization error:', error)
+        console.error('🔍 AUTH DEBUG: Auth initialization error:', error)
         // Clear invalid token/user
         authService.logout()
         dispatch({ type: 'SET_LOADING', payload: false })
@@ -77,10 +87,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth()
   }, [])
 
+  // Listen for localStorage changes to sync AuthContext
+  useEffect(() => {
+    const handleAuthChange = () => {
+      console.log('🔄 AUTH CONTEXT: Auth change event received')
+      const token = authService.getToken()
+      const storedUser = authService.getStoredUser()
+      
+      console.log('🔄 AUTH CONTEXT: Token exists:', !!token)
+      console.log('🔄 AUTH CONTEXT: Stored user exists:', !!storedUser)
+      console.log('🔄 AUTH CONTEXT: Stored user email:', storedUser?.email || 'null')
+      
+      if (token && storedUser) {
+        console.log('🔄 AUTH CONTEXT: Syncing user from localStorage to context')
+        dispatch({ type: 'SET_USER', payload: storedUser })
+      } else {
+        console.log('🔄 AUTH CONTEXT: No token/user, logging out context')
+        dispatch({ type: 'LOGOUT' })
+      }
+    }
+
+    console.log('🔄 AUTH CONTEXT: Adding auth-change event listener')
+    window.addEventListener('auth-change', handleAuthChange)
+    return () => {
+      console.log('🔄 AUTH CONTEXT: Removing auth-change event listener')
+      window.removeEventListener('auth-change', handleAuthChange)
+    }
+  }, [])
+
   const login = async (credentials: LoginCredentials) => {
     try {
+      console.log('🔐 AUTH CONTEXT: Starting login process')
       dispatch({ type: 'SET_LOADING', payload: true })
       const { user, token } = await authService.login(credentials)
+      
+      console.log('🔐 AUTH CONTEXT: Login successful, user:', user.email)
+      console.log('🔐 AUTH CONTEXT: Token received:', !!token)
       
       authService.setToken(token)
       authService.setStoredUser(user)
@@ -88,8 +130,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Small delay to ensure token is properly set
       await new Promise(resolve => setTimeout(resolve, 100))
       
+      console.log('🔐 AUTH CONTEXT: Setting user in context state')
       dispatch({ type: 'SET_USER', payload: user })
     } catch (error: any) {
+      console.error('❌ AUTH CONTEXT: Login failed:', error)
       const message = error.response?.data?.error || 'Login failed'
       dispatch({ type: 'SET_ERROR', payload: message })
       throw error
@@ -142,6 +186,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const refreshUser = async () => {
+    try {
+      console.log('🔄 AUTH CONTEXT: Refreshing user profile...')
+      const refreshedUser = await authService.refreshUserProfile()
+      if (refreshedUser) {
+        console.log('✅ AUTH CONTEXT: User profile refreshed, updating context')
+        dispatch({ type: 'SET_USER', payload: refreshedUser })
+      } else {
+        console.log('❌ AUTH CONTEXT: Failed to refresh user profile')
+      }
+    } catch (error: any) {
+      console.error('💥 AUTH CONTEXT: Error refreshing user:', error)
+    }
+  }
+
   const clearError = () => {
     dispatch({ type: 'CLEAR_ERROR' })
   }
@@ -153,6 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     confirmRegistration,
     logout,
     updateProfile,
+    refreshUser,
     clearError,
   }
 
