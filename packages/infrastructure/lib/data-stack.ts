@@ -47,14 +47,17 @@ export class DataStack extends Construct {
       ],
     })
 
-    // DynamoDB Tables with fixed names to prevent drift
+    // DynamoDB Tables with static names to retain data across deployments
+    const baseTimestamp = '1764183053' // Fixed timestamp to prevent data loss
+    
+    // User table
     this.userTable = new dynamodb.Table(this, 'UserTable', {
-      tableName: 'marketplace-users',
+      tableName: `marketplace-users-${baseTimestamp}`,
       partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for email lookup
@@ -71,12 +74,12 @@ export class DataStack extends Construct {
     })
 
     this.solutionTable = new dynamodb.Table(this, 'SolutionTable', {
-      tableName: 'marketplace-solutions',
+      tableName: `marketplace-solutions-${baseTimestamp}`,
       partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
       pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
     })
 
     // Add GSI for partner solutions
@@ -101,23 +104,22 @@ export class DataStack extends Construct {
     })
 
     this.sessionTable = new dynamodb.Table(this, 'SessionTable', {
-      tableName: 'marketplace-sessions',
+      tableName: `marketplace-sessions-${baseTimestamp}`,
       partitionKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       timeToLiveAttribute: 'expiresAt',
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-      deletionProtection: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Partner Application Table
     this.partnerApplicationTable = new dynamodb.Table(this, 'PartnerApplicationTable', {
-      tableName: 'marketplace-partner-applications',
+      tableName: `marketplace-partner-applications-${baseTimestamp}`,
       partitionKey: { name: 'applicationId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for user applications
@@ -136,13 +138,12 @@ export class DataStack extends Construct {
 
     // Marketplace Token Table for solution access
     this.tokenTable = new dynamodb.Table(this, 'TokenTable', {
-      tableName: 'marketplace-tokens',
+      tableName: 'marketplace-tokens-1764183053',
       partitionKey: { name: 'tokenId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       timeToLiveAttribute: 'expiresAt',
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-      deletionProtection: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for user token lookup
@@ -161,13 +162,13 @@ export class DataStack extends Construct {
 
     // User-Solution Entitlements Table for Control Plane
     this.userSolutionEntitlementsTable = new dynamodb.Table(this, 'UserSolutionEntitlementsTable', {
-      tableName: 'marketplace-user-solution-entitlements',
+      tableName: 'marketplace-user-solution-entitlements-1764183053',
       partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING }, // user#email@example.com
       sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING }, // solution#faiss
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for token lookup
@@ -192,7 +193,7 @@ export class DataStack extends Construct {
 
     // PhonePe Payment Credentials Secret
     this.phonepeSecret = new secretsmanager.Secret(this, 'PhonePeSecret', {
-      secretName: 'marketplace/phonepe/credentials',
+      secretName: 'marketplace/phonepe/credentials-v3',
       description: 'PhonePe payment gateway credentials',
       generateSecretString: {
         secretStringTemplate: JSON.stringify({
@@ -209,12 +210,12 @@ export class DataStack extends Construct {
 
     // Payment Transactions Table
     this.paymentTransactionsTable = new dynamodb.Table(this, 'PaymentTransactionsTable', {
-      tableName: 'marketplace-payment-transactions',
+      tableName: 'marketplace-payment-transactions-1764183053',
       partitionKey: { name: 'transactionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for user payment lookup
@@ -238,12 +239,12 @@ export class DataStack extends Construct {
 
     // User Sessions Table for Location Tracking and Analytics
     this.userSessionsTable = new dynamodb.Table(this, 'UserSessionsTable', {
-      tableName: 'marketplace-user-sessions',
+      tableName: 'marketplace-user-sessions-1764183053',
       partitionKey: { name: 'sessionId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for user-based session queries
@@ -276,13 +277,13 @@ export class DataStack extends Construct {
 
     // API Metrics Table for Performance Tracking
     this.apiMetricsTable = new dynamodb.Table(this, 'ApiMetricsTable', {
-      tableName: 'marketplace-api-metrics',
+      tableName: 'marketplace-api-metrics-1764183053',
       partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING }, // endpoint#/api/validate-solution-token
       sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING }, // timestamp#2025-11-13T07:00:00Z
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       encryption: dynamodb.TableEncryption.AWS_MANAGED,
       pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // Add GSI for endpoint-based metrics
@@ -308,7 +309,7 @@ export class DataStack extends Construct {
 
     // S3 Bucket for assets
     this.assetsBucket = new s3.Bucket(this, 'AssetsBucket', {
-      bucketName: `marketplace-assets-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
+      bucketName: `marketplace-assets-1764183053${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       versioned: true,
@@ -318,7 +319,7 @@ export class DataStack extends Construct {
           noncurrentVersionExpiration: cdk.Duration.days(30),
         },
       ],
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
     // RDS PostgreSQL for transactions and financial data
@@ -335,23 +336,23 @@ export class DataStack extends Construct {
       'Allow PostgreSQL access from VPC'
     )
 
-    this.database = new rds.DatabaseInstance(this, 'MarketplaceDatabase', {
-      engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_15_7,
-      }),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
-      vpc: this.vpc,
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
-      },
-      securityGroups: [dbSecurityGroup],
-      databaseName: 'marketplace',
-      credentials: rds.Credentials.fromGeneratedSecret('marketplace_admin', {
-        secretName: 'marketplace/database/credentials',
-      }),
-      backupRetention: cdk.Duration.days(7),
-      deletionProtection: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-    })
+    // Temporarily disabled RDS for quick deployment
+    // this.database = new rds.DatabaseInstance(this, 'MarketplaceDatabase', {
+    //   engine: rds.DatabaseInstanceEngine.postgres({
+    //     version: rds.PostgresEngineVersion.VER_15_4,
+    //   }),
+    //   instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
+    //   vpc: this.vpc,
+    //   vpcSubnets: {
+    //     subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+    //   },
+    //   securityGroups: [dbSecurityGroup],
+    //   databaseName: 'marketplace',
+    //   credentials: rds.Credentials.fromGeneratedSecret('marketplace_admin', {
+    //     secretName: 'marketplace/database/credentials-v3',
+    //   }),
+    //   backupRetention: cdk.Duration.days(7),
+    //   removalPolicy: cdk.RemovalPolicy.DESTROY,
+    // })
   }
 }

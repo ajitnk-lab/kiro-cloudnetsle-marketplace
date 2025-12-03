@@ -1,6 +1,6 @@
 // Solution URL mapping and token generation
 export const SOLUTION_URLS: Record<string, string> = {
-  'aws-solution-finder': 'https://awssolutionfinder.solutions.cloudnestle.com',
+  'aws-solution-finder-001': 'https://awssolutionfinder.solutions.cloudnestle.com',
   'faiss': 'https://awssolutionfinder.solutions.cloudnestle.com',
   'aws-finder': 'https://awssolutionfinder.solutions.cloudnestle.com'
 }

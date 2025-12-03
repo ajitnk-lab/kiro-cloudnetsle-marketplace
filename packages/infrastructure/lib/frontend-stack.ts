@@ -4,6 +4,7 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront'
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins'
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment'
 import * as iam from 'aws-cdk-lib/aws-iam'
+import * as acm from 'aws-cdk-lib/aws-certificatemanager'
 import { Construct } from 'constructs'
 
 export class FrontendStack extends Construct {
@@ -52,8 +53,17 @@ export class FrontendStack extends Construct {
       cookieBehavior: cloudfront.OriginRequestCookieBehavior.none(),
     })
 
+    // Import existing SSL certificate for marketplace.cloudnestle.com
+    const certificate = acm.Certificate.fromCertificateArn(
+      this,
+      'MarketplaceCertificate',
+      'arn:aws:acm:us-east-1:637423202175:certificate/a60be722-3639-412d-80d9-c6b8e13199f8'
+    )
+
     // CloudFront Distribution
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
+      domainNames: ['marketplace.cloudnestle.com'],
+      certificate: certificate,
       defaultBehavior: {
         origin: new origins.S3Origin(this.websiteBucket, {
           originAccessIdentity,

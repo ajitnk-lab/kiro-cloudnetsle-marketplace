@@ -37,6 +37,35 @@ interface BusinessMetrics {
     registeredToPro: number
     totalRegistered: number
   }
+  transactions: {
+    total: number
+    completed: number
+    failed: number
+    pending: number
+    byStatus: Record<string, number>
+  }
+  dailyRevenue: Record<string, number>
+  conversionFunnel: {
+    registered: number
+    loggedIn: number
+    upgraded: number
+    registrationRate: number
+    loginRate: number
+    conversionRate: number
+  }
+  recentTransactions: Array<{
+    id: string
+    amount: number
+    currency: string
+    status: string
+    gateway: string
+    userId: string
+    date: string
+  }>
+  businessInsights: Array<{
+    type: string
+    text: string
+  }>
 }
 
 interface GeographicData {
@@ -131,6 +160,99 @@ export function AnalyticsDashboard() {
     loadAnalyticsData()
   }, [])
 
+  useEffect(() => {
+    if (businessMetrics && businessMetrics.dailyRevenue) {
+      renderRevenueChart()
+    }
+  }, [businessMetrics])
+
+  const renderRevenueChart = () => {
+    const canvas = document.getElementById('adminRevenueChart') as HTMLCanvasElement
+    if (!canvas || !businessMetrics?.dailyRevenue) return
+
+    // Clear any existing chart
+    const existingChart = (window as any).Chart?.getChart(canvas)
+    if (existingChart) {
+      existingChart.destroy()
+    }
+
+    // Load Chart.js if not already loaded
+    if (!(window as any).Chart) {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/chart.js'
+      script.onload = () => renderChart()
+      document.head.appendChild(script)
+    } else {
+      renderChart()
+    }
+
+    function renderChart() {
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      const dailyRevenue = businessMetrics!.dailyRevenue
+      const sortedDates = Object.keys(dailyRevenue).sort()
+      const labels = sortedDates.map(date => {
+        const d = new Date(date)
+        return `${d.getDate()}/${d.getMonth() + 1}`
+      })
+      const values = sortedDates.map(date => dailyRevenue[date])
+
+      new (window as any).Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Daily Revenue (₹)',
+            data: values,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#10b981',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { 
+            y: { 
+              beginAtZero: true,
+              ticks: {
+                callback: function(value: any) {
+                  return '₹' + value
+                }
+              }
+            },
+            x: {
+              ticks: {
+                maxTicksLimit: 10
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                title: function(context: any) {
+                  const dateIndex = context[0].dataIndex
+                  const date = sortedDates[dateIndex]
+                  return new Date(date).toLocaleDateString()
+                },
+                label: function(context: any) {
+                  return 'Revenue: ₹' + context.parsed.y
+                }
+              }
+            }
+          }
+        }
+      })
+    }
+  }
+
   const getAuthToken = async () => {
     let token = authService.getToken()
     
@@ -204,10 +326,6 @@ export function AnalyticsDashboard() {
       style: 'currency',
       currency: 'INR'
     }).format(amount)
-  }
-
-  const formatPercentage = (value: number) => {
-    return `${(value * 100).toFixed(1)}%`
   }
 
   if (loading) {
@@ -305,7 +423,7 @@ export function AnalyticsDashboard() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
               <p className="text-2xl font-bold text-gray-900">
-                {businessMetrics ? formatPercentage(businessMetrics.conversions.rate) : '0%'}
+                {businessMetrics ? `${businessMetrics.conversions.rate}%` : '0%'}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {businessMetrics ? businessMetrics.conversions.calculation.breakdown : ''}
@@ -330,6 +448,53 @@ export function AnalyticsDashboard() {
         </div>
       </div>
 
+      {/* Transaction Status & User Role Analytics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <Activity className="h-5 w-5 mr-2" />
+            📊 Transaction Status Breakdown
+          </h3>
+          <div className="space-y-3">
+            {businessMetrics && businessMetrics.transactions && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Total Transactions</span>
+                  <span className="font-semibold">{businessMetrics.transactions.total}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-green-600">✅ Completed</span>
+                  <span className="font-semibold text-green-600">{businessMetrics.transactions.completed}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-red-600">❌ Failed</span>
+                  <span className="font-semibold text-red-600">{businessMetrics.transactions.failed}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-yellow-600">⏳ Pending</span>
+                  <span className="font-semibold text-yellow-600">{businessMetrics.transactions.pending}</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <Users className="h-5 w-5 mr-2" />
+            👥 User Role Distribution
+          </h3>
+          <div className="space-y-3">
+            {businessMetrics && Object.entries(businessMetrics.users.byRole).map(([role, count]) => (
+              <div key={role} className="flex justify-between items-center">
+                <span className="text-gray-600 capitalize">{role}</span>
+                <span className="font-semibold">{count.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Geographic Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
@@ -346,19 +511,17 @@ export function AnalyticsDashboard() {
             ))}
           </div>
         </div>
+      </div>
 
+      {/* Daily Revenue Trend */}
+      <div className="grid grid-cols-1 gap-8 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <Users className="h-5 w-5 mr-2" />
-            Users by Role
+            <TrendingUp className="h-5 w-5 mr-2" />
+            💰 Daily Revenue Trend
           </h3>
-          <div className="space-y-3">
-            {businessMetrics && Object.entries(businessMetrics.users.byRole).map(([role, count]) => (
-              <div key={role} className="flex justify-between items-center">
-                <span className="text-gray-600 capitalize">{role}</span>
-                <span className="font-semibold">{count.toLocaleString()}</span>
-              </div>
-            ))}
+          <div style={{ height: '300px' }}>
+            <canvas id="adminRevenueChart"></canvas>
           </div>
         </div>
       </div>
@@ -384,6 +547,33 @@ export function AnalyticsDashboard() {
           <div>
             <p className="text-sm text-gray-600">Total API Requests</p>
             <p className="text-xl font-bold">{usageData ? usageData.performance.totalRequests.toLocaleString() : '0'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Transactions */}
+      <div className="grid grid-cols-1 gap-8 mb-8">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <DollarSign className="h-5 w-5 mr-2" />
+            💳 Recent Transactions
+          </h3>
+          <div className="space-y-3">
+            {businessMetrics && businessMetrics.recentTransactions && businessMetrics.recentTransactions.map((transaction) => (
+              <div key={transaction.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                <div>
+                  <div className="font-medium">₹{transaction.amount.toLocaleString('en-IN')}</div>
+                  <div className="text-sm text-gray-500">{transaction.date} • {transaction.gateway}</div>
+                </div>
+                <div className={`px-2 py-1 rounded text-xs font-medium ${
+                  transaction.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  transaction.status === 'failed' ? 'bg-red-100 text-red-800' :
+                  'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {transaction.status}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

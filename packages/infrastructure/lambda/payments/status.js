@@ -1,105 +1,99 @@
-const crypto = require('crypto')
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
+const { DynamoDBDocumentClient, GetCommand } = require('@aws-sdk/lib-dynamodb')
+
+const dynamoClient = new DynamoDBClient({})
+const docClient = DynamoDBDocumentClient.from(dynamoClient)
+
+const PAYMENT_TRANSACTIONS_TABLE = process.env.PAYMENT_TRANSACTIONS_TABLE
+
+const corsHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+}
 
 exports.handler = async (event) => {
   console.log('Payment status check called:', JSON.stringify(event, null, 2))
   
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: ''
+    }
+  }
+
   try {
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-      'Access-Control-Allow-Methods': 'GET,OPTIONS',
-      'Content-Type': 'application/json',
-    }
-
-    if (event.httpMethod === 'OPTIONS') {
-      return {
-        statusCode: 200,
-        headers,
-        body: '',
-      }
-    }
-
     const transactionId = event.pathParameters?.transactionId
 
     if (!transactionId) {
       return {
         statusCode: 400,
-        headers,
+        headers: corsHeaders,
         body: JSON.stringify({ 
           success: false, 
           message: 'Transaction ID is required' 
-        }),
+        })
       }
     }
 
-    // PhonePe Test Environment Configuration
-    const PHONEPE_CONFIG = {
-      merchantId: 'PGTESTPAYUAT',
-      saltKey: '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399',
-      saltIndex: 1,
-      baseUrl: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
-      env: 'UAT'
-    }
+    // Get transaction from database
+    const transactionResponse = await docClient.send(new GetCommand({
+      TableName: PAYMENT_TRANSACTIONS_TABLE,
+      Key: { transactionId }
+    }))
 
-    // Generate checksum for status check
-    const checksumString = `/pg/v1/status/${PHONEPE_CONFIG.merchantId}/${transactionId}` + PHONEPE_CONFIG.saltKey
-    const checksum = crypto.createHash('sha256').update(checksumString).digest('hex') + '###' + PHONEPE_CONFIG.saltIndex
-
-    // PhonePe Status Check API
-    const phonepeResponse = await fetch(`${PHONEPE_CONFIG.baseUrl}/pg/v1/status/${PHONEPE_CONFIG.merchantId}/${transactionId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-VERIFY': checksum,
-        'X-MERCHANT-ID': PHONEPE_CONFIG.merchantId
-      }
-    })
-
-    const phonepeData = await phonepeResponse.json()
-    
-    console.log('PhonePe Status Response:', phonepeData)
-
-    if (phonepeData.success) {
-      const paymentStatus = phonepeData.data?.state || 'UNKNOWN'
-      
-      // TODO: Update order status in database here
-      
+    if (!transactionResponse.Item) {
       return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: true,
-          status: paymentStatus,
-          transactionId,
-          amount: phonepeData.data?.amount ? phonepeData.data.amount / 100 : null, // Convert from paise
-          paymentInstrument: phonepeData.data?.paymentInstrument,
-          message: phonepeData.message || 'Status retrieved successfully'
-        }),
-      }
-    } else {
-      return {
-        statusCode: 400,
-        headers,
+        statusCode: 404,
+        headers: corsHeaders,
         body: JSON.stringify({
           success: false,
-          status: 'FAILED',
-          message: phonepeData.message || 'Payment status check failed'
-        }),
+          message: 'Transaction not found'
+        })
       }
+    }
+
+    const transaction = transactionResponse.Item
+    
+    // Map database status to frontend status
+    const statusMapping = {
+      'initiated': 'PENDING',
+      'pending': 'PENDING', 
+      'completed': 'COMPLETED',
+      'failed': 'FAILED'
+    }
+
+    const frontendStatus = statusMapping[transaction.status] || 'UNKNOWN'
+
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: JSON.stringify({
+        success: true,
+        status: frontendStatus,
+        transactionId,
+        merchantOrderId: transaction.gatewayOrderId,
+        amount: transaction.amount / 100, // Convert from paisa to rupees
+        currency: transaction.currency,
+        paymentGateway: transaction.paymentGateway,
+        createdAt: transaction.createdAt,
+        updatedAt: transaction.updatedAt,
+        message: `Payment ${transaction.status}`
+      })
     }
 
   } catch (error) {
     console.error('Payment status check error:', error)
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
+      headers: corsHeaders,
       body: JSON.stringify({
         success: false,
-        message: 'Internal server error'
-      }),
+        message: 'Internal server error',
+        error: error.message
+      })
     }
   }
 }

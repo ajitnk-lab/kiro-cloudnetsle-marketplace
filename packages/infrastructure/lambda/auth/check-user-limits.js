@@ -53,7 +53,7 @@ exports.handler = async (event) => {
         KeyConditionExpression: 'pk = :pk AND sk = :sk',
         ExpressionAttributeValues: {
           ':pk': `user#${userEmail}`,
-          ':sk': 'solution#aws-solution-finder'
+          ':sk': 'solution#aws-solution-finder-001'
         }
       })
       const entitlementResult = await docClient.send(entitlementCommand)

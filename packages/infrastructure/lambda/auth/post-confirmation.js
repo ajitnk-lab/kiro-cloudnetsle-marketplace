@@ -50,10 +50,10 @@ exports.handler = async (event) => {
 
     console.log('User profile created:', userProfile)
 
-    // Create entitlement for aws-solution-finder for all new users
+    // Create entitlement for aws-solution-finder-001 for all new users
     if (process.env.USER_SOLUTION_ENTITLEMENTS_TABLE) {
       try {
-        const solutionId = 'aws-solution-finder'
+        const solutionId = 'aws-solution-finder-001'
         const token = generatePermanentToken(userEmail, solutionId)
         const pk = `user#${userProfile.userId}`
         const sk = `solution#${solutionId}`
@@ -65,6 +65,8 @@ exports.handler = async (event) => {
           solutionId,
           token,
           tier: 'registered',
+          accessTier: 'registered', // Add this field for validation
+          dailyLimit: 10, // Add daily limit for registered users
           dailyUsage: 0,
           lastUsageDate: new Date().toISOString().split('T')[0],
           createdAt: new Date().toISOString(),

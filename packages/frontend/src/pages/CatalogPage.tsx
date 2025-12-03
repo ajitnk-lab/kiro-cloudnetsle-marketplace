@@ -178,7 +178,7 @@ export function CatalogPage() {
   return (
     <div className="min-h-screen relative">
       <BackgroundImage />
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-72">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-900">Solution Catalog</h1>
@@ -310,25 +310,61 @@ export function CatalogPage() {
                           const apiUrl = (import.meta as any).env.VITE_API_URL || 'https://juvt4m81ld.execute-api.us-east-1.amazonaws.com/prod'
                           console.log('🔍 CATALOG: API URL:', apiUrl)
                           
-                          // Get user details to extract userId - MUST be UUID, no fallbacks
+                          // Get user details to extract userId and determine actual tier
                           let userId = user?.userId
+                          let userTier = 'registered' // Default fallback
+                          
                           if (!userId) {
                             console.log('🔍 CATALOG: No userId in context, fetching from profile API')
-                            try {
-                              const profileResponse = await fetch(`${apiUrl}/user/profile`, {
-                                headers: {
-                                  'Authorization': `Bearer ${authService.getToken()}`,
-                                  'Content-Type': 'application/json'
-                                }
-                              })
-                              if (profileResponse.ok) {
-                                const profileData = await profileResponse.json()
+                          }
+                          
+                          // Always fetch profile to get entitlements and determine actual tier
+                          try {
+                            const profileResponse = await fetch(`${apiUrl}/user/profile`, {
+                              headers: {
+                                'Authorization': `Bearer ${authService.getToken()}`,
+                                'Content-Type': 'application/json'
+                              }
+                            })
+                            if (profileResponse.ok) {
+                              const profileData = await profileResponse.json()
+                              if (!userId) {
                                 userId = profileData.user?.userId
                                 console.log('🔍 CATALOG: Got userId from profile:', userId)
                               }
-                            } catch (profileError) {
-                              console.error('🔍 CATALOG: Profile fetch failed:', profileError)
+                              
+                              // Determine user's actual tier from entitlements
+                              const entitlements = profileData.entitlements || []
+                              console.log('🔍 CATALOG: All entitlements:', entitlements)
+                              
+                              const awsFinderEntitlement = entitlements.find((e: any) => 
+                                e.solutionId === 'aws-solution-finder' || 
+                                e.solutionId === 'aws-solution-finder-001'
+                              )
+                              console.log('🔍 CATALOG: AWS Finder entitlement:', awsFinderEntitlement)
+                              
+                              if (awsFinderEntitlement) {
+                                const tier = awsFinderEntitlement.access_tier || 'registered'
+                                const expiresAt = awsFinderEntitlement.pro_expires_at
+                                console.log('🔍 CATALOG: Entitlement tier:', tier, 'expires:', expiresAt)
+                                
+                                // Check if pro tier is still valid
+                                if (tier === 'pro' && expiresAt) {
+                                  const expiryDate = new Date(expiresAt)
+                                  const now = new Date()
+                                  userTier = expiryDate > now ? 'pro' : 'registered'
+                                  console.log('🔍 CATALOG: Pro tier check - expires:', expiryDate, 'now:', now, 'result:', userTier)
+                                } else {
+                                  userTier = tier
+                                  console.log('🔍 CATALOG: Using tier directly:', userTier)
+                                }
+                              } else {
+                                console.log('🔍 CATALOG: No AWS Finder entitlement found, using default:', userTier)
+                              }
+                              console.log('🔍 CATALOG: Determined user tier:', userTier)
                             }
+                          } catch (profileError) {
+                            console.error('🔍 CATALOG: Profile fetch failed:', profileError)
                           }
                           
                           if (!userId) {
@@ -337,9 +373,9 @@ export function CatalogPage() {
                           }
                           
                           const payload = {
-                            user_id: userId,                            // ← MUST be UUID, no fallbacks
-                            solution_id: 'aws-solution-finder',        // ← Backend expects solution_id  
-                            access_tier: 'registered'                  // ← Backend expects access_tier
+                            user_id: userId,
+                            solution_id: 'aws-solution-finder-001',
+                            access_tier: userTier
                           }
                           console.log('🔍 CATALOG: API payload:', payload)
                           
@@ -360,7 +396,7 @@ export function CatalogPage() {
                             
                             // Verify token exists before redirecting
                             if (data.token) {
-                              const redirectUrl = `https://awssolutionfinder.solutions.cloudnestle.com/search?token=${data.token}&user_id=${encodeURIComponent(userId)}&tier=registered`
+                              const redirectUrl = `https://awssolutionfinder.solutions.cloudnestle.com/search?token=${data.token}&user_id=${encodeURIComponent(userId)}&user_email=${encodeURIComponent(userEmail)}&tier=${userTier}`
                               console.log('🔍 CATALOG: Opening redirect URL:', redirectUrl)
                               window.open(redirectUrl, '_blank')
                             } else {
@@ -378,7 +414,7 @@ export function CatalogPage() {
                         }
                       } else {
                         console.log('🔍 CATALOG: Opening external URL directly:', solution.externalUrl)
-                        window.open(solution.externalUrl, '_blank')
+                        window.location.href = solution.externalUrl
                       }
                     } else {
                       console.log('🔍 CATALOG: No external URL, showing modal')
@@ -387,7 +423,7 @@ export function CatalogPage() {
                   }}
                   className="btn-primary text-sm"
                 >
-                  {solution.actionButtonText || 'View Details'}
+                  {solution.externalUrl && solution.externalUrl.includes('awssolutionfinder') ? 'Access Now' : (solution.actionButtonText || 'View Details')}
                 </button>
               </div>
               

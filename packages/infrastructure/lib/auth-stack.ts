@@ -30,7 +30,7 @@ export class AuthStack extends Construct {
 
     // Create Cognito User Pool
     this.userPool = new cognito.UserPool(this, 'MarketplaceUserPool', {
-      userPoolName: 'marketplace-users',
+      userPoolName: 'marketplace-users-v2',
       selfSignUpEnabled: true,
       signInAliases: {
         email: true,

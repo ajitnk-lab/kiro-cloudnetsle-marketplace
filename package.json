@@ -30,7 +30,11 @@
     "npm": ">=9.0.0"
   },
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.906.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.940.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.940.0",
+    "@aws-sdk/client-dynamodb": "^3.940.0",
+    "@aws-sdk/credential-providers": "^3.940.0",
+    "@aws-sdk/util-dynamodb": "^3.940.0",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.12.2",
     "node-fetch": "^3.3.2",

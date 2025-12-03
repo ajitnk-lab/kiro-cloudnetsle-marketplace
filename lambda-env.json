@@ -1,0 +1,16 @@
+{
+  "Variables": {
+    "MARKETPLACE_ENTITLEMENT_TABLE_NAME": "marketplace-user-solution-entitlements-1764183053",
+    "MODEL_ID": "us.amazon.nova-pro-v1:0",
+    "EMBEDDING_MODEL_ID": "amazon.titan-embed-text-v2:0",
+    "METADATA_KEY": "metadata.json",
+    "INDEX_BUCKET": "faiss-rag-agent-vectors-039920874011",
+    "MARKETPLACE_SESSION_TABLE_NAME": "marketplace-sessions-1764183053",
+    "INDEX_KEY": "faiss_index.bin",
+    "MARKETPLACE_API_URL": "https://x3toyrmnn0.execute-api.us-west-1.amazonaws.com/prod/",
+    "MARKETPLACE_USER_TABLE_NAME": "marketplace-users-1764183053",
+    "USAGE_TABLE": "aws-finder-usage",
+    "CACHE_RESET": "1732786086",
+    "UPGRADE_ENDPOINT": "checkout"
+  }
+}

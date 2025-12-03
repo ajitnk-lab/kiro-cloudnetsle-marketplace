@@ -27,7 +27,7 @@ const updateUserTier = async (userId, userEmail) => {
 
     // Update existing entitlement record (don't create new one)
     const pk = `user#${userEmail}`;
-    const sk = `solution#aws-solution-finder`;
+    const sk = `solution#aws-solution-finder-001`;
 
     await docClient.send(new UpdateCommand({
       TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
@@ -105,7 +105,7 @@ exports.handler = async (event) => {
 
         // Check current entitlement status
         const pk = `user#${userEmail}`;
-        const sk = `solution#aws-solution-finder`;
+        const sk = `solution#aws-solution-finder-001`;
         
         const entitlementResult = await docClient.send(new GetCommand({
           TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,

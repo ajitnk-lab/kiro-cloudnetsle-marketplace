@@ -132,7 +132,7 @@ export function RegisterPage() {
           // The registration already created the token and entitlement
           // Just redirect to the solution with the token
           const solutionUrls: Record<string, string> = {
-            'aws-solution-finder': 'https://awssolutionfinder.solutions.cloudnestle.com',
+            'aws-solution-finder-001': 'https://awssolutionfinder.solutions.cloudnestle.com',
             'faiss': 'https://awssolutionfinder.solutions.cloudnestle.com'
           }
           

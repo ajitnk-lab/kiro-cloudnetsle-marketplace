@@ -1,124 +1,208 @@
-const crypto = require('crypto')
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
+const { DynamoDBDocumentClient, PutCommand, GetCommand } = require('@aws-sdk/lib-dynamodb')
+const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager')
+const https = require('https')
 
-exports.handler = async (event) => {
-  console.log('Payment initiation called:', JSON.stringify(event, null, 2))
+const dynamoClient = new DynamoDBClient({})
+const docClient = DynamoDBDocumentClient.from(dynamoClient)
+const secretsClient = new SecretsManagerClient({ region: 'us-east-1' })
+
+const PAYMENT_TRANSACTIONS_TABLE = process.env.PAYMENT_TRANSACTIONS_TABLE
+const SOLUTION_TABLE_NAME = process.env.SOLUTION_TABLE_NAME
+
+const getCashfreeCredentials = async () => {
+  const command = new GetSecretValueCommand({
+    SecretId: 'marketplace/cashfree/credentials'
+  })
+  const response = await secretsClient.send(command)
+  return JSON.parse(response.SecretString)
+}
+
+const createCashfreeOrder = async (credentials, orderData) => {
+  const postData = JSON.stringify(orderData)
   
-  try {
-    const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-      'Access-Control-Allow-Methods': 'POST,OPTIONS',
+  // Use sandbox for testing, production for live
+  const hostname = credentials.secretKey.includes('_test_') ? 'sandbox.cashfree.com' : 'api.cashfree.com'
+  
+  console.log('Cashfree API Request:', {
+    hostname,
+    path: '/pg/orders',
+    headers: {
       'Content-Type': 'application/json',
-    }
+      'x-api-version': credentials.apiVersion || '2023-08-01',
+      'x-client-id': credentials.appId,
+      'x-client-secret': '[REDACTED]'
+    },
+    body: orderData
+  })
 
-    if (event.httpMethod === 'OPTIONS') {
-      return {
-        statusCode: 200,
-        headers,
-        body: '',
-      }
-    }
-
-    const body = JSON.parse(event.body || '{}')
-    const { solutionId, amount, currency, userId, userEmail, userName } = body
-
-    if (!solutionId || !amount || !userId) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ 
-          success: false, 
-          message: 'Missing required fields: solutionId, amount, userId' 
-        }),
-      }
-    }
-
-    // PhonePe Test Environment Configuration
-    const PHONEPE_CONFIG = {
-      merchantId: 'PGTESTPAYUAT',
-      saltKey: '099eb0cd-02cf-4e2a-8aca-3e6c6aff0399',
-      saltIndex: 1,
-      baseUrl: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
-      env: 'UAT'
-    }
-
-    // Generate unique transaction ID
-    const merchantTransactionId = `TXN_${Date.now()}_${userId}`
-    
-    // Create payment payload
-    const paymentPayload = {
-      merchantId: PHONEPE_CONFIG.merchantId,
-      merchantTransactionId,
-      merchantUserId: userId,
-      amount: amount * 100, // Convert to paise
-      redirectUrl: `${process.env.FRONTEND_URL || 'http://marketplace-frontend-20251007232833.s3-website-us-east-1.amazonaws.com'}/payment/success?transactionId=${merchantTransactionId}`,
-      redirectMode: 'REDIRECT',
-      callbackUrl: `${process.env.API_BASE_URL || 'https://y26tmcluvk.execute-api.us-east-1.amazonaws.com/prod'}/payments/webhook`,
-      mobileNumber: '9999999999', // Default for testing
-      paymentInstrument: {
-        type: 'PAY_PAGE'
-      }
-    }
-
-    // Encode payload to base64
-    const base64Payload = Buffer.from(JSON.stringify(paymentPayload)).toString('base64')
-    
-    // Generate checksum
-    const checksumString = base64Payload + '/pg/v1/pay' + PHONEPE_CONFIG.saltKey
-    const checksum = crypto.createHash('sha256').update(checksumString).digest('hex') + '###' + PHONEPE_CONFIG.saltIndex
-
-    // PhonePe API request
-    const phonepeResponse = await fetch(`${PHONEPE_CONFIG.baseUrl}/pg/v1/pay`, {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname,
+      port: 443,
+      path: '/pg/orders',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-VERIFY': checksum
-      },
-      body: JSON.stringify({
-        request: base64Payload
-      })
-    })
-
-    const phonepeData = await phonepeResponse.json()
-    
-    console.log('PhonePe Response:', phonepeData)
-
-    if (phonepeData.success && phonepeData.data?.instrumentResponse?.redirectInfo?.url) {
-      // TODO: Save order to database here
-      
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: true,
-          redirectUrl: phonepeData.data.instrumentResponse.redirectInfo.url,
-          transactionId: merchantTransactionId,
-          message: 'Payment initiated successfully'
-        }),
-      }
-    } else {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({
-          success: false,
-          message: phonepeData.message || 'Payment initiation failed'
-        }),
+        'x-api-version': credentials.apiVersion || '2023-08-01',
+        'x-client-id': credentials.appId,
+        'x-client-secret': credentials.secretKey,
+        'Content-Length': Buffer.byteLength(postData)
       }
     }
 
+    const req = https.request(options, (res) => {
+      let data = ''
+      res.on('data', (chunk) => data += chunk)
+      res.on('end', () => {
+        console.log('Cashfree API Response:', res.statusCode, data)
+        try {
+          const response = JSON.parse(data)
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(response)
+          } else {
+            reject(new Error(`Cashfree API Error: ${res.statusCode} - ${data}`))
+          }
+        } catch (error) {
+          reject(new Error(`JSON Parse Error: ${error.message} - Response: ${data}`))
+        }
+      })
+    })
+
+    req.on('error', (error) => {
+      console.error('Cashfree Request Error:', error)
+      reject(error)
+    })
+    req.write(postData)
+    req.end()
+  })
+}
+
+const corsHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+}
+
+exports.handler = async (event) => {
+  console.log('Cashfree payment request:', JSON.stringify(event, null, 2))
+
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: ''
+    }
+  }
+
+  try {
+    const body = JSON.parse(event.body)
+    const { userId, solutionId = 'aws-solution-finder-001', amount: requestAmount, userEmail, userName, userPhone } = body
+
+    if (!userId) {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Missing userId' })
+      }
+    }
+
+    // Get solution details
+    let amount = requestAmount ? requestAmount * 100 : 29900 // Convert to paisa or default
+    let solutionName = 'AWS Solution'
+    let tier = 'pro'
+    
+    try {
+      const solutionResponse = await docClient.send(new GetCommand({
+        TableName: SOLUTION_TABLE_NAME,
+        Key: { solutionId }
+      }))
+      
+      if (solutionResponse.Item) {
+        solutionName = solutionResponse.Item.name || solutionResponse.Item.title || 'AWS Solution'
+        if (!requestAmount && solutionResponse.Item.pricing?.proTier?.amount) {
+          amount = solutionResponse.Item.pricing.proTier.amount * 100 // Convert to paisa
+        }
+      }
+    } catch (error) {
+      console.warn('Could not fetch solution details, using defaults:', error)
+    }
+
+    const credentials = await getCashfreeCredentials()
+    const transactionId = `CF_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    
+    const orderData = {
+      order_id: transactionId,
+      order_amount: amount / 100, // Cashfree expects rupees, not paisa
+      order_currency: 'INR',
+      customer_details: {
+        customer_id: userId,
+        customer_phone: userPhone || '9999999999',
+        customer_email: userEmail || 'user@example.com',
+        customer_name: userName || 'Customer'
+      },
+      order_meta: {
+        return_url: `https://marketplace.cloudnestle.com/payment-callback?gateway=cashfree&transactionId=${transactionId}`,
+        notify_url: `https://7kzsoygrzl.execute-api.us-east-1.amazonaws.com/prod/payments/cashfree-webhook`
+      },
+      order_note: `${solutionName} - ${tier.toUpperCase()} tier upgrade`
+    }
+
+    console.log('Creating Cashfree order:', JSON.stringify(orderData, null, 2))
+
+    // Create transaction record
+    await docClient.send(new PutCommand({
+      TableName: PAYMENT_TRANSACTIONS_TABLE,
+      Item: {
+        transactionId,
+        userId,
+        solutionId,
+        solutionName,
+        amount,
+        currency: 'INR',
+        paymentGateway: 'cashfree',
+        gatewayOrderId: transactionId,
+        status: 'initiated',
+        tier: tier,
+        customerEmail: userEmail || 'user@example.com',
+        customerName: userName || 'Customer',
+        customerPhone: userPhone || '9999999999',
+        createdAt: new Date().toISOString(),
+        gateway_data: {
+          order_id: transactionId,
+          solution_name: solutionName,
+          tier_purchased: tier
+        }
+      }
+    }))
+
+    const cashfreeResponse = await createCashfreeOrder(credentials, orderData)
+    console.log('Cashfree order created:', JSON.stringify(cashfreeResponse, null, 2))
+
+    // Return payment session ID for frontend to use with Cashfree JS SDK
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: JSON.stringify({
+        success: true,
+        transactionId,
+        paymentSessionId: cashfreeResponse.payment_session_id,
+        gateway: 'cashfree',
+        amount: amount / 100,
+        sessionId: cashfreeResponse.payment_session_id
+      })
+    }
+
   } catch (error) {
-    console.error('Payment initiation error:', error)
+    console.error('Cashfree payment error:', error)
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        success: false,
-        message: 'Internal server error'
-      }),
+      headers: corsHeaders,
+      body: JSON.stringify({ 
+        error: 'Payment initiation failed',
+        details: error.message 
+      })
     }
   }
 }

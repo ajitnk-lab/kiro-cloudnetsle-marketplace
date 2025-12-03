@@ -6,10 +6,20 @@ export interface Solution {
   category: string
   tags: string[]
   pricing: {
-    model: 'upfront' | 'subscription'
-    amount: number
-    currency: 'INR'
+    model: 'upfront' | 'subscription' | 'freemium'
+    amount?: number
+    currency?: 'INR' | 'USD'
     billingCycle?: 'monthly' | 'annual'
+    tiers?: Array<{
+      name: string
+      amount: number
+      currency: string
+      billingPeriod?: string
+    }>
+    proTier?: {
+      amount: number
+      currency: 'INR'
+    }
   }
   assets: {
     images: string[]

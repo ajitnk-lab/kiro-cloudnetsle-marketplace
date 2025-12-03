@@ -14,26 +14,31 @@ export function SolutionDetailPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [hasAccess, setHasAccess] = useState(false)
   const [solutionToken, setSolutionToken] = useState<string | null>(null)
+  const [solution, setSolution] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  // Mock solution data - replace with actual API call
-  const solution = {
-    id,
-    name: 'AWS Solution Finder',
-    description: 'AI-powered search engine for AWS repositories with FAISS vector search and Bedrock integration.',
-    price: 0, // Free tier available
-    currency: 'INR',
-    category: 'Developer Tools',
-    vendor: 'CloudNetsle',
-    features: [
-      'Semantic search across 8,500+ AWS repositories',
-      'FAISS vector search with embeddings',
-      'Amazon Bedrock Nova Pro integration',
-      'Real-time repository discovery',
-      'Free tier: 10 searches/day',
-      'Pro tier: Unlimited searches'
-    ],
-    solutionId: 'aws-solution-finder'
-  }
+  // Fetch solution data from API
+  useEffect(() => {
+    const fetchSolution = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}catalog/${id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setSolution(data.solution)
+        } else {
+          console.error('Failed to fetch solution')
+        }
+      } catch (error) {
+        console.error('Error fetching solution:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (id) {
+      fetchSolution()
+    }
+  }, [id])
 
   // Check if user has access to this solution
   useEffect(() => {
@@ -48,7 +53,7 @@ export function SolutionDetailPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            token: localStorage.getItem(`solution_token_${solution.solutionId}`),
+            token: localStorage.getItem(`solution_token_${solution?.solutionId || id}`),
             userId: user.email
           })
         })
@@ -65,11 +70,13 @@ export function SolutionDetailPage() {
       }
     }
 
-    checkAccess()
-  }, [isAuthenticated, user, solution.solutionId])
+    if (solution?.solutionId) {
+      checkAccess()
+    }
+  }, [isAuthenticated, user, solution?.solutionId])
 
   const handleAccessSolution = () => {
-    if (hasAccess && solutionToken && user) {
+    if (hasAccess && solutionToken && user && solution?.solutionId) {
       const solutionUrl = generateSolutionUrl({
         solutionId: solution.solutionId,
         token: solutionToken,
@@ -127,17 +134,31 @@ export function SolutionDetailPage() {
       <BackgroundImage />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <UserDebug />
+      
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg text-gray-600">Loading solution details...</div>
+        </div>
+      ) : !solution ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg text-gray-600">Solution not found</div>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Solution Image */}
         <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg flex items-center justify-center">
-          <span className="text-gray-500">Solution Preview</span>
+          {solution.imageUrl ? (
+            <img src={solution.imageUrl} alt={solution.name} className="w-full h-full object-cover rounded-lg" />
+          ) : (
+            <span className="text-gray-500">Solution Preview</span>
+          )}
         </div>
 
         {/* Solution Details */}
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{solution.name}</h1>
-            <p className="text-lg text-gray-600 mt-2">by {solution.vendor}</p>
+            <p className="text-lg text-gray-600 mt-2">by CloudNestle Consulting & Services</p>
             <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full mt-2">
               {solution.category}
             </span>
@@ -149,7 +170,7 @@ export function SolutionDetailPage() {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
             <ul className="space-y-2">
-              {solution.features.map((feature, index) => (
+              {solution.features?.map((feature: string, index: number) => (
                 <li key={index} className="flex items-center text-gray-700">
                   <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -165,9 +186,11 @@ export function SolutionDetailPage() {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-3xl font-bold text-gray-900">
-                  ₹{solution.price.toLocaleString()}
+                  {solution.pricing?.currency === 'INR' ? '₹' : '$'}{solution.pricing?.amount?.toLocaleString() || '0'}
                 </span>
-                <span className="text-gray-600 ml-2">one-time purchase</span>
+                <span className="text-gray-600 ml-2">
+                  {solution.pricing?.model === 'freemium' ? 'Free tier available' : `per ${solution.pricing?.billingCycle || 'month'}`}
+                </span>
               </div>
             </div>
 
@@ -185,7 +208,7 @@ export function SolutionDetailPage() {
             )}
 
             {/* Purchase Button - Only for customers without access */}
-            {isAuthenticated && user?.role === 'customer' && !hasAccess && solution.price > 0 && (
+            {isAuthenticated && user?.role === 'customer' && !hasAccess && solution.pricing?.amount > 0 && (
               <button
                 onClick={handlePurchase}
                 disabled={isProcessing}
@@ -196,9 +219,9 @@ export function SolutionDetailPage() {
             )}
 
             {/* Free Registration Button */}
-            {isAuthenticated && user?.role === 'customer' && !hasAccess && solution.price === 0 && (
+            {isAuthenticated && user?.role === 'customer' && !hasAccess && solution?.pricing?.amount === 0 && (
               <button
-                onClick={() => window.location.href = `https://marketplace.cloudnestle.com/register?solution_id=${solution.solutionId}`}
+                onClick={() => window.location.href = `https://marketplace.cloudnestle.com/register?solution_id=${solution?.solutionId || id}`}
                 className="w-full mt-6 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
                 Get Free Access
@@ -227,14 +250,9 @@ export function SolutionDetailPage() {
           </div>
         </div>
       </div>
-      
-      <CustomPopup
-        message={popup.message}
-        type={popup.type}
-        isOpen={popup.isOpen}
-        onClose={closePopup}
-      />
+      )}
       </div>
+      {popup && <CustomPopup {...popup} onClose={closePopup} />}
     </div>
   )
 }

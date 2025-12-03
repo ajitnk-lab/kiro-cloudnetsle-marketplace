@@ -62,6 +62,9 @@ export function HomePage() {
               Your Gateway to
               <span className="block text-blue-200">Software Solutions</span>
             </h1>
+            <p className="text-lg text-blue-200 mb-4 font-semibold">
+              Powered by CloudNestle Consulting & Services
+            </p>
             <div className="text-sm text-blue-200 mb-4">
               Last updated: {new Date().toLocaleString()}
             </div>

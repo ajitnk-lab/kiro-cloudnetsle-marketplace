@@ -181,10 +181,10 @@ async function updateTransactionAndUser(transactionId, status, webhookData = {})
     })
     await docClient.send(updateUserCommand)
 
-    // Create or update entitlement for aws-solution-finder
+    // Create or update entitlement for aws-solution-finder-001
     if (USER_SOLUTION_ENTITLEMENTS_TABLE) {
       try {
-        const solutionId = 'aws-solution-finder'
+        const solutionId = 'aws-solution-finder-001'
         const pk = `user#${transaction.userId}`
         const sk = `solution#${solutionId}`
         

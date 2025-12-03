@@ -31,7 +31,7 @@ export function Layout({ children }: LayoutProps) {
                 className="flex items-center space-x-2 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 transition-colors px-3 py-2 rounded-lg font-semibold border border-blue-200"
               >
                 <ExternalLink className="h-4 w-4" />
-                <span>CloudNestle</span>
+                <span>CloudNestle Consulting & Services</span>
               </a>
               <Link
                 to="/catalog"
@@ -65,16 +65,7 @@ export function Layout({ children }: LayoutProps) {
                   to="/admin/dashboard"
                   className="text-gray-700 hover:text-blue-600 transition-colors"
                 >
-                  Admin Dashboard
-                </Link>
-              )}
-
-              {user?.role === 'admin' && (
-                <Link
-                  to="/founder-dashboard"
-                  className="text-gray-700 hover:text-blue-600 transition-colors"
-                >
-                  📊 Founder Dashboard
+                  📊 Admin Dashboard
                 </Link>
               )}
             </nav>
@@ -187,7 +178,7 @@ export function Layout({ children }: LayoutProps) {
           
           <div className="mt-8 pt-8 border-t border-gray-200">
             <p className="text-center text-gray-600">
-              © 2024 Marketplace Platform. All rights reserved.
+              © 2025 CloudNestle Consulting & Services. All rights reserved.
             </p>
           </div>
         </div>

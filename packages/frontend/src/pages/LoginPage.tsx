@@ -62,11 +62,11 @@ export function LoginPage() {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
               },
               body: JSON.stringify({
                 user_id: user.userId || user.email, // Send as user_id to match backend
-                solution_id: 'aws-solution-finder', // Use correct solution_id
+                solution_id: 'aws-solution-finder-001', // Use correct solution_id
                 access_tier: 'registered', // Use access_tier to match backend
                 return_url: 'https://awssolutionfinder.solutions.cloudnestle.com/search'
               })

@@ -236,14 +236,51 @@ exports.handler = async (event) => {
         }
       }
 
-      // Process entitlement (existing logic continues below)
-      const accessTier = entitlement.access_tier || entitlement.accessTier || 'registered'
-      console.log('DEBUG: Direct query - Entitlement access_tier:', entitlement.access_tier)
-      console.log('DEBUG: Direct query - Entitlement accessTier:', entitlement.accessTier)
-      console.log('DEBUG: Direct query - Final accessTier:', accessTier)
-      const limits = getQuotaLimits(accessTier)
+      // Process entitlement with pro expiry check
+      let accessTier = entitlement.access_tier || entitlement.accessTier || entitlement.tier || 'registered'
       
-      // Handle both old and new entitlement formats for usage
+      // Check if pro subscription has expired
+      if (accessTier === 'pro' && entitlement.pro_expires_at) {
+        const now = new Date()
+        const expiryDate = new Date(entitlement.pro_expires_at)
+        
+        if (expiryDate <= now) {
+          console.log(`Pro subscription expired for user ${user_email}. Expiry: ${entitlement.pro_expires_at}`)
+          accessTier = 'registered' // Auto-downgrade to registered
+        } else {
+          console.log(`Pro subscription active until: ${entitlement.pro_expires_at}`)
+        }
+      }
+      
+      console.log('DEBUG: Direct query - Final accessTier:', accessTier)
+      
+      // PRO users get unlimited access - skip quota checks
+      if (accessTier === 'pro') {
+        console.log('PRO user detected - unlimited access granted')
+        await trackUserLocation(user_email, event.headers || {})
+        
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            allowed: true,
+            user_email,
+            solution_id,
+            access_tier: accessTier,
+            quota_remaining: -1,
+            quota: {
+              daily_limit: -1,
+              daily_used: 0,
+              unlimited: true
+            },
+            entitlement_status: entitlement.status,
+            created_at: entitlement.created_at
+          }),
+        }
+      }
+      
+      // For registered users, check quota limits
+      const limits = getQuotaLimits(accessTier)
       const usage = entitlement.dailyUsage !== undefined ? entitlement.dailyUsage : (entitlement.usage || {})
       const quotaCheck = checkQuota(usage, limits)
       
@@ -329,14 +366,52 @@ exports.handler = async (event) => {
       }
     }
 
-    // Get quota limits for the user's tier (handle both old and new formats)
-    const accessTier = entitlement.tier || entitlement.access_tier || entitlement.accessTier || 'registered'
-    console.log('DEBUG: Entitlement access_tier:', entitlement.access_tier)
-    console.log('DEBUG: Entitlement accessTier:', entitlement.accessTier)
-    console.log('DEBUG: Final accessTier:', accessTier)
-    const limits = getQuotaLimits(accessTier)
+    // Get quota limits for the user's tier with pro expiry check
+    let accessTier = entitlement.tier || entitlement.access_tier || entitlement.accessTier || 'registered'
     
-    // Check current usage and increment if not check_only
+    // Check if pro subscription has expired
+    if (accessTier === 'pro' && entitlement.pro_expires_at) {
+      const now = new Date()
+      const expiryDate = new Date(entitlement.pro_expires_at)
+      
+      if (expiryDate <= now) {
+        console.log(`Pro subscription expired for token scan. Expiry: ${entitlement.pro_expires_at}`)
+        accessTier = 'registered' // Auto-downgrade to registered
+      } else {
+        console.log(`Pro subscription active until: ${entitlement.pro_expires_at}`)
+      }
+    }
+    
+    console.log('DEBUG: Token scan - Final accessTier:', accessTier)
+    
+    // PRO users get unlimited access - skip quota checks
+    if (accessTier === 'pro') {
+      console.log('PRO user detected - unlimited access granted')
+      const userEmailFromEntitlement = entitlement.user_email
+      await trackUserLocation(userEmailFromEntitlement, event.headers || {})
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          allowed: true,
+          user_email: userEmailFromEntitlement,
+          solution_id,
+          access_tier: accessTier,
+          quota_remaining: -1,
+          quota: {
+            daily_limit: -1,
+            daily_used: 0,
+            unlimited: true
+          },
+          entitlement_status: entitlement.status,
+          created_at: entitlement.created_at
+        }),
+      }
+    }
+    
+    // For registered users, check and update quota
+    const limits = getQuotaLimits(accessTier)
     const checkOnly = body.check_only === true
     const quotaCheck = await checkAndUpdateQuota(entitlement, limits, checkOnly)
     

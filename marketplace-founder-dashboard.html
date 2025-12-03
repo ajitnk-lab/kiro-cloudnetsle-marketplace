@@ -50,127 +50,46 @@
     <div class="dashboard">
         <!-- Key Metrics -->
         <div class="metrics-grid">
-            <div class="metric-card revenue">
-                <div class="metric-value">₹897</div>
-                <div class="metric-label">Total Revenue</div>
-                <div class="metric-change positive">+₹299 this week</div>
-            </div>
             <div class="metric-card users">
-                <div class="metric-value">68</div>
+                <div class="metric-value" id="totalUsers">Loading...</div>
                 <div class="metric-label">Total Users</div>
-                <div class="metric-change positive">+12 this week</div>
+                <div class="metric-change" id="userChange">Loading...</div>
             </div>
             <div class="metric-card conversion">
-                <div class="metric-value">4.4%</div>
+                <div class="metric-value" id="conversionRate">Loading...</div>
                 <div class="metric-label">Conversion Rate</div>
-                <div class="metric-change positive">3/68 users upgraded</div>
-            </div>
-            <div class="metric-card transactions">
-                <div class="metric-value">11</div>
-                <div class="metric-label">Total Transactions</div>
-                <div class="metric-change">3 completed, 2 failed, 6 pending</div>
+                <div class="metric-change" id="conversionDetails">Loading...</div>
             </div>
         </div>
 
         <!-- Charts -->
         <div class="charts-grid">
             <div class="chart-card">
-                <h3 class="chart-title">📊 Transaction Status Breakdown</h3>
-                <canvas id="transactionChart" width="400" height="300"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 class="chart-title">👥 User Role Distribution</h3>
-                <canvas id="userChart" width="400" height="300"></canvas>
-            </div>
-        </div>
-
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h3 class="chart-title">💰 Daily Revenue Trend</h3>
-                <canvas id="revenueChart" width="400" height="200"></canvas>
-            </div>
-            <div class="chart-card">
                 <h3 class="chart-title">🔄 Conversion Funnel</h3>
                 <canvas id="funnelChart" width="400" height="200"></canvas>
             </div>
         </div>
 
-        <!-- Recent Transactions Table -->
-        <div class="chart-card full-width">
-            <h3 class="chart-title">💳 Recent Transactions</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Payment Method</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Nov 12, 2025 16:32</td>
-                        <td>₹299</td>
-                        <td><span class="status-badge status-failed">Failed</span></td>
-                        <td>PhonePe</td>
-                    </tr>
-                    <tr>
-                        <td>Nov 12, 2025 15:48</td>
-                        <td>₹299</td>
-                        <td><span class="status-badge status-completed">Completed</span></td>
-                        <td>PhonePe</td>
-                    </tr>
-                    <tr>
-                        <td>Nov 12, 2025 13:04</td>
-                        <td>₹299</td>
-                        <td><span class="status-badge status-failed">Failed</span></td>
-                        <td>PhonePe</td>
-                    </tr>
-                    <tr>
-                        <td>Nov 12, 2025 12:03</td>
-                        <td>₹299</td>
-                        <td><span class="status-badge status-completed">Completed</span></td>
-                        <td>PhonePe</td>
-                    </tr>
-                    <tr>
-                        <td>Nov 11, 2025 17:35</td>
-                        <td>₹299</td>
-                        <td><span class="status-badge status-completed">Completed</span></td>
-                        <td>PhonePe</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
         <!-- Key Insights -->
         <div class="chart-card full-width">
-            <h3 class="chart-title">🎯 Key Business Insights</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+            <h3 class="chart-title">🎯 AI-Powered Business Insights</h3>
+            <div id="businessInsights" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
                 <div>
                     <h4 style="color: #10b981; margin-bottom: 0.5rem;">✅ Strengths</h4>
-                    <ul style="color: #374151; line-height: 1.6;">
-                        <li>Strong user acquisition (68 total users)</li>
-                        <li>Healthy conversion rate (4.4%)</li>
-                        <li>Consistent Pro upgrades (₹299 each)</li>
-                        <li>Active partner ecosystem (17 partners)</li>
+                    <ul id="strengthsList" style="color: #374151; line-height: 1.6;">
+                        <li>Loading AI insights...</li>
                     </ul>
                 </div>
                 <div>
                     <h4 style="color: #f59e0b; margin-bottom: 0.5rem;">⚠️ Areas for Improvement</h4>
-                    <ul style="color: #374151; line-height: 1.6;">
-                        <li>Payment failure rate: 18% (2/11 transactions)</li>
-                        <li>6 pending transactions need follow-up</li>
-                        <li>Only 3 Pro users from 51 customers (5.9%)</li>
-                        <li>Revenue concentration risk (single price point)</li>
+                    <ul id="improvementsList" style="color: #374151; line-height: 1.6;">
+                        <li>Loading AI insights...</li>
                     </ul>
                 </div>
                 <div>
                     <h4 style="color: #3b82f6; margin-bottom: 0.5rem;">🚀 Growth Opportunities</h4>
-                    <ul style="color: #374141; line-height: 1.6;">
-                        <li>Implement payment retry mechanisms</li>
-                        <li>Add multiple pricing tiers</li>
-                        <li>Partner revenue sharing program</li>
-                        <li>Automated conversion campaigns</li>
+                    <ul id="opportunitiesList" style="color: #374151; line-height: 1.6;">
+                        <li>Loading AI insights...</li>
                     </ul>
                 </div>
             </div>
@@ -178,91 +97,146 @@
     </div>
 
     <script>
-        // Transaction Status Chart
-        const transactionCtx = document.getElementById('transactionChart').getContext('2d');
-        new Chart(transactionCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Completed', 'Failed', 'Pending'],
-                datasets: [{
-                    data: [3, 2, 6],
-                    backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
+        // API Configuration
+        const API_BASE_URL = 'https://7kzsoygrzl.execute-api.us-east-1.amazonaws.com/prod';
+        
+        // Fetch real-time business metrics
+        async function fetchBusinessMetrics() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/founder/metrics`);
+                if (!response.ok) throw new Error('Failed to fetch metrics');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching business metrics:', error);
+                return null;
             }
-        });
+        }
 
-        // User Role Chart
-        const userCtx = document.getElementById('userChart').getContext('2d');
-        new Chart(userCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Customers', 'Partners', 'Admins'],
-                datasets: [{
-                    data: [51, 17, 2],
-                    backgroundColor: ['#3b82f6', '#8b5cf6', '#06b6d4'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
+        // Update dashboard with real data
+        async function updateDashboard() {
+            const data = await fetchBusinessMetrics();
+            if (!data) {
+                document.querySelectorAll('.metric-value').forEach(el => el.textContent = 'Error');
+                return;
             }
-        });
 
-        // Revenue Trend Chart
-        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-        new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-                labels: ['Nov 8', 'Nov 9', 'Nov 10', 'Nov 11', 'Nov 12'],
-                datasets: [{
-                    label: 'Daily Revenue (₹)',
-                    data: [0, 0, 0, 299, 598],
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
+            // Update users
+            document.getElementById('totalUsers').textContent = data.users?.total || '0';
+            document.getElementById('userChange').textContent = data.users?.calculation?.breakdown || 'No data';
+
+            // Update conversion rate
+            document.getElementById('conversionRate').textContent = `${data.conversions?.rate || 0}%`;
+            document.getElementById('conversionDetails').textContent = `${data.conversions?.registeredToPro || 0}/${data.conversions?.totalRegistered || 0} users upgraded`;
+
+            updateFunnelChart(data);
+            updateBusinessInsights(data);
+        }
+
+        // Update Business Insights with AI-generated content
+        function updateBusinessInsights(data) {
+            const insights = data.businessInsights || [];
+            
+            const strengths = insights.filter(item => item.type === 'strength').map(item => item.text);
+            const improvements = insights.filter(item => item.type === 'improvement').map(item => item.text);
+            const opportunities = insights.filter(item => item.type === 'opportunity').map(item => item.text);
+
+            // Update strengths
+            const strengthsList = document.getElementById('strengthsList');
+            if (strengths.length > 0) {
+                strengthsList.innerHTML = strengths.map(item => `<li>${item}</li>`).join('');
+            } else {
+                strengthsList.innerHTML = '<li>Loading AI insights...</li>';
             }
-        });
 
-        // Conversion Funnel Chart
-        const funnelCtx = document.getElementById('funnelChart').getContext('2d');
-        new Chart(funnelCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Visitors', 'Registered', 'Pro Users'],
-                datasets: [{
-                    label: 'Users',
-                    data: [200, 68, 3],
-                    backgroundColor: ['#e5e7eb', '#3b82f6', '#10b981'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
+            // Update improvements
+            const improvementsList = document.getElementById('improvementsList');
+            if (improvements.length > 0) {
+                improvementsList.innerHTML = improvements.map(item => `<li>${item}</li>`).join('');
+            } else {
+                improvementsList.innerHTML = '<li>Loading AI insights...</li>';
+            }
+
+            // Update opportunities
+            const opportunitiesList = document.getElementById('opportunitiesList');
+            if (opportunities.length > 0) {
+                opportunitiesList.innerHTML = opportunities.map(item => `<li>${item}</li>`).join('');
+            } else {
+                opportunitiesList.innerHTML = '<li>Loading AI insights...</li>';
+            }
+        }
+
+        // Update Conversion Funnel Chart with real data
+        function updateFunnelChart(data) {
+            const ctx = document.getElementById('funnelChart').getContext('2d');
+            
+            // Use real data from API
+            const totalUsers = data.users?.total || 0;
+            const registeredUsers = data.conversions?.totalRegistered || 0;
+            const proUsers = data.conversions?.registeredToPro || 0;
+            
+            // Calculate anonymous users (total - registered)
+            const anonymousUsers = Math.max(0, totalUsers - registeredUsers);
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Anonymous Users', 'Registered Users', 'Pro Users'],
+                    datasets: [{
+                        label: 'Users',
+                        data: [anonymousUsers, registeredUsers, proUsers],
+                        backgroundColor: ['#e5e7eb', '#3b82f6', '#10b981'],
+                        borderWidth: 0
+                    }]
                 },
-                plugins: {
-                    legend: { display: false }
+                options: {
+                    responsive: true,
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1 // Show whole numbers only
+                            }
+                        }
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label;
+                                    const value = context.parsed.y;
+                                    let percentage = '';
+                                    
+                                    if (label === 'Registered Users' && anonymousUsers + registeredUsers > 0) {
+                                        percentage = ` (${((registeredUsers / (anonymousUsers + registeredUsers)) * 100).toFixed(1)}% of total)`;
+                                    } else if (label === 'Pro Users' && registeredUsers > 0) {
+                                        percentage = ` (${((proUsers / registeredUsers) * 100).toFixed(1)}% of registered)`;
+                                    }
+                                    
+                                    return `${label}: ${value}${percentage}`;
+                                }
+                            }
+                        }
+                    }
                 }
-            }
+            });
+        }
+
+        // Update Transaction Chart
+        function updateTransactionChart(data) {
+            // Removed - not needed for founder dashboard
+        }
+
+        // Update User Chart
+        function updateUserChart(data) {
+            // Removed - not needed for founder dashboard
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDashboard();
+            // Refresh every 30 seconds
+            setInterval(updateDashboard, 30000);
         });
     </script>
 </body>

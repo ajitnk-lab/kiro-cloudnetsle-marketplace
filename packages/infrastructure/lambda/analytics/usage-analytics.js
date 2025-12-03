@@ -11,8 +11,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 }
 
-// Get usage patterns from entitlements table
+// Get usage patterns from users table for accurate count
 const getUsagePatterns = async (filters = {}) => {
+  // Get total users from marketplace users table
+  const usersParams = {
+    TableName: process.env.MARKETPLACE_USERS_TABLE
+  }
+  const usersResult = await docClient.send(new ScanCommand(usersParams))
+  
+  // Get entitlements for tier distribution
   const params = {
     TableName: process.env.USER_SOLUTION_ENTITLEMENTS_TABLE
   }
@@ -27,14 +34,14 @@ const getUsagePatterns = async (filters = {}) => {
   const tierDistribution = {}
   const usageByCountry = {}
   const totalUsage = {}
-  const uniqueUsers = new Set() // Track unique users
+  const uniqueUsers = new Set() // Track unique users from entitlements
   
   result.Items.forEach(item => {
     const tier = item.tier || 'registered'
     const country = item.country || 'Unknown'
     const userId = item.userId
     
-    // Count unique users only
+    // Count unique users from entitlements
     if (userId) {
       uniqueUsers.add(userId)
     }
@@ -49,6 +56,7 @@ const getUsagePatterns = async (filters = {}) => {
     if (item.dailyUsage) userTotalUsage += item.dailyUsage
     if (item.totalUsage) userTotalUsage += item.totalUsage
     if (item.searchCount) userTotalUsage += item.searchCount
+    if (item.count) userTotalUsage += item.count  // FAISS usage table uses 'count' field
     
     // Also check for date-based usage fields (usage_YYYY-MM-DD format)
     Object.keys(item).forEach(key => {
@@ -71,12 +79,12 @@ const getUsagePatterns = async (filters = {}) => {
   const userCount = Object.keys(totalUsage).length
 
   return {
-    totalUsers: uniqueUsers.size, // Use unique user count instead of total records
+    totalUsers: usersResult.Items.length, // Use total registered users
     userCalculation: {
-      uniqueUsers: uniqueUsers.size,
+      uniqueUsers: usersResult.Items.length,
       totalEntitlements: result.Items.length,
-      breakdown: `${uniqueUsers.size} unique users with solution entitlements (from ${result.Items.length} total entitlement records)`,
-      formula: `Active Users = Unique userId count from entitlements table = ${uniqueUsers.size}`
+      breakdown: `${usersResult.Items.length} unique users with solution entitlements (from ${result.Items.length} total entitlement records)`,
+      formula: `Active Users = Total registered users = ${usersResult.Items.length}`
     },
     tierDistribution,
     usageByCountry,
@@ -171,7 +179,7 @@ const getPerformanceMetrics = async (filters = {}) => {
       Dimensions: [
         {
           Name: 'ApiName',
-          Value: 'MarketplaceAPI' // Your API Gateway name
+          Value: 'marketplace-api-manual' // Correct API Gateway name
         }
       ],
       StartTime: startTime,

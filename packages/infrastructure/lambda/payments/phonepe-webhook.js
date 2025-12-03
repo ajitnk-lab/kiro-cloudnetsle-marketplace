@@ -36,7 +36,7 @@ const updateReconciliationData = async (transaction, phonePePayload, userDetails
       
       // Business context
       user_tier: userDetails?.subscriptionTier || 'free',
-      solution_id: transaction.solution_id || 'aws-solution-finder',
+      solution_id: transaction.solution_id || 'aws-solution-finder-001',
       solution_name: transaction.solution_name || 'AWS Solution Finder Pro',
       country: userDetails?.country || transaction.country || 'Unknown',
       city: userDetails?.city || transaction.city,
@@ -107,12 +107,12 @@ const updateUserTier = async (userId, userEmail) => {
 
     // Update entitlement using UUID-based key (same as registration creates)
     const uuidPk = `user#${userId}` // Use userId (UUID), not userEmail
-    const sk = `solution#aws-solution-finder`
+    const sk = `solution#aws-solution-finder-001`
 
     await docClient.send(new UpdateCommand({
       TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
       Key: { pk: uuidPk, sk },
-      UpdateExpression: 'SET tier = :tier, access_tier = :tier, updatedAt = :updatedAt, #status = :status',
+      UpdateExpression: 'SET tier = :tier, access_tier = :tier, accessTier = :tier, updatedAt = :updatedAt, #status = :status',
       ExpressionAttributeNames: {
         '#status': 'status'
       },
@@ -130,7 +130,7 @@ const updateUserTier = async (userId, userEmail) => {
       await docClient.send(new UpdateCommand({
         TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
         Key: { pk: emailPk, sk },
-        UpdateExpression: 'SET tier = :tier, access_tier = :tier, updated_at = :updatedAt, #status = :status',
+        UpdateExpression: 'SET tier = :tier, access_tier = :tier, accessTier = :tier, updated_at = :updatedAt, #status = :status',
         ExpressionAttributeNames: {
           '#status': 'status'
         },

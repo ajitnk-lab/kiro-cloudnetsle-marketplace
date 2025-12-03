@@ -17,7 +17,7 @@ const getBaseUrl = (solutionId) => {
   const solutionUrls = {
     'faiss': 'https://awssolutionfinder.solutions.cloudnestle.com/search',
     'aws-finder': 'https://awssolutionfinder.solutions.cloudnestle.com/search',
-    'aws-solution-finder': 'https://awssolutionfinder.solutions.cloudnestle.com/search'
+    'aws-solution-finder-001': 'https://awssolutionfinder.solutions.cloudnestle.com/search'
   }
   
   return solutionUrls[solutionId] || `https://solution-${solutionId}.example.com`

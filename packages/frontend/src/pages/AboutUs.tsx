@@ -4,29 +4,34 @@ export function AboutUs() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">About Cloud Nestle Marketplace</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">About CloudNestle Consulting & Services</h1>
+        <p className="text-lg text-gray-600 mb-4">Operating CloudNestle Marketplace Platform</p>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
           Where Your Business Finds Its Cloud Home
         </p>
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg inline-block">
+          <p className="text-lg font-semibold text-gray-800">Legal Business Name:</p>
+          <p className="text-xl font-bold text-blue-600">CloudNestle Consulting & Services</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
         <div>
           <h2 className="text-3xl font-semibold mb-6">Meet the Founder</h2>
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <h3 className="text-2xl font-semibold mb-4">Ajit NK</h3>
+            <h3 className="text-2xl font-semibold mb-4">Ajit Nijagal Kamalakantha</h3>
             <p className="text-gray-700 text-lg leading-relaxed">
               "After years of seeing businesses struggle with their AWS architecture, I founded Cloud Nestle to provide expert, personalized guidance that helps companies of all sizes succeed in the cloud"
             </p>
           </div>
         </div>
         <div>
-          <h2 className="text-3xl font-semibold mb-6">The Cloud Nestle Story</h2>
+          <h2 className="text-3xl font-semibold mb-6">The CloudNestle Consulting & Services Story</h2>
           <p className="text-gray-700 text-lg leading-relaxed mb-6">
-            Cloud Nestle was born from a vision to help businesses find their perfect cloud home. We understand that every business has unique needs, and we're here to provide expert guidance to help you succeed in the cloud.
+            CloudNestle Consulting & Services was born from a vision to help businesses find their perfect cloud home. We understand that every business has unique needs, and we're here to provide expert guidance to help you succeed in the cloud.
           </p>
           <p className="text-gray-700 text-lg leading-relaxed">
-            Our marketplace platform empowers businesses to discover and implement cloud solutions that drive growth and efficiency, while connecting them with trusted partners and expert services.
+            CloudNestle Consulting & Services operates this marketplace platform to empower businesses to discover and implement cloud solutions that drive growth and efficiency, while connecting them with trusted partners and expert services.
           </p>
         </div>
       </div>

@@ -7,6 +7,7 @@ interface PaymentStatus {
   message: string
   transactionId?: string
   merchantOrderId?: string
+  amount?: string | number
 }
 
 const PaymentCallback: React.FC = () => {
@@ -20,18 +21,18 @@ const PaymentCallback: React.FC = () => {
   useEffect(() => {
     const checkPaymentStatus = async () => {
       try {
-        const merchantOrderId = searchParams.get('merchantOrderId')
+        const transactionId = searchParams.get('transactionId')
         
-        if (!merchantOrderId) {
+        if (!transactionId) {
           setPaymentStatus({
             status: 'failed',
-            message: 'Invalid payment callback - missing order ID'
+            message: 'Invalid payment callback - missing transaction ID'
           })
           return
         }
 
         // Check payment status with backend
-        const response = await fetch(`${import.meta.env.VITE_API_URL}payments/status/${merchantOrderId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/payments/status/${transactionId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -100,7 +101,7 @@ const PaymentCallback: React.FC = () => {
   const handleContinue = () => {
     if (paymentStatus.status === 'success') {
       // Redirect to AWS Solution Finder with Pro access
-      window.location.href = 'https://awssolutionfinder.solutions.cloudnestle.com'
+      window.location.href = 'https://awssolutionfinder.solutions.cloudnestle.com/search'
     } else if (paymentStatus.status === 'failed') {
       // Redirect back to upgrade page
       navigate('/solutions/61deb2fb-6e5e-4cda-ac5d-ff20202a8788')
@@ -138,7 +139,7 @@ const PaymentCallback: React.FC = () => {
               )}
               <div className="flex justify-between">
                 <span className="text-sm font-medium text-gray-500">Amount:</span>
-                <span className="text-sm text-gray-900">₹299</span>
+                <span className="text-sm text-gray-900">₹{paymentStatus.amount || '299'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm font-medium text-gray-500">Plan:</span>

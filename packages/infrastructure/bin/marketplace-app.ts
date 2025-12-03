@@ -8,11 +8,11 @@ const app = new cdk.App()
 // Get environment configuration
 const env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
+  region: 'us-west-1', // Deploy to us-west-1 with unique names
 }
 
-// Create the main infrastructure stack with existing stack name
-new MarketplaceInfrastructureStack(app, 'MP-1762926799834', {
+// Create the main infrastructure stack with new name
+new MarketplaceInfrastructureStack(app, 'MarketplaceStack-Clean', {
   env,
   description: 'Marketplace Platform - Main infrastructure stack',
   tags: {

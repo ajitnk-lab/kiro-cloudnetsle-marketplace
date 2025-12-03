@@ -16,6 +16,9 @@ console.log('Environment variables:', {
   PARTNER_APPLICATION_TABLE
 });
 
+// Force update timestamp: 2025-12-02T10:08:00Z
+console.log('Admin Lambda updated:', new Date().toISOString());
+
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',

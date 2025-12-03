@@ -53,16 +53,17 @@ exports.handler = async (event) => {
       
       // Also fetch user's entitlements
       let entitlements = []
-      if (USER_SOLUTION_ENTITLEMENTS_TABLE && result.Item.email) {
+      if (USER_SOLUTION_ENTITLEMENTS_TABLE) {
         try {
           const entitlementResult = await docClient.send(new QueryCommand({
             TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
             KeyConditionExpression: 'pk = :pk',
             ExpressionAttributeValues: {
-              ':pk': `user#${result.Item.email}`
+              ':pk': `user#${userId}`
             }
           }))
           entitlements = entitlementResult.Items || []
+          console.log('Found entitlements:', entitlements)
         } catch (error) {
           console.error('Error fetching entitlements:', error)
         }

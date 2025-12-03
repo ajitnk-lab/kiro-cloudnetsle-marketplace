@@ -111,6 +111,18 @@ export class ApiStack extends Construct {
       ],
       resources: ['*'], // You might want to restrict this to specific email addresses
     }))
+
+    // Grant Bedrock permissions for AI insights
+    lambdaRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'bedrock:InvokeModel',
+      ],
+      resources: [
+        'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0',
+        'arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0'
+      ],
+    }))
     
     // Grant CloudWatch permissions for API metrics
     lambdaRole.addToPolicy(new iam.PolicyStatement({
@@ -142,6 +154,7 @@ export class ApiStack extends Construct {
       code: lambda.Code.fromAsset('lambda/auth'),
       environment: {
         USER_TABLE_NAME: props.userTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
       },
       role: lambdaRole,
     })
@@ -207,6 +220,9 @@ export class ApiStack extends Construct {
       code: lambda.Code.fromAsset('lambda/payments'),
       environment: {
         USER_TABLE_NAME: props.userTable.tableName,
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        SOLUTION_TABLE_NAME: props.solutionTable.tableName,
+        API_BASE_URL: `https://${this.api.restApiId}.execute-api.us-west-1.amazonaws.com/prod`,
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -219,6 +235,7 @@ export class ApiStack extends Construct {
       code: lambda.Code.fromAsset('lambda/payments'),
       environment: {
         USER_TABLE_NAME: props.userTable.tableName,
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -232,6 +249,7 @@ export class ApiStack extends Construct {
       environment: {
         USER_TABLE: props.userTable.tableName,
         PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        API_BASE_URL: `https://${this.api.restApiId}.execute-api.us-west-1.amazonaws.com/prod`,
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -376,6 +394,21 @@ export class ApiStack extends Construct {
       timeout: cdk.Duration.seconds(30),
     })
 
+    // Cashfree Webhook Function
+    const cashfreeWebhookFunction = new lambda.Function(this, 'CashfreeWebhookFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'cashfree-webhook.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        USER_TABLE: props.userTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        SOLUTION_TABLE_NAME: props.solutionTable.tableName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
     const paymentReconciliationFunction = new lambda.Function(this, 'PaymentReconciliationFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'payment-reconciliation.handler',
@@ -410,6 +443,7 @@ export class ApiStack extends Construct {
       code: lambda.Code.fromAsset('lambda/analytics'),
       environment: {
         USER_TABLE: props.userTable.tableName,
+        MARKETPLACE_USERS_TABLE: props.userTable.tableName,
         PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
         USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
         USER_SESSIONS_TABLE: props.userSessionsTable.tableName
@@ -436,6 +470,21 @@ export class ApiStack extends Construct {
       handler: 'usage-analytics.handler',
       code: lambda.Code.fromAsset('lambda/analytics'),
       environment: {
+        USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        USER_SESSIONS_TABLE: props.userSessionsTable.tableName
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    const msmeKpiFunction = new lambda.Function(this, 'MsmeKpiFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'msme-kpis.handler',
+      code: lambda.Code.fromAsset('lambda/analytics'),
+      environment: {
+        USER_TABLE: props.userTable.tableName,
+        MARKETPLACE_USERS_TABLE: props.userTable.tableName,
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
         USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
         USER_SESSIONS_TABLE: props.userSessionsTable.tableName
       },
@@ -481,14 +530,18 @@ export class ApiStack extends Construct {
     paymentsApi.addResource('initiate').addMethod('POST', new apigateway.LambdaIntegration(paymentInitiateFunction), {
       authorizer: cognitoAuthorizer,
     })
-    paymentsApi.addResource('status').addResource('{transactionId}').addMethod('GET', new apigateway.LambdaIntegration(paymentStatusFunction), {
-      authorizer: cognitoAuthorizer,
-    })
+    paymentsApi.addResource('status').addResource('{transactionId}').addMethod('GET', new apigateway.LambdaIntegration(paymentStatusFunction))
     paymentsApi.addResource('upgrade-to-pro').addMethod('POST', new apigateway.LambdaIntegration(upgradeToProFunction))
     
     // PhonePe webhook route (no auth required)
     const phonePeWebhookResource = paymentsApi.addResource('phonepe-webhook')
     phonePeWebhookResource.addMethod('POST', new apigateway.LambdaIntegration(phonePeWebhookFunction), {
+      authorizationType: apigateway.AuthorizationType.NONE
+    })
+
+    // Cashfree webhook route (no auth required)
+    const cashfreeWebhookResource = paymentsApi.addResource('cashfree-webhook')
+    cashfreeWebhookResource.addMethod('POST', new apigateway.LambdaIntegration(cashfreeWebhookFunction), {
       authorizationType: apigateway.AuthorizationType.NONE
     })
 
@@ -651,10 +704,17 @@ export class ApiStack extends Construct {
     analyticsApi.addResource('business-metrics').addMethod('GET', new apigateway.LambdaIntegration(businessMetricsFunction), {
       authorizer: cognitoAuthorizer,
     })
+    
+    // Public founder dashboard endpoint (no auth required)
+    const founderApi = apiResource.addResource('founder')
+    founderApi.addResource('metrics').addMethod('GET', new apigateway.LambdaIntegration(businessMetricsFunction))
     analyticsApi.addResource('geographic').addMethod('GET', new apigateway.LambdaIntegration(geographicAnalyticsFunction), {
       authorizer: cognitoAuthorizer,
     })
     analyticsApi.addResource('usage').addMethod('GET', new apigateway.LambdaIntegration(usageAnalyticsFunction), {
+      authorizer: cognitoAuthorizer,
+    })
+    analyticsApi.addResource('msme-kpis').addMethod('GET', new apigateway.LambdaIntegration(msmeKpiFunction), {
       authorizer: cognitoAuthorizer,
     })
 
