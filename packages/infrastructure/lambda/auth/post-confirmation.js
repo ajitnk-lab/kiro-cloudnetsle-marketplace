@@ -79,6 +79,26 @@ exports.handler = async (event) => {
         }))
 
         console.log(`Created entitlement for ${userEmail}:${solutionId} with token ${token}`)
+        
+        // Record initial subscription in history
+        if (process.env.SUBSCRIPTION_HISTORY_TABLE) {
+          await docClient.send(new PutCommand({
+            TableName: process.env.SUBSCRIPTION_HISTORY_TABLE,
+            Item: {
+              userId: userProfile.userId,
+              timestamp: new Date().toISOString(),
+              userEmail,
+              solutionId,
+              action: 'signup',
+              fromTier: 'none',
+              toTier: 'registered',
+              startDate: new Date().toISOString(),
+              endDate: null, // No expiry for registered tier
+              recordedAt: new Date().toISOString()
+            }
+          }))
+          console.log(`Recorded signup history for ${userEmail}`)
+        }
       } catch (error) {
         console.error('Error creating solution entitlement:', error)
         // Don't fail the registration if entitlement creation fails

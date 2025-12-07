@@ -12,6 +12,7 @@ export class AuthStack extends Construct {
   constructor(scope: Construct, id: string, props: { 
     userTableName: string
     userSolutionEntitlementsTableName: string
+    subscriptionHistoryTableName: string
     tokenSecret: string
   }) {
     super(scope, id)
@@ -24,6 +25,7 @@ export class AuthStack extends Construct {
       environment: {
         USER_TABLE_NAME: props.userTableName,
         USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTableName,
+        SUBSCRIPTION_HISTORY_TABLE: props.subscriptionHistoryTableName,
         TOKEN_SECRET: props.tokenSecret,
       },
     })

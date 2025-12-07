@@ -16,6 +16,7 @@ export class DataStack extends Construct {
   public readonly paymentTransactionsTable: dynamodb.Table
   public readonly userSessionsTable: dynamodb.Table // NEW: For location tracking
   public readonly apiMetricsTable: dynamodb.Table // NEW: For API performance tracking
+  public readonly subscriptionHistoryTable: dynamodb.Table // NEW: For subscription history tracking
   public readonly assetsBucket: s3.Bucket
   public readonly vpc: ec2.Vpc
   public readonly database: rds.DatabaseInstance
@@ -273,6 +274,31 @@ export class DataStack extends Construct {
       indexName: 'DeviceIndex',
       partitionKey: { name: 'device', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Subscription History Table for tracking tier changes
+    this.subscriptionHistoryTable = new dynamodb.Table(this, 'SubscriptionHistoryTable', {
+      tableName: `marketplace-subscription-history-${baseTimestamp}`,
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    })
+
+    // Add GSI for solution-based history queries
+    this.subscriptionHistoryTable.addGlobalSecondaryIndex({
+      indexName: 'SolutionIndex',
+      partitionKey: { name: 'solutionId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
+    })
+
+    // Add GSI for action-based queries (upgrade/downgrade)
+    this.subscriptionHistoryTable.addGlobalSecondaryIndex({
+      indexName: 'ActionIndex',
+      partitionKey: { name: 'action', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
     })
 
     // API Metrics Table for Performance Tracking

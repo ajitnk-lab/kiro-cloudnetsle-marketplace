@@ -16,12 +16,14 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
     const authStack = new AuthStack(this, 'AuthStack', {
       userTableName: dataStack.userTable.tableName,
       userSolutionEntitlementsTableName: dataStack.userSolutionEntitlementsTable.tableName,
+      subscriptionHistoryTableName: dataStack.subscriptionHistoryTable.tableName,
       tokenSecret: 'marketplace-secret-key-2024', // In production, use AWS Secrets Manager
     })
 
     // Grant permissions
     dataStack.userTable.grantWriteData(authStack.postConfirmationFunction)
     dataStack.userSolutionEntitlementsTable.grantWriteData(authStack.postConfirmationFunction)
+    dataStack.subscriptionHistoryTable.grantWriteData(authStack.postConfirmationFunction)
 
     // Create API layer (API Gateway, Lambda functions)
     const apiStack = new ApiStack(this, 'ApiStack', {
@@ -34,6 +36,7 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
       paymentTransactionsTable: dataStack.paymentTransactionsTable,
       userSessionsTable: dataStack.userSessionsTable, // NEW: Analytics tables
       apiMetricsTable: dataStack.apiMetricsTable, // NEW: Analytics tables
+      subscriptionHistoryTable: dataStack.subscriptionHistoryTable, // NEW: Subscription history
       assetsBucket: dataStack.assetsBucket,
     })
 

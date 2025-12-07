@@ -58,7 +58,7 @@ const getQuotaLimits = (accessTier) => {
 }
 
 // Check quota without updating
-const checkQuota = (usage, limits) => {
+const checkQuota = (usage, limits, lastUsageDate = null) => {
   const today = new Date().toISOString().split('T')[0]
   
   // Handle both old and new entitlement formats
@@ -66,7 +66,8 @@ const checkQuota = (usage, limits) => {
   
   if (typeof usage === 'number') {
     // New format: usage is directly the dailyUsage number
-    todayUsage = usage || 0
+    // Reset if it's a new day
+    todayUsage = (lastUsageDate === today) ? (usage || 0) : 0
   } else {
     // Old format: usage is an object with daily_usage structure
     const dailyUsage = usage?.daily_usage || {}
@@ -96,7 +97,9 @@ const checkAndUpdateQuota = async (entitlement, limits, checkOnly = false) => {
   
   if (entitlement.dailyUsage !== undefined) {
     // New UUID-based format: simple dailyUsage field
-    todayUsage = entitlement.dailyUsage || 0
+    // Reset if it's a new day
+    const lastDate = entitlement.lastUsageDate || ''
+    todayUsage = (lastDate === today) ? (entitlement.dailyUsage || 0) : 0
   } else {
     // Old email-based format: nested usage.daily_usage structure
     const usage = entitlement.usage || {}
@@ -246,6 +249,59 @@ exports.handler = async (event) => {
         
         if (expiryDate <= now) {
           console.log(`Pro subscription expired for user ${user_email}. Expiry: ${entitlement.pro_expires_at}`)
+          
+          // Update database tier to registered if not already done
+          if (entitlement.tier === 'pro' || entitlement.access_tier === 'pro') {
+            try {
+              await docClient.send(new UpdateCommand({
+                TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
+                Key: { pk: entitlement.pk, sk: entitlement.sk },
+                UpdateExpression: 'SET tier = :tier, access_tier = :tier, accessTier = :tier, dailyLimit = :limit, dailyUsage = :usage',
+                ExpressionAttributeValues: { 
+                  ':tier': 'registered',
+                  ':limit': 10,
+                  ':usage': 0
+                }
+              }))
+              console.log(`Updated tier to registered for ${user_email}`)
+            } catch (error) {
+              console.error('Failed to update tier:', error)
+            }
+          }
+          
+          // Record downgrade in history (only once)
+          if (process.env.SUBSCRIPTION_HISTORY_TABLE && !entitlement.downgrade_recorded) {
+            try {
+              await docClient.send(new PutCommand({
+                TableName: process.env.SUBSCRIPTION_HISTORY_TABLE,
+                Item: {
+                  userId: entitlement.userId || entitlement.pk.replace('user#', ''),
+                  timestamp: new Date().toISOString(),
+                  userEmail: user_email,
+                  solutionId: solution_id,
+                  action: 'downgrade',
+                  fromTier: 'pro',
+                  toTier: 'registered',
+                  startDate: entitlement.pro_expires_at,
+                  endDate: null,
+                  recordedAt: new Date().toISOString()
+                }
+              }))
+              
+              // Mark downgrade as recorded
+              await docClient.send(new UpdateCommand({
+                TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
+                Key: { pk: entitlement.pk, sk: entitlement.sk },
+                UpdateExpression: 'SET downgrade_recorded = :recorded',
+                ExpressionAttributeValues: { ':recorded': true }
+              }))
+              
+              console.log(`Recorded downgrade history for ${user_email}`)
+            } catch (error) {
+              console.error('Failed to record downgrade history:', error)
+            }
+          }
+          
           accessTier = 'registered' // Auto-downgrade to registered
         } else {
           console.log(`Pro subscription active until: ${entitlement.pro_expires_at}`)
@@ -282,7 +338,7 @@ exports.handler = async (event) => {
       // For registered users, check quota limits
       const limits = getQuotaLimits(accessTier)
       const usage = entitlement.dailyUsage !== undefined ? entitlement.dailyUsage : (entitlement.usage || {})
-      const quotaCheck = checkQuota(usage, limits)
+      const quotaCheck = checkQuota(usage, limits, entitlement.lastUsageDate)
       
       if (!quotaCheck.allowed) {
         return {
@@ -376,6 +432,60 @@ exports.handler = async (event) => {
       
       if (expiryDate <= now) {
         console.log(`Pro subscription expired for token scan. Expiry: ${entitlement.pro_expires_at}`)
+        
+        // Update database tier to registered if not already done
+        if (entitlement.tier === 'pro' || entitlement.access_tier === 'pro') {
+          try {
+            await docClient.send(new UpdateCommand({
+              TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
+              Key: { pk: entitlement.pk, sk: entitlement.sk },
+              UpdateExpression: 'SET tier = :tier, access_tier = :tier, accessTier = :tier, dailyLimit = :limit, dailyUsage = :usage',
+              ExpressionAttributeValues: { 
+                ':tier': 'registered',
+                ':limit': 10,
+                ':usage': 0
+              }
+            }))
+            console.log(`Updated tier to registered via token scan`)
+          } catch (error) {
+            console.error('Failed to update tier:', error)
+          }
+        }
+        
+        // Record downgrade in history (only once)
+        if (process.env.SUBSCRIPTION_HISTORY_TABLE && !entitlement.downgrade_recorded) {
+          try {
+            const user_email = entitlement.user_email || entitlement.pk?.replace('user#', '') || 'unknown'
+            await docClient.send(new PutCommand({
+              TableName: process.env.SUBSCRIPTION_HISTORY_TABLE,
+              Item: {
+                userId: entitlement.userId || entitlement.pk.replace('user#', ''),
+                timestamp: new Date().toISOString(),
+                userEmail: user_email,
+                solutionId: solution_id,
+                action: 'downgrade',
+                fromTier: 'pro',
+                toTier: 'registered',
+                startDate: entitlement.pro_expires_at,
+                endDate: null,
+                recordedAt: new Date().toISOString()
+              }
+            }))
+            
+            // Mark downgrade as recorded
+            await docClient.send(new UpdateCommand({
+              TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
+              Key: { pk: entitlement.pk, sk: entitlement.sk },
+              UpdateExpression: 'SET downgrade_recorded = :recorded',
+              ExpressionAttributeValues: { ':recorded': true }
+            }))
+            
+            console.log(`Recorded downgrade history via token scan`)
+          } catch (error) {
+            console.error('Failed to record downgrade history:', error)
+          }
+        }
+        
         accessTier = 'registered' // Auto-downgrade to registered
       } else {
         console.log(`Pro subscription active until: ${entitlement.pro_expires_at}`)

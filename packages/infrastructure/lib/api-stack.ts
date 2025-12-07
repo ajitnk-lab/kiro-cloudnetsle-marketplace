@@ -17,6 +17,7 @@ interface ApiStackProps {
   paymentTransactionsTable: dynamodb.Table
   userSessionsTable: dynamodb.Table // NEW: Analytics tables
   apiMetricsTable: dynamodb.Table // NEW: Analytics tables
+  subscriptionHistoryTable: dynamodb.Table // NEW: Subscription history
   assetsBucket: s3.Bucket
 }
 
@@ -79,6 +80,7 @@ export class ApiStack extends Construct {
     props.userSolutionEntitlementsTable.grantReadWriteData(lambdaRole)
     props.paymentTransactionsTable.grantReadWriteData(lambdaRole)
     props.userSessionsTable.grantReadWriteData(lambdaRole) // NEW: Analytics tables
+    props.subscriptionHistoryTable.grantReadWriteData(lambdaRole) // NEW: Subscription history
     props.assetsBucket.grantReadWrite(lambdaRole)
 
     // Grant Cognito permissions for user management
@@ -371,6 +373,7 @@ export class ApiStack extends Construct {
       code: lambda.Code.fromAsset('lambda/tokens'),
       environment: {
         USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        SUBSCRIPTION_HISTORY_TABLE: props.subscriptionHistoryTable.tableName,
         USER_SESSIONS_TABLE_NAME: props.userSessionsTable.tableName,
         ENABLE_LOCATION_TRACKING: 'true',
         IP_SALT: 'marketplace-location-salt-2025'
@@ -403,6 +406,7 @@ export class ApiStack extends Construct {
         PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
         USER_TABLE: props.userTable.tableName,
         USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
+        SUBSCRIPTION_HISTORY_TABLE: props.subscriptionHistoryTable.tableName,
         SOLUTION_TABLE_NAME: props.solutionTable.tableName,
       },
       role: lambdaRole,

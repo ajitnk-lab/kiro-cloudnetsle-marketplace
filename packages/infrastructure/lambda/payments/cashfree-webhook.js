@@ -1,6 +1,8 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
 const { DynamoDBDocumentClient, UpdateCommand, GetCommand, PutCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb')
 const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses')
+const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager')
+const https = require('https')
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient, {
@@ -9,11 +11,86 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient, {
   }
 })
 const sesClient = new SESClient({})
+const secretsClient = new SecretsManagerClient({ region: 'us-east-1' })
 
 const USER_TABLE = process.env.USER_TABLE
 const PAYMENT_TRANSACTIONS_TABLE = process.env.PAYMENT_TRANSACTIONS_TABLE
 const USER_SOLUTION_ENTITLEMENTS_TABLE = process.env.USER_SOLUTION_ENTITLEMENTS_TABLE
+const SUBSCRIPTION_HISTORY_TABLE = process.env.SUBSCRIPTION_HISTORY_TABLE
 const SOLUTION_TABLE_NAME = process.env.SOLUTION_TABLE_NAME
+
+// Get Cashfree credentials from Secrets Manager
+const getCashfreeCredentials = async () => {
+  const command = new GetSecretValueCommand({
+    SecretId: 'marketplace/cashfree/credentials'
+  })
+  const response = await secretsClient.send(command)
+  return JSON.parse(response.SecretString)
+}
+
+// Verify order status with Cashfree API
+const verifyCashfreeOrder = async (credentials, orderId) => {
+  const hostname = credentials.secretKey.includes('_test_') ? 'sandbox.cashfree.com' : 'api.cashfree.com'
+  
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname,
+      port: 443,
+      path: `/pg/orders/${orderId}`,
+      method: 'GET',
+      headers: {
+        'x-api-version': credentials.apiVersion || '2023-08-01',
+        'x-client-id': credentials.appId,
+        'x-client-secret': credentials.secretKey
+      }
+    }
+
+    const req = https.request(options, (res) => {
+      let data = ''
+      res.on('data', (chunk) => { data += chunk })
+      res.on('end', () => {
+        try {
+          const response = JSON.parse(data)
+          console.log('Cashfree order verification response:', response)
+          resolve(response)
+        } catch (error) {
+          reject(new Error('Failed to parse Cashfree response'))
+        }
+      })
+    })
+
+    req.on('error', (error) => {
+      console.error('Cashfree verification error:', error)
+      reject(error)
+    })
+
+    req.end()
+  })
+}
+
+// Helper function to record subscription history
+async function recordSubscriptionHistory(userId, userEmail, solutionId, action, fromTier, toTier, startDate, endDate) {
+  try {
+    await docClient.send(new PutCommand({
+      TableName: SUBSCRIPTION_HISTORY_TABLE,
+      Item: {
+        userId,
+        timestamp: new Date().toISOString(),
+        userEmail,
+        solutionId,
+        action, // 'upgrade' or 'downgrade'
+        fromTier,
+        toTier,
+        startDate,
+        endDate,
+        recordedAt: new Date().toISOString()
+      }
+    }))
+    console.log(`Recorded subscription history: ${action} from ${fromTier} to ${toTier}`)
+  } catch (error) {
+    console.error('Failed to record subscription history:', error)
+  }
+}
 
 exports.handler = async (event) => {
   console.log('Cashfree webhook received:', JSON.stringify(event, null, 2))
@@ -65,9 +142,32 @@ exports.handler = async (event) => {
     const transaction = transactionResponse.Item
     const { userId, solutionId } = transaction
 
-    // Check if already processed to avoid duplicate processing
-    const isSuccessful = payment_status === 'SUCCESS' || order_status === 'PAID'
-    const isFailed = payment_status === 'FAILED' || order_status === 'FAILED'
+    // SECURITY: Verify order status with Cashfree API before processing
+    console.log('Verifying order with Cashfree API:', order_id)
+    let verifiedOrder
+    try {
+      const credentials = await getCashfreeCredentials()
+      verifiedOrder = await verifyCashfreeOrder(credentials, order_id)
+      console.log('Order verification successful:', {
+        order_status: verifiedOrder.order_status,
+        payment_status: verifiedOrder.order_status
+      })
+    } catch (error) {
+      console.error('Failed to verify order with Cashfree:', error)
+      // If verification fails, acknowledge webhook but don't process payment
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ 
+          success: false, 
+          message: 'Order verification failed - webhook acknowledged' 
+        })
+      }
+    }
+
+    // Use verified order status instead of webhook data
+    const verifiedOrderStatus = verifiedOrder.order_status
+    const isSuccessful = verifiedOrderStatus === 'PAID'
+    const isFailed = verifiedOrderStatus === 'FAILED' || verifiedOrderStatus === 'CANCELLED'
     
     if (transaction.status === 'completed' && isSuccessful) {
       console.log('Transaction already processed successfully, returning 200')
@@ -84,8 +184,9 @@ exports.handler = async (event) => {
                      isFailed ? 'failed' : 'pending'
 
     console.log('Payment status determination:', {
-      payment_status,
-      order_status,
+      webhook_payment_status: payment_status,
+      webhook_order_status: order_status,
+      verified_order_status: verifiedOrderStatus,
       isSuccessful,
       isFailed,
       newStatus,
@@ -195,6 +296,8 @@ exports.handler = async (event) => {
           const proExpiresAt = new Date()
           proExpiresAt.setDate(proExpiresAt.getDate() + 30)
           
+          const previousTier = existingEntitlement.access_tier || existingEntitlement.tier || 'registered'
+          
           await docClient.send(new UpdateCommand({
             TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
             Key: {
@@ -209,6 +312,18 @@ exports.handler = async (event) => {
               ':updated': new Date().toISOString()
             }
           }))
+          
+          // Record subscription history
+          await recordSubscriptionHistory(
+            userId,
+            user.email,
+            solutionId,
+            'upgrade',
+            previousTier,
+            'pro',
+            new Date().toISOString(),
+            proExpiresAt.toISOString()
+          )
           
           console.log(`Updated existing entitlement to Pro for user ${user.email} solution ${solutionId}`)
         } else {
@@ -235,6 +350,18 @@ exports.handler = async (event) => {
               status: 'active'
             }
           }))
+          
+          // Record subscription history
+          await recordSubscriptionHistory(
+            userId,
+            user.email,
+            solutionId,
+            'upgrade',
+            'none',
+            'pro',
+            new Date().toISOString(),
+            proExpiresAt.toISOString()
+          )
           
           console.log(`Created new Pro entitlement for user ${user.email} solution ${solutionId} with token ${newToken}`)
         }
