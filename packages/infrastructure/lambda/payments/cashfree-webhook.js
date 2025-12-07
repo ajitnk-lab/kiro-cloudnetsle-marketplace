@@ -411,6 +411,27 @@ exports.handler = async (event) => {
         } catch (emailError) {
           console.error('Failed to send confirmation email:', emailError)
         }
+
+        // Trigger invoice generation if billing info exists
+        if (transaction.billingCountry) {
+          try {
+            const { LambdaClient, InvokeCommand } = require('@aws-sdk/client-lambda')
+            const lambdaClient = new LambdaClient({})
+            
+            await lambdaClient.send(new InvokeCommand({
+              FunctionName: process.env.INVOICE_LAMBDA_NAME,
+              InvocationType: 'Event', // Async invocation
+              Payload: JSON.stringify({
+                transactionId: order_id,
+                customerEmail: user.email
+              })
+            }))
+            console.log('Invoice generation triggered')
+          } catch (invoiceError) {
+            console.error('Failed to trigger invoice generation:', invoiceError)
+            // Don't fail webhook - invoice can be regenerated later
+          }
+        }
       }
     }
 

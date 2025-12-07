@@ -98,7 +98,23 @@ exports.handler = async (event) => {
 
   try {
     const body = JSON.parse(event.body)
-    const { userId, solutionId = 'aws-solution-finder-001', amount: requestAmount, userEmail, userName, userPhone } = body
+    const { 
+      userId, 
+      solutionId = 'aws-solution-finder-001', 
+      amount: requestAmount, 
+      userEmail, 
+      userName, 
+      userPhone,
+      // Billing information (optional, for GST)
+      billingCountry,
+      billingAddress,
+      billingCity,
+      billingState,
+      billingPostalCode,
+      isBusinessPurchase,
+      gstin,
+      companyName
+    } = body
 
     if (!userId) {
       return {
@@ -109,7 +125,7 @@ exports.handler = async (event) => {
     }
 
     // Get solution details
-    let amount = requestAmount ? requestAmount * 100 : 29900 // Convert to paisa or default
+    let baseAmount = requestAmount || 299 // Base price in rupees
     let solutionName = 'AWS Solution'
     let tier = 'pro'
     
@@ -122,19 +138,25 @@ exports.handler = async (event) => {
       if (solutionResponse.Item) {
         solutionName = solutionResponse.Item.name || solutionResponse.Item.title || 'AWS Solution'
         if (!requestAmount && solutionResponse.Item.pricing?.proTier?.amount) {
-          amount = solutionResponse.Item.pricing.proTier.amount * 100 // Convert to paisa
+          baseAmount = solutionResponse.Item.pricing.proTier.amount
         }
       }
     } catch (error) {
       console.warn('Could not fetch solution details, using defaults:', error)
     }
 
+    // Calculate GST (18% for India, 0% for others)
+    const gstRate = billingCountry === 'India' ? 18 : 0
+    const gstAmount = (baseAmount * gstRate) / 100
+    const totalAmount = baseAmount + gstAmount
+    const amountInPaisa = Math.round(totalAmount * 100) // Convert to paisa for Cashfree
+
     const credentials = await getCashfreeCredentials()
     const transactionId = `CF_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
     const orderData = {
       order_id: transactionId,
-      order_amount: amount / 100, // Cashfree expects rupees, not paisa
+      order_amount: totalAmount, // Cashfree expects rupees
       order_currency: 'INR',
       customer_details: {
         customer_id: userId,
@@ -159,7 +181,11 @@ exports.handler = async (event) => {
         userId,
         solutionId,
         solutionName,
-        amount,
+        amount: amountInPaisa, // Legacy field in paisa
+        baseAmount, // New: amount before GST
+        gstAmount, // New: GST amount
+        gstRate, // New: GST percentage
+        totalAmount, // New: final amount
         currency: 'INR',
         paymentGateway: 'cashfree',
         gatewayOrderId: transactionId,
@@ -168,6 +194,17 @@ exports.handler = async (event) => {
         customerEmail: userEmail || 'user@example.com',
         customerName: userName || 'Customer',
         customerPhone: userPhone || '9999999999',
+        // Billing information (optional)
+        ...(billingCountry && {
+          billingCountry,
+          billingAddress,
+          billingCity,
+          billingState,
+          billingPostalCode,
+          isBusinessPurchase,
+          gstin,
+          companyName
+        }),
         createdAt: new Date().toISOString(),
         gateway_data: {
           order_id: transactionId,
@@ -189,7 +226,10 @@ exports.handler = async (event) => {
         transactionId,
         paymentSessionId: cashfreeResponse.payment_session_id,
         gateway: 'cashfree',
-        amount: amount / 100,
+        amount: totalAmount,
+        baseAmount,
+        gstAmount,
+        gstRate,
         sessionId: cashfreeResponse.payment_session_id
       })
     }

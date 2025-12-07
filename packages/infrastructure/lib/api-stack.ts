@@ -18,7 +18,9 @@ interface ApiStackProps {
   userSessionsTable: dynamodb.Table // NEW: Analytics tables
   apiMetricsTable: dynamodb.Table // NEW: Analytics tables
   subscriptionHistoryTable: dynamodb.Table // NEW: Subscription history
+  companySettingsTable: dynamodb.Table // NEW: For GST invoices
   assetsBucket: s3.Bucket
+  invoiceBucket: s3.Bucket // NEW: For PDF invoices
 }
 
 export class ApiStack extends Construct {
@@ -81,7 +83,9 @@ export class ApiStack extends Construct {
     props.paymentTransactionsTable.grantReadWriteData(lambdaRole)
     props.userSessionsTable.grantReadWriteData(lambdaRole) // NEW: Analytics tables
     props.subscriptionHistoryTable.grantReadWriteData(lambdaRole) // NEW: Subscription history
+    props.companySettingsTable.grantReadData(lambdaRole) // NEW: GST company settings (read-only)
     props.assetsBucket.grantReadWrite(lambdaRole)
+    props.invoiceBucket.grantReadWrite(lambdaRole) // NEW: Invoice storage
 
     // Grant Cognito permissions for user management
     lambdaRole.addToPolicy(new iam.PolicyStatement({
@@ -224,7 +228,7 @@ export class ApiStack extends Construct {
         USER_TABLE_NAME: props.userTable.tableName,
         PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
         SOLUTION_TABLE_NAME: props.solutionTable.tableName,
-        API_BASE_URL: `https://${this.api.restApiId}.execute-api.us-west-1.amazonaws.com/prod`,
+        AWS_REGION_NAME: 'us-west-1',
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -251,7 +255,7 @@ export class ApiStack extends Construct {
       environment: {
         USER_TABLE: props.userTable.tableName,
         PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
-        API_BASE_URL: `https://${this.api.restApiId}.execute-api.us-west-1.amazonaws.com/prod`,
+        AWS_REGION_NAME: 'us-west-1',
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
@@ -408,10 +412,28 @@ export class ApiStack extends Construct {
         USER_SOLUTION_ENTITLEMENTS_TABLE: props.userSolutionEntitlementsTable.tableName,
         SUBSCRIPTION_HISTORY_TABLE: props.subscriptionHistoryTable.tableName,
         SOLUTION_TABLE_NAME: props.solutionTable.tableName,
+        INVOICE_LAMBDA_NAME: 'MarketplaceStack-Clean-InvoiceGenerationFunction', // Will be updated after deploy
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),
     })
+
+    // Invoice Generation Lambda Function (NEW: For GST invoices)
+    const invoiceGenerationFunction = new lambda.Function(this, 'InvoiceGenerationFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'generate-invoice.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        COMPANY_SETTINGS_TABLE: props.companySettingsTable.tableName,
+        PAYMENT_TRANSACTIONS_TABLE: props.paymentTransactionsTable.tableName,
+        INVOICE_BUCKET: props.invoiceBucket.bucketName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    // Grant Lambda invoke permission to webhook
+    invoiceGenerationFunction.grantInvoke(cashfreeWebhookFunction)
 
     const paymentReconciliationFunction = new lambda.Function(this, 'PaymentReconciliationFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,

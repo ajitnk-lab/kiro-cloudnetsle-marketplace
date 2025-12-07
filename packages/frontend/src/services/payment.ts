@@ -11,6 +11,15 @@ export interface PaymentRequest {
   amount: number;
   currency?: string;
   purpose: string;
+  // Billing information (optional, for GST)
+  billingCountry?: string;
+  billingAddress?: string;
+  billingCity?: string;
+  billingState?: string;
+  billingPostalCode?: string;
+  isBusinessPurchase?: boolean;
+  gstin?: string;
+  companyName?: string;
 }
 
 export interface PaymentResponse {
@@ -18,6 +27,9 @@ export interface PaymentResponse {
   paymentSessionId: string;
   paymentRequestId: string;
   amount: number;
+  baseAmount?: number; // Amount before GST
+  gstAmount?: number; // GST amount
+  gstRate?: number; // GST percentage
   currency: string;
   solutionName: string;
 }

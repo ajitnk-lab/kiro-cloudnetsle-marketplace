@@ -37,7 +37,9 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
       userSessionsTable: dataStack.userSessionsTable, // NEW: Analytics tables
       apiMetricsTable: dataStack.apiMetricsTable, // NEW: Analytics tables
       subscriptionHistoryTable: dataStack.subscriptionHistoryTable, // NEW: Subscription history
+      companySettingsTable: dataStack.companySettingsTable, // NEW: GST company settings
       assetsBucket: dataStack.assetsBucket,
+      invoiceBucket: dataStack.invoiceBucket, // NEW: Invoice storage
     })
 
     // Create frontend deployment (S3 + CloudFront)

@@ -17,9 +17,11 @@
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.927.0",
     "@aws-sdk/lib-dynamodb": "^3.927.0",
+    "@types/pdfkit": "^0.17.4",
     "aws-cdk": "^2.1031.1",
     "aws-cdk-lib": "^2.100.0",
-    "constructs": "^10.3.0"
+    "constructs": "^10.3.0",
+    "pdfkit": "^0.17.2"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

@@ -17,7 +17,9 @@ export class DataStack extends Construct {
   public readonly userSessionsTable: dynamodb.Table // NEW: For location tracking
   public readonly apiMetricsTable: dynamodb.Table // NEW: For API performance tracking
   public readonly subscriptionHistoryTable: dynamodb.Table // NEW: For subscription history tracking
+  public readonly companySettingsTable: dynamodb.Table // NEW: For GST invoice company details
   public readonly assetsBucket: s3.Bucket
+  public readonly invoiceBucket: s3.Bucket // NEW: For storing PDF invoices
   public readonly vpc: ec2.Vpc
   public readonly database: rds.DatabaseInstance
   public readonly phonepeSecret: secretsmanager.Secret
@@ -333,6 +335,16 @@ export class DataStack extends Construct {
       sortKey: { name: 'timestamp', type: dynamodb.AttributeType.STRING },
     })
 
+    // Company Settings Table for GST Invoice Details
+    this.companySettingsTable = new dynamodb.Table(this, 'CompanySettingsTable', {
+      tableName: `marketplace-company-settings-${baseTimestamp}`,
+      partitionKey: { name: 'companyId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      encryption: dynamodb.TableEncryption.AWS_MANAGED,
+      pointInTimeRecovery: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN, // Retain company data
+    })
+
     // S3 Bucket for assets
     this.assetsBucket = new s3.Bucket(this, 'AssetsBucket', {
       bucketName: `marketplace-assets-1764183053${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
@@ -346,6 +358,15 @@ export class DataStack extends Construct {
         },
       ],
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+    })
+
+    // S3 Bucket for invoices (GST compliance)
+    this.invoiceBucket = new s3.Bucket(this, 'InvoiceBucket', {
+      bucketName: `marketplace-invoices-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      versioned: true,
+      removalPolicy: cdk.RemovalPolicy.RETAIN, // Retain invoices for compliance
     })
 
     // RDS PostgreSQL for transactions and financial data

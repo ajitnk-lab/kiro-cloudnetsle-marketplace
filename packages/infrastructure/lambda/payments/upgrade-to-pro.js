@@ -9,6 +9,13 @@ const secretsClient = new SecretsManagerClient({})
 
 const USER_TABLE = process.env.USER_TABLE
 const PAYMENT_TRANSACTIONS_TABLE = process.env.PAYMENT_TRANSACTIONS_TABLE
+const AWS_REGION = process.env.AWS_REGION_NAME || process.env.AWS_REGION || 'us-west-1'
+
+// Construct API URL at runtime to avoid circular dependency
+const getApiBaseUrl = () => {
+  const apiId = process.env.API_GATEWAY_ID || 'juvt4m81ld'
+  return `https://${apiId}.execute-api.${AWS_REGION}.amazonaws.com/prod`
+}
 
 const getCashfreeCredentials = async () => {
   const command = new GetSecretValueCommand({
@@ -118,7 +125,7 @@ exports.handler = async (event) => {
       },
       order_meta: {
         return_url: returnUrl || 'https://marketplace.cloudnestle.com/profile',
-        notify_url: `${process.env.API_BASE_URL || 'https://juvt4m81ld.execute-api.us-east-1.amazonaws.com/prod'}/payments/cashfree-webhook`
+        notify_url: `${getApiBaseUrl()}/payments/cashfree-webhook`
       }
     }
 

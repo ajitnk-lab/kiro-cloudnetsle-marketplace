@@ -1,0 +1,189 @@
+import React, { useState } from 'react';
+import { countries } from '../config/countries';
+import { indianStates } from '../config/indianStates';
+import { validateGSTIN } from '../utils/gstinValidator';
+
+interface BillingInfo {
+  billingCountry: string;
+  billingAddress: string;
+  billingCity: string;
+  billingState: string;
+  billingPostalCode: string;
+  isBusinessPurchase: boolean;
+  gstin?: string;
+  companyName?: string;
+}
+
+interface Props {
+  onSubmit: (billingInfo: BillingInfo) => void;
+  onBack?: () => void;
+}
+
+export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack }) => {
+  const [formData, setFormData] = useState<BillingInfo>({
+    billingCountry: 'India',
+    billingAddress: '',
+    billingCity: '',
+    billingState: '',
+    billingPostalCode: '',
+    isBusinessPurchase: false,
+  });
+
+  const [errors, setErrors] = useState<Partial<Record<keyof BillingInfo, string>>>({});
+
+  const validate = () => {
+    const newErrors: Partial<Record<keyof BillingInfo, string>> = {};
+
+    if (!formData.billingCountry) newErrors.billingCountry = 'Country is required';
+    if (!formData.billingAddress) newErrors.billingAddress = 'Address is required';
+    if (!formData.billingCity) newErrors.billingCity = 'City is required';
+    if (!formData.billingState) newErrors.billingState = 'State is required';
+    if (!formData.billingPostalCode) newErrors.billingPostalCode = 'Postal code is required';
+
+    if (formData.isBusinessPurchase && formData.billingCountry === 'India' && formData.gstin) {
+      if (!validateGSTIN(formData.gstin)) {
+        newErrors.gstin = 'Invalid GSTIN format';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validate()) {
+      onSubmit(formData);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-lg font-semibold">Billing Information</h3>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Country *</label>
+        <select
+          value={formData.billingCountry}
+          onChange={(e) => setFormData({ ...formData, billingCountry: e.target.value })}
+          className="w-full p-2 border rounded"
+        >
+          {countries.map((c) => (
+            <option key={c.code} value={c.code}>{c.name}</option>
+          ))}
+        </select>
+        {errors.billingCountry && <p className="text-red-500 text-sm">{errors.billingCountry}</p>}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Address *</label>
+        <input
+          type="text"
+          value={formData.billingAddress}
+          onChange={(e) => setFormData({ ...formData, billingAddress: e.target.value })}
+          className="w-full p-2 border rounded"
+        />
+        {errors.billingAddress && <p className="text-red-500 text-sm">{errors.billingAddress}</p>}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">City *</label>
+          <input
+            type="text"
+            value={formData.billingCity}
+            onChange={(e) => setFormData({ ...formData, billingCity: e.target.value })}
+            className="w-full p-2 border rounded"
+          />
+          {errors.billingCity && <p className="text-red-500 text-sm">{errors.billingCity}</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">State *</label>
+          {formData.billingCountry === 'India' ? (
+            <select
+              value={formData.billingState}
+              onChange={(e) => setFormData({ ...formData, billingState: e.target.value })}
+              className="w-full p-2 border rounded"
+            >
+              <option value="">Select State</option>
+              {indianStates.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={formData.billingState}
+              onChange={(e) => setFormData({ ...formData, billingState: e.target.value })}
+              className="w-full p-2 border rounded"
+            />
+          )}
+          {errors.billingState && <p className="text-red-500 text-sm">{errors.billingState}</p>}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Postal Code *</label>
+        <input
+          type="text"
+          value={formData.billingPostalCode}
+          onChange={(e) => setFormData({ ...formData, billingPostalCode: e.target.value })}
+          className="w-full p-2 border rounded"
+        />
+        {errors.billingPostalCode && <p className="text-red-500 text-sm">{errors.billingPostalCode}</p>}
+      </div>
+
+      <div>
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={formData.isBusinessPurchase}
+            onChange={(e) => setFormData({ ...formData, isBusinessPurchase: e.target.checked })}
+          />
+          <span className="text-sm">Buying for business?</span>
+        </label>
+      </div>
+
+      {formData.isBusinessPurchase && (
+        <>
+          <div>
+            <label className="block text-sm font-medium mb-1">Company Name</label>
+            <input
+              type="text"
+              value={formData.companyName || ''}
+              onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+              className="w-full p-2 border rounded"
+            />
+          </div>
+
+          {formData.billingCountry === 'India' && (
+            <div>
+              <label className="block text-sm font-medium mb-1">GSTIN (Optional)</label>
+              <input
+                type="text"
+                value={formData.gstin || ''}
+                onChange={(e) => setFormData({ ...formData, gstin: e.target.value.toUpperCase() })}
+                placeholder="29ABCDE1234F1Z5"
+                maxLength={15}
+                className="w-full p-2 border rounded"
+              />
+              {errors.gstin && <p className="text-red-500 text-sm">{errors.gstin}</p>}
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="flex gap-4">
+        {onBack && (
+          <button type="button" onClick={onBack} className="px-4 py-2 border rounded">
+            Back
+          </button>
+        )}
+        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+          Continue to Payment
+        </button>
+      </div>
+    </form>
+  );
+};
