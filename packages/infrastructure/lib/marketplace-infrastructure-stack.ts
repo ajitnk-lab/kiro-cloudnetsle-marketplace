@@ -1,45 +1,70 @@
 import * as cdk from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import { AuthStack } from './auth-stack'
-import { DataStack } from './data-stack'
-import { ApiStack } from './api-stack'
+import { DataConstruct } from './constructs/data-construct'
+import { ApiConstruct } from './constructs/api-construct'
 import { FrontendStack } from './frontend-stack'
 
 export class MarketplaceInfrastructureStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    // Create data layer (DynamoDB, S3, RDS)
-    const dataStack = new DataStack(this, 'DataStack')
-
-    // Create authentication layer (Cognito)
+    // Create authentication layer first (Cognito with custom attributes)
     const authStack = new AuthStack(this, 'AuthStack', {
-      userTableName: dataStack.userTable.tableName,
-      userSolutionEntitlementsTableName: dataStack.userSolutionEntitlementsTable.tableName,
-      subscriptionHistoryTableName: dataStack.subscriptionHistoryTable.tableName,
-      tokenSecret: 'marketplace-secret-key-2024', // In production, use AWS Secrets Manager
+      userTableName: '', // Will be set after DataConstruct creation
+      userSolutionEntitlementsTableName: '',
+      subscriptionHistoryTableName: '',
+      tokenSecret: 'marketplace-secret-key-2024',
     })
 
-    // Grant permissions
-    dataStack.userTable.grantWriteData(authStack.postConfirmationFunction)
-    dataStack.userSolutionEntitlementsTable.grantWriteData(authStack.postConfirmationFunction)
-    dataStack.subscriptionHistoryTable.grantWriteData(authStack.postConfirmationFunction)
-
-    // Create API layer (API Gateway, Lambda functions)
-    const apiStack = new ApiStack(this, 'ApiStack', {
+    // Create data layer (DynamoDB, S3, Lambda functions) - pass AuthStack's UserPool
+    const dataConstruct = new DataConstruct(this, 'DataStack', {
       userPool: authStack.userPool,
-      userTable: dataStack.userTable,
-      solutionTable: dataStack.solutionTable,
-      partnerApplicationTable: dataStack.partnerApplicationTable,
-      tokenTable: dataStack.tokenTable,
-      userSolutionEntitlementsTable: dataStack.userSolutionEntitlementsTable,
-      paymentTransactionsTable: dataStack.paymentTransactionsTable,
-      userSessionsTable: dataStack.userSessionsTable, // NEW: Analytics tables
-      apiMetricsTable: dataStack.apiMetricsTable, // NEW: Analytics tables
-      subscriptionHistoryTable: dataStack.subscriptionHistoryTable, // NEW: Subscription history
-      companySettingsTable: dataStack.companySettingsTable, // NEW: GST company settings
-      assetsBucket: dataStack.assetsBucket,
-      invoiceBucket: dataStack.invoiceBucket, // NEW: Invoice storage
+      userPoolClient: authStack.userPoolClient,
+    })
+
+    // Grant permissions to auth functions
+    dataConstruct.userTable.grantWriteData(authStack.postConfirmationFunction)
+    dataConstruct.userSolutionEntitlementsTable.grantWriteData(authStack.postConfirmationFunction)
+    dataConstruct.subscriptionHistoryTable.grantWriteData(authStack.postConfirmationFunction)
+    
+    // Update AuthStack Lambda environment variables with table names
+    authStack.postConfirmationFunction.addEnvironment('USER_TABLE_NAME', dataConstruct.userTable.tableName)
+    authStack.postConfirmationFunction.addEnvironment('ENTITLEMENT_TABLE_NAME', dataConstruct.userSolutionEntitlementsTable.tableName)
+    authStack.postConfirmationFunction.addEnvironment('SUBSCRIPTION_HISTORY_TABLE_NAME', dataConstruct.subscriptionHistoryTable.tableName)
+
+    // Create API layer (API Gateway only - references Lambda from DataConstruct)
+    const apiConstruct = new ApiConstruct(this, 'ApiStack', {
+      // Pass all Lambda functions from DataConstruct
+      paymentInitiateFunction: dataConstruct.paymentInitiateFunction,
+      paymentStatusFunction: dataConstruct.paymentStatusFunction,
+      upgradeToProFunction: dataConstruct.upgradeToProFunction,
+      paymentCallbackFunction: dataConstruct.paymentCallbackFunction,
+      cashfreeWebhookFunction: dataConstruct.cashfreeWebhookFunction,
+      phonepeWebhookFunction: dataConstruct.phonepeWebhookFunction,
+      phonepeReconciliationFunction: dataConstruct.phonepeReconciliationFunction,
+      invoiceGenerationFunction: dataConstruct.invoiceGenerationFunction,
+      catalogFunction: dataConstruct.catalogFunction,
+      solutionManagementFunction: dataConstruct.solutionManagementFunction,
+      partnerApplicationFunction: dataConstruct.partnerApplicationFunction,
+      adminFunction: dataConstruct.adminFunction,
+      userManagementFunction: dataConstruct.userManagementFunction,
+      profileFunction: dataConstruct.profileFunction,
+      registerFunction: dataConstruct.registerFunction,
+      tokenManagerFunction: dataConstruct.tokenManagerFunction,
+      solutionTokenGeneratorFunction: dataConstruct.solutionTokenGeneratorFunction,
+      generateSolutionTokenFunction: dataConstruct.generateSolutionTokenFunction,
+      solutionTokenValidatorFunction: dataConstruct.solutionTokenValidatorFunction,
+      checkUserLimitsFunction: dataConstruct.checkUserLimitsFunction,
+      incrementUsageFunctionCF29C1F7: dataConstruct.incrementUsageFunctionCF29C1F7,
+      usageAnalyticsFunction: dataConstruct.usageAnalyticsFunction,
+      businessMetricsFunction: dataConstruct.businessMetricsFunction,
+      geographicAnalyticsFunction: dataConstruct.geographicAnalyticsFunction,
+      msmeKpiFunction: dataConstruct.msmeKpiFunction,
+      paymentReconciliationFunction: dataConstruct.paymentReconciliationFunction,
+      
+      // Pass Cognito User Pool from AuthStack
+      userPool: authStack.userPool,
     })
 
     // Create frontend deployment (S3 + CloudFront)
@@ -57,13 +82,18 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
     })
 
     new cdk.CfnOutput(this, 'ApiGatewayUrl', {
-      value: apiStack.api.url,
+      value: apiConstruct.api.url,
       description: 'API Gateway URL',
     })
 
     new cdk.CfnOutput(this, 'AssetsBucketName', {
-      value: dataStack.assetsBucket.bucketName,
+      value: dataConstruct.assetsBucket.bucketName,
       description: 'S3 Assets Bucket Name',
+    })
+
+    new cdk.CfnOutput(this, 'InvoiceBucketName', {
+      value: dataConstruct.invoiceBucket.bucketName,
+      description: 'S3 Invoice Bucket Name',
     })
 
     new cdk.CfnOutput(this, 'WebsiteUrl', {
@@ -83,18 +113,23 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
 
     // Export DynamoDB table names for FAISS integration
     new cdk.CfnOutput(this, 'UserTableName', {
-      value: dataStack.userTable.tableName,
+      value: dataConstruct.userTable.tableName,
       description: 'DynamoDB User Table Name',
     })
 
     new cdk.CfnOutput(this, 'EntitlementTableName', {
-      value: dataStack.userSolutionEntitlementsTable.tableName,
+      value: dataConstruct.userSolutionEntitlementsTable.tableName,
       description: 'DynamoDB User Solution Entitlements Table Name',
     })
 
     new cdk.CfnOutput(this, 'SessionTableName', {
-      value: dataStack.sessionTable.tableName,
+      value: dataConstruct.sessionTable.tableName,
       description: 'DynamoDB Session Table Name',
+    })
+
+    new cdk.CfnOutput(this, 'CompanySettingsTableName', {
+      value: dataConstruct.companySettingsTable.tableName,
+      description: 'DynamoDB Company Settings Table Name (GST)',
     })
   }
 }

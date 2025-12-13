@@ -14,7 +14,7 @@ export function PaymentSuccess() {
       }
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}payments/status/${transactionId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/payments/status/${transactionId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }

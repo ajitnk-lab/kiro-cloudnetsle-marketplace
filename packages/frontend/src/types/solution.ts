@@ -20,6 +20,9 @@ export interface Solution {
       amount: number
       currency: 'INR'
     }
+    pro?: {
+      price: number
+    }
   }
   assets: {
     images: string[]

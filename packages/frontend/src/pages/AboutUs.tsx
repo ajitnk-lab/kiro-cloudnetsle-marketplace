@@ -4,14 +4,40 @@ export function AboutUs() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">About CloudNestle Consulting & Services</h1>
-        <p className="text-lg text-gray-600 mb-4">Operating CloudNestle Marketplace Platform</p>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">About CloudNestle Marketplace</h1>
+        <p className="text-2xl text-blue-600 font-semibold mb-8">
           Where Your Business Finds Its Cloud Home
         </p>
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg inline-block">
-          <p className="text-lg font-semibold text-gray-800">Legal Business Name:</p>
-          <p className="text-xl font-bold text-blue-600">CloudNestle Consulting & Services</p>
+      </div>
+
+      {/* What is the Marketplace */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-8 mb-12">
+        <h2 className="text-3xl font-semibold mb-4 text-gray-900">What is CloudNestle Marketplace?</h2>
+        <p className="text-lg text-gray-700 leading-relaxed mb-4">
+          CloudNestle Marketplace is a platform that connects businesses with vetted cloud solutions, expert services, and trusted partners. We make it easy to discover, evaluate, and implement cloud solutions that drive your business forward.
+        </p>
+        <p className="text-lg text-gray-700 leading-relaxed mb-4">
+          We offer products and solutions built in-house and by our trusted partners.
+        </p>
+        <div className="text-center">
+          <a 
+            href="/catalog" 
+            className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+          >
+            Browse Catalog & Make a Purchase
+          </a>
+        </div>
+      </div>
+
+      {/* Behind the Platform */}
+      <div className="bg-white border border-gray-200 rounded-lg p-8 mb-12">
+        <h2 className="text-3xl font-semibold mb-4 text-gray-900">Behind the Platform</h2>
+        <p className="text-lg text-gray-700 leading-relaxed mb-6">
+          Built and operated by <span className="font-semibold text-blue-600">CloudNestle Consulting & Services</span>, a cloud consulting company specializing in AWS solutions and digital transformation.
+        </p>
+        <div className="bg-gray-50 border-l-4 border-blue-600 p-4">
+          <p className="text-sm text-gray-600 font-semibold mb-1">Legal Business Name</p>
+          <p className="text-base text-gray-800">CloudNestle Consulting & Services</p>
         </div>
       </div>
 
@@ -69,16 +95,7 @@ export function AboutUs() {
         </div>
       </div>
 
-
-
-      <div className="text-center">
-        <p className="text-gray-600 mb-4">
-          Professional AWS cloud consulting and migration services through our comprehensive marketplace platform.
-        </p>
-        <p className="text-gray-600">
-          Visit our main website: <a href="https://www.cloudnestle.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">www.cloudnestle.com</a>
-        </p>
-      </div>
+      {/* CloudNestle website link hidden for payment gateway compliance */}
     </div>
   )
 }

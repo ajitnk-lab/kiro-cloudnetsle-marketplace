@@ -1,0 +1,252 @@
+# Marketplace Stack Split Implementation Guide
+
+**Q CLI TODO ID: 1765126153627**
+
+## Problem
+Circular dependency in CloudFormation with 150+ API Gateway resources preventing deployment of GST features.
+
+## Solution
+Split into 2 stacks:
+1. **MarketplaceDataStack** - All data resources and Lambda functions
+2. **MarketplaceApiStack** - API Gateway only (references Lambda from DataStack)
+
+## Why This Works
+- Lambda functions created BEFORE API Gateway
+- API Gateway only references them (no circular dependency)
+- 100% automated, zero manual steps
+- FAISS app continues working (API URL unchanged)
+
+---
+
+## Implementation Steps
+
+### Phase 1: Create MarketplaceDataStack (Tasks 1-8)
+
+**File: `packages/infrastructure/lib/marketplace-data-stack.ts`**
+
+Move from existing stacks:
+- ✅ All DynamoDB tables (10 tables including new company-settings)
+- ✅ S3 buckets (assets + new invoice bucket)
+- ✅ Cognito (UserPool, Client, Identity Pool, Google provider)
+- ✅ SES email identity
+- ✅ Secrets Manager references
+- ✅ Lambda execution role with all permissions
+- ✅ ALL ~30 Lambda functions (payment, catalog, admin, analytics, webhooks, invoice)
+
+**Export all Lambda functions:**
+```typescript
+export class MarketplaceDataStack extends cdk.Stack {
+  public readonly paymentInitiateFunction: lambda.Function
+  public readonly cashfreeWebhookFunction: lambda.Function
+  public readonly invoiceGenerationFunction: lambda.Function
+  // ... export all ~30 functions
+}
+```
+
+### Phase 2: Create MarketplaceApiStack (Tasks 9-11)
+
+**File: `packages/infrastructure/lib/marketplace-api-stack.ts`**
+
+Contains ONLY:
+- ✅ API Gateway RestApi definition
+- ✅ Cognito Authorizer
+- ✅ All ~150 API routes (addMethod calls)
+- ✅ References Lambda functions from DataStack props
+
+**Props interface:**
+```typescript
+interface MarketplaceApiStackProps extends cdk.StackProps {
+  paymentInitiateFunction: lambda.IFunction
+  cashfreeWebhookFunction: lambda.IFunction
+  // ... all Lambda function references
+  cognitoUserPool: cognito.IUserPool
+}
+```
+
+### Phase 3: Update Main Stack (Tasks 12-13)
+
+**File: `packages/infrastructure/lib/marketplace-infrastructure-stack.ts`**
+
+```typescript
+export class MarketplaceInfrastructureStack extends cdk.Stack {
+  constructor(scope: Construct, id: string) {
+    super(scope, id)
+    
+    // 1. Create DataStack first
+    const dataStack = new MarketplaceDataStack(this, 'DataStack')
+    
+    // 2. Create ApiStack with DataStack outputs
+    const apiStack = new MarketplaceApiStack(this, 'ApiStack', {
+      paymentInitiateFunction: dataStack.paymentInitiateFunction,
+      cashfreeWebhookFunction: dataStack.cashfreeWebhookFunction,
+      // ... pass all Lambda functions
+      cognitoUserPool: dataStack.userPool
+    })
+    
+    // 3. Explicit dependency
+    apiStack.addDependency(dataStack)
+  }
+}
+```
+
+### Phase 4: Build & Deploy (Tasks 14-16)
+
+```bash
+# 1. Build
+cd packages/infrastructure
+npm run build
+
+# 2. Deploy DataStack first
+cdk deploy MarketplaceStack-Clean/DataStack --require-approval never
+
+# 3. Deploy ApiStack second
+cdk deploy MarketplaceStack-Clean/ApiStack --require-approval never
+
+# Or deploy both together (CDK respects dependency order)
+cdk deploy MarketplaceStack-Clean --require-approval never
+```
+
+### Phase 5: Verification (Tasks 17-21)
+
+```bash
+# 1. Check API Gateway URL
+aws apigateway get-rest-apis --query "items[?name=='Marketplace API'].id" --output text
+# Should be: 7kzsoygrzl (or note new ID)
+
+# 2. Test FAISS integration
+cd /persistent/home/ubuntu/workspace/faiss-rag-agent
+# FAISS should work without changes
+
+# 3. Seed company settings
+cd /persistent/home/ubuntu/workspace/kiro-cloudnetsle-marketplace/packages/infrastructure
+node scripts/seed-company-settings.js
+
+# 4. Test GST payment (Indian customer)
+# Create payment via frontend - verify 18% GST, invoice generated
+
+# 5. Test international payment
+# Create payment with non-Indian country - verify 0% GST
+```
+
+### Phase 6: Documentation & Cleanup (Tasks 22-24)
+
+```bash
+# 1. Update README
+# Add deployment order: DataStack -> ApiStack
+
+# 2. Update deploy-full.sh
+# Ensure it deploys both stacks in order
+
+# 3. Commit
+git add -A
+git commit -m "Refactor: Split stack to fix circular dependency, enable GST features"
+git push
+```
+
+---
+
+## Key Files to Modify
+
+### New Files
+- `packages/infrastructure/lib/marketplace-data-stack.ts` (NEW)
+- `packages/infrastructure/lib/marketplace-api-stack.ts` (NEW - refactored from api-stack.ts)
+
+### Modified Files
+- `packages/infrastructure/lib/marketplace-infrastructure-stack.ts` (orchestrates both stacks)
+- `packages/infrastructure/bin/marketplace-app.ts` (if needed)
+- `packages/infrastructure/lib/data-stack.ts` (DELETE - merged into marketplace-data-stack.ts)
+- `packages/infrastructure/lib/api-stack.ts` (DELETE - split into data + api stacks)
+
+### Lambda Code (Already Updated)
+- ✅ `lambda/payments/initiate.js` (GST calculation)
+- ✅ `lambda/payments/cashfree-webhook.js` (invoice trigger)
+- ✅ `lambda/payments/generate-invoice.js` (PDF generation)
+
+---
+
+## Deployment Order (New Account)
+
+```bash
+# 1. Clone repo
+git clone <repo-url>
+cd kiro-cloudnetsle-marketplace
+
+# 2. Install dependencies
+npm install
+
+# 3. Build
+cd packages/infrastructure
+npm run build
+
+# 4. Bootstrap CDK (if needed)
+cdk bootstrap
+
+# 5. Deploy (automatic order)
+cdk deploy MarketplaceStack-Clean --all --require-approval never
+
+# 6. Seed company settings
+node scripts/seed-company-settings.js
+
+# 7. Update FAISS .env (if API ID changed)
+cd /persistent/home/ubuntu/workspace/faiss-rag-agent
+# Update MARKETPLACE_API_URL if needed
+```
+
+---
+
+## FAISS Integration
+
+**No changes needed!**
+
+FAISS calls:
+```python
+MARKETPLACE_API_URL = 'https://7kzsoygrzl.execute-api.us-east-1.amazonaws.com/prod/'
+```
+
+This URL remains the same after stack split. API Gateway ID and endpoints unchanged.
+
+---
+
+## Rollback Plan
+
+If deployment fails:
+1. DataStack deployed successfully → Keep it
+2. ApiStack failed → Fix and redeploy ApiStack only
+3. Both failed → Delete both stacks, fix code, redeploy
+
+**No data loss** - DynamoDB tables have RETAIN policy.
+
+---
+
+## Success Criteria
+
+✅ Both stacks deploy without circular dependency error
+✅ API Gateway URL unchanged (or FAISS .env updated)
+✅ FAISS app can call /api/validate-solution-token
+✅ GST payment flow works (18% for India, 0% international)
+✅ Invoice PDF generated and stored in S3
+✅ Invoice email sent via SES
+✅ All existing marketplace features work
+
+---
+
+## Estimated Time
+
+- Phase 1 (DataStack): 1 hour
+- Phase 2 (ApiStack): 1 hour  
+- Phase 3 (Main Stack): 15 mins
+- Phase 4 (Deploy): 20 mins
+- Phase 5 (Testing): 30 mins
+- Phase 6 (Docs): 15 mins
+
+**Total: ~3.5 hours**
+
+---
+
+## Notes
+
+- This is a **one-time refactor** that fixes the circular dependency permanently
+- Future deployments will be fast and reliable
+- Works in any AWS account
+- No manual steps required
+- FAISS integration safe

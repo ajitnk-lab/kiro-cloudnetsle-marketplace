@@ -14,7 +14,7 @@ export function ProfilePage() {
     // Fetch user entitlements to get subscription details
     const fetchEntitlements = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}user/profile`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/user/profile`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('authToken')}`
           }
@@ -265,7 +265,31 @@ export function ProfilePage() {
                     </div>
                     
                     <button
-                      onClick={() => navigate('/checkout?solution=aws-solution-finder')}
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/generate-solution-token`, {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                            },
+                            body: JSON.stringify({
+                              solutionId: 'aws-solution-finder-001'
+                            })
+                          })
+                          
+                          if (response.ok) {
+                            const data = await response.json()
+                            const returnUrl = `https://awssolutionfinder.solutions.cloudnestle.com/search?token=${data.token}&user_id=${encodeURIComponent(user.userId)}&user_email=${encodeURIComponent(user.email)}&tier=pro`
+                            navigate(`/upgrade?solution=aws-solution-finder-001&return_url=${encodeURIComponent(returnUrl)}`)
+                          } else {
+                            navigate('/upgrade?solution=aws-solution-finder-001')
+                          }
+                        } catch (error) {
+                          console.error('Error generating token:', error)
+                          navigate('/upgrade?solution=aws-solution-finder-001')
+                        }
+                      }}
                       className="w-full bg-purple-600 text-white py-2 px-4 rounded-md font-medium hover:bg-purple-700 transition-colors"
                     >
                       Renew Pro Subscription
@@ -275,7 +299,31 @@ export function ProfilePage() {
                 
                 {subscriptionStatus.status === 'active' && (subscriptionStatus.daysUntilExpiry ?? 0) <= 7 && (
                   <button
-                    onClick={() => navigate('/checkout?solution=aws-solution-finder')}
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/generate-solution-token`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                          },
+                          body: JSON.stringify({
+                            solutionId: 'aws-solution-finder-001'
+                          })
+                        })
+                        
+                        if (response.ok) {
+                          const data = await response.json()
+                          const returnUrl = `https://awssolutionfinder.solutions.cloudnestle.com/search?token=${data.token}&user_id=${encodeURIComponent(user.userId)}&user_email=${encodeURIComponent(user.email)}&tier=pro`
+                          navigate(`/upgrade?solution=aws-solution-finder-001&return_url=${encodeURIComponent(returnUrl)}`)
+                        } else {
+                          navigate('/upgrade?solution=aws-solution-finder-001')
+                        }
+                      } catch (error) {
+                        console.error('Error generating token:', error)
+                        navigate('/upgrade?solution=aws-solution-finder-001')
+                      }
+                    }}
                     className="w-full bg-purple-600 text-white py-2 px-4 rounded-md font-medium hover:bg-purple-700 transition-colors"
                   >
                     Renew Subscription
@@ -297,7 +345,33 @@ export function ProfilePage() {
                 </div>
                 
                 <button
-                  onClick={() => navigate('/checkout?solution=aws-solution-finder')}
+                  onClick={async () => {
+                    try {
+                      // Generate token for AWS Solution Finder
+                      const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/generate-solution-token`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        },
+                        body: JSON.stringify({
+                          solutionId: 'aws-solution-finder-001'
+                        })
+                      })
+                      
+                      if (response.ok) {
+                        const data = await response.json()
+                        const returnUrl = `https://awssolutionfinder.solutions.cloudnestle.com/search?token=${data.token}&user_id=${encodeURIComponent(user.userId)}&user_email=${encodeURIComponent(user.email)}&tier=pro`
+                        navigate(`/upgrade?solution=aws-solution-finder-001&return_url=${encodeURIComponent(returnUrl)}`)
+                      } else {
+                        // Fallback to upgrade page without token
+                        navigate('/upgrade?solution=aws-solution-finder-001')
+                      }
+                    } catch (error) {
+                      console.error('Error generating token:', error)
+                      navigate('/upgrade?solution=aws-solution-finder-001')
+                    }
+                  }}
                   className="w-full bg-purple-600 text-white py-2 px-4 rounded-md font-medium hover:bg-purple-700 transition-colors"
                 >
                   Upgrade to Pro Monthly

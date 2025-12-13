@@ -12,21 +12,26 @@ interface BillingInfo {
   isBusinessPurchase: boolean;
   gstin?: string;
   companyName?: string;
+  phoneCountryCode?: string;
+  phoneNumber?: string;
 }
 
 interface Props {
   onSubmit: (billingInfo: BillingInfo) => void;
   onBack?: () => void;
+  initialData?: BillingInfo;
 }
 
-export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack }) => {
-  const [formData, setFormData] = useState<BillingInfo>({
+export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, initialData }) => {
+  const [formData, setFormData] = useState<BillingInfo>(initialData || {
     billingCountry: 'India',
     billingAddress: '',
     billingCity: '',
     billingState: '',
     billingPostalCode: '',
     isBusinessPurchase: false,
+    phoneCountryCode: '+91',
+    phoneNumber: '',
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof BillingInfo, string>>>({});
@@ -39,6 +44,7 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack }) =>
     if (!formData.billingCity) newErrors.billingCity = 'City is required';
     if (!formData.billingState) newErrors.billingState = 'State is required';
     if (!formData.billingPostalCode) newErrors.billingPostalCode = 'Postal code is required';
+    if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
 
     if (formData.isBusinessPurchase && formData.billingCountry === 'India' && formData.gstin) {
       if (!validateGSTIN(formData.gstin)) {
@@ -132,6 +138,30 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack }) =>
           className="w-full p-2 border rounded"
         />
         {errors.billingPostalCode && <p className="text-red-500 text-sm">{errors.billingPostalCode}</p>}
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Country Code *</label>
+          <input
+            type="text"
+            value={formData.phoneCountryCode}
+            onChange={(e) => setFormData({ ...formData, phoneCountryCode: e.target.value })}
+            placeholder="+91"
+            className="w-full p-2 border rounded"
+          />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium mb-1">Phone Number *</label>
+          <input
+            type="tel"
+            value={formData.phoneNumber}
+            onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+            placeholder="9876543210"
+            className="w-full p-2 border rounded"
+          />
+          {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
+        </div>
       </div>
 
       <div>

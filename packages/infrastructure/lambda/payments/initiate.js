@@ -156,7 +156,7 @@ exports.handler = async (event) => {
     
     const orderData = {
       order_id: transactionId,
-      order_amount: totalAmount, // Cashfree expects rupees
+      order_amount: parseFloat(totalAmount.toFixed(2)), // Fix floating point precision
       order_currency: 'INR',
       customer_details: {
         customer_id: userId,
@@ -166,7 +166,7 @@ exports.handler = async (event) => {
       },
       order_meta: {
         return_url: `https://marketplace.cloudnestle.com/payment-callback?gateway=cashfree&transactionId=${transactionId}`,
-        notify_url: `https://7kzsoygrzl.execute-api.us-east-1.amazonaws.com/prod/payments/cashfree-webhook`
+        notify_url: `https://ltp1ccays5.execute-api.us-east-1.amazonaws.com/prod/payments/cashfree-webhook`
       },
       order_note: `${solutionName} - ${tier.toUpperCase()} tier upgrade`
     }

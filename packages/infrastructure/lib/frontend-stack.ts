@@ -75,15 +75,15 @@ export class FrontendStack extends Construct {
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         originRequestPolicy: geoOriginRequestPolicy, // Add geographic headers
       },
-      additionalBehaviors: {
-        '/api/*': {
-          origin: new origins.HttpOrigin('api.marketplace.com'), // This will be updated with actual API Gateway domain
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-          cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-          originRequestPolicy: geoOriginRequestPolicy, // Use same policy for API calls
-        },
-      },
+      // additionalBehaviors: {
+      //   '/api/*': {
+      //     origin: new origins.HttpOrigin('api.marketplace.com'), // This will be updated with actual API Gateway domain
+      //     viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      //     allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+      //     cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+      //     originRequestPolicy: geoOriginRequestPolicy, // Use same policy for API calls
+      //   },
+      // },
       defaultRootObject: 'index.html',
       errorResponses: [
         {

@@ -5,6 +5,7 @@ import { BackgroundImage } from '../components/BackgroundImage'
 import { CustomPopup, usePopup } from '../components/CustomPopup'
 import { authService } from '../services/auth'
 import { fetchAuthSession } from 'aws-amplify/auth'
+import { SOLUTION_URLS } from '../utils/solutionUrls'
 
 interface Solution {
   solutionId: string
@@ -57,7 +58,7 @@ export function CatalogPage() {
       
       console.log('Loading solutions from:', `${apiUrl}${endpoint}`, 'with auth:', !!headers.Authorization)
       
-      const response = await fetch(`${apiUrl}${endpoint}`, {
+      const response = await fetch(`${apiUrl.replace(/\/$/, '')}${endpoint}`, {
         headers
       })
       
@@ -66,7 +67,14 @@ export function CatalogPage() {
       if (response.ok) {
         const data = await response.json()
         console.log('Solutions data:', data)
-        setSolutions(data.solutions || [])
+        
+        // Add externalUrl to solutions that have URLs in SOLUTION_URLS
+        const solutionsWithUrls = (data.solutions || []).map((solution: Solution) => ({
+          ...solution,
+          externalUrl: SOLUTION_URLS[solution.solutionId] || undefined
+        }))
+        
+        setSolutions(solutionsWithUrls)
       } else {
         const errorText = await response.text()
         console.error('API Error:', response.status, errorText)
@@ -100,7 +108,7 @@ export function CatalogPage() {
         return
       }
       
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}admin/solutions/${solutionId}`, {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL.replace(/\/$/, '')}/admin/solutions/${solutionId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -130,7 +138,7 @@ export function CatalogPage() {
         return
       }
 
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}payments/initiate`, {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL.replace(/\/$/, '')}/payments/initiate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -320,7 +328,7 @@ export function CatalogPage() {
                           
                           // Always fetch profile to get entitlements and determine actual tier
                           try {
-                            const profileResponse = await fetch(`${apiUrl}/user/profile`, {
+                            const profileResponse = await fetch(`${apiUrl.replace(/\/$/, '')}/user/profile`, {
                               headers: {
                                 'Authorization': `Bearer ${authService.getToken()}`,
                                 'Content-Type': 'application/json'
@@ -379,7 +387,7 @@ export function CatalogPage() {
                           }
                           console.log('🔍 CATALOG: API payload:', payload)
                           
-                          const response = await fetch(`${apiUrl}/api/generate-solution-token`, {
+                          const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/generate-solution-token`, {
                             method: 'POST',
                             headers: {
                               'Content-Type': 'application/json',

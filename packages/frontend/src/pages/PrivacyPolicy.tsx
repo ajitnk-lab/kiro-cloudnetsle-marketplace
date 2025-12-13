@@ -56,6 +56,32 @@ export function PrivacyPolicy() {
           <h2 className="text-2xl font-semibold mb-4">8. Contact Us</h2>
           <p className="text-gray-700">If you have questions about this Privacy Policy, please contact us at support@cloudnestle.com</p>
         </section>
+
+        <section className="bg-gray-50 rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Company Information</h2>
+          <div className="space-y-3 text-sm text-gray-700">
+            <p className="font-semibold text-gray-900">CloudNestle Consulting & Services</p>
+            
+            <div>
+              <p className="font-semibold text-gray-900 mb-1">📍 Registered Office:</p>
+              <p className="leading-relaxed">
+                🇮🇳 Ground floor, #85, 2nd Cross Road,<br />
+                Central Excise Layout, Vijay Nagar,<br />
+                Bangalore 560040, India
+              </p>
+            </div>
+            
+            <div>
+              <p className="font-semibold text-gray-900 mb-1">📧 Contact:</p>
+              <p>Sales: <a href="mailto:sales@cloudnestle.com" className="text-blue-600 hover:text-blue-800">sales@cloudnestle.com</a></p>
+              <p>Support: <a href="mailto:support@cloudnestle.com" className="text-blue-600 hover:text-blue-800">support@cloudnestle.com</a></p>
+            </div>
+            
+            <div>
+              <p className="font-semibold text-gray-900">🏢 GSTIN: 29ADWPA6289Q1ZB</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   )

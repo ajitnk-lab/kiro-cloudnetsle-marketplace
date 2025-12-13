@@ -70,7 +70,7 @@ export function PaymentReconciliationDashboard() {
         return
       }
 
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}api/payments/reconciliation`, {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL.replace(/\/$/, "")}/api/payments/reconciliation`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

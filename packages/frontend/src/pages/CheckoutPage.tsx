@@ -6,6 +6,7 @@ import { paymentService } from '../services/payment';
 import { useApiError } from '../hooks/useApiError';
 import { useToast } from '../components/Toast';
 import { Solution } from '../types/solution';
+import { BillingInformationForm } from '../components/BillingInformationForm';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
 const CheckoutPage: React.FC = () => {
@@ -22,6 +23,19 @@ const CheckoutPage: React.FC = () => {
   const { error: showError } = useToast();
   const [processing, setProcessing] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showBillingForm, setShowBillingForm] = useState(false);
+  const [billingInfo, setBillingInfo] = useState<any>(null);
+  const [priceBreakdown, setPriceBreakdown] = useState<{
+    baseAmount: number;
+    cgst?: number;
+    sgst?: number;
+    utgst?: number;
+    igst?: number;
+    gstRate: number;
+    totalAmount: number;
+    isIntrastate: boolean;
+    isUT: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (!solutionId) {
@@ -44,20 +58,87 @@ const CheckoutPage: React.FC = () => {
 
   const handlePurchase = async () => {
     if (!solution || !user || !agreedToTerms) return;
+    
+    // Show billing form first
+    setShowBillingForm(true);
+  };
+
+  const handleBillingSubmit = async (submittedBillingInfo: any) => {
+    if (!solution || !user) return;
+
+    setBillingInfo(submittedBillingInfo);
+    setShowBillingForm(false);
+
+    const proTier = solution.pricing?.tiers?.find(tier => tier.name === 'Pro');
+    const baseAmount = proTier?.amount || solution.pricing?.pro?.price || solution.pricing?.proTier?.amount || solution.pricing?.amount || 299;
+
+    // Calculate GST for all India purchases (18% GST is mandatory)
+    let cgst = 0;
+    let sgst = 0;
+    let utgst = 0;
+    let igst = 0;
+    let gstRate = 0;
+    let isIntrastate = false;
+    let isUT = false;
+
+    if (submittedBillingInfo.billingCountry === 'India') {
+      gstRate = 18;
+      const supplierState = 'Karnataka'; // Your business is in Karnataka
+      const customerState = submittedBillingInfo.billingState;
+      
+      // Union Territories without legislature
+      const unionTerritories = ['Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Lakshadweep', 'Ladakh'];
+      isUT = unionTerritories.includes(customerState);
+
+      if (supplierState === customerState) {
+        // Intrastate: CGST + SGST/UTGST
+        isIntrastate = true;
+        cgst = Math.round((baseAmount * 9) / 100 * 100) / 100; // 9%
+        if (isUT) {
+          utgst = Math.round((baseAmount * 9) / 100 * 100) / 100; // 9% UTGST
+        } else {
+          sgst = Math.round((baseAmount * 9) / 100 * 100) / 100; // 9% SGST
+        }
+      } else {
+        // Interstate: IGST
+        isIntrastate = false;
+        igst = Math.round((baseAmount * 18) / 100 * 100) / 100; // 18%
+      }
+    }
+
+    const totalAmount = baseAmount + cgst + sgst + utgst + igst;
+
+    setPriceBreakdown({
+      baseAmount,
+      cgst: cgst > 0 ? cgst : undefined,
+      sgst: sgst > 0 ? sgst : undefined,
+      utgst: utgst > 0 ? utgst : undefined,
+      igst: igst > 0 ? igst : undefined,
+      gstRate,
+      totalAmount,
+      isIntrastate,
+      isUT
+    });
+  };
+
+  const handleProceedToPayment = async () => {
+    if (!solution || !user || !billingInfo || !priceBreakdown) return;
 
     setProcessing(true);
 
-    const proTier = solution.pricing?.tiers?.find(tier => tier.name === 'Pro');
-    const amount = proTier?.amount || solution.pricing?.proTier?.amount || solution.pricing?.amount || 299;
+    const paymentData = {
+      ...billingInfo,
+      baseAmount: priceBreakdown.baseAmount,
+      cgst: priceBreakdown.cgst,
+      sgst: priceBreakdown.sgst,
+      utgst: priceBreakdown.utgst,
+      igst: priceBreakdown.igst,
+      gstRate: priceBreakdown.gstRate,
+      sacCode: '998315'
+    };
 
     await executeWithErrorHandling(
-      () => paymentService.initiatePayment(solution.solutionId, amount!, solution.name),
-      {
-        onError: (error) => {
-          showError('Payment Failed', error.message);
-          setProcessing(false);
-        }
-      }
+      () => paymentService.initiatePayment(solution.solutionId, priceBreakdown.baseAmount, solution.name, paymentData)
     );
   };
 
@@ -105,7 +186,7 @@ const CheckoutPage: React.FC = () => {
   }
 
   const proTier = solution.pricing?.tiers?.find(tier => tier.name === 'Pro');
-  const amount = proTier?.amount || solution.pricing?.proTier?.amount || solution.pricing?.amount || 299;
+  const amount = proTier?.amount || solution.pricing?.pro?.price || solution.pricing?.proTier?.amount || solution.pricing?.amount || 299;
 
   const isSubscription = solution.pricing.model === 'subscription';
 
@@ -153,7 +234,7 @@ const CheckoutPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => navigate(`/solution/${solutionId}`)}
+            onClick={() => navigate('/catalog')}
             className="flex items-center text-gray-600 hover:text-gray-800 mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -220,7 +301,17 @@ const CheckoutPage: React.FC = () => {
 
               {/* User Information */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Billing Information</h3>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-sm font-medium text-gray-700">Billing Information</h3>
+                  {billingInfo && (
+                    <button
+                      onClick={() => setShowBillingForm(true)}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
                 <div className="bg-gray-50 rounded-md p-4 space-y-3">
                   <div className="text-sm">
                     <div className="text-xs text-gray-500 uppercase tracking-wide">Email Address</div>
@@ -230,18 +321,51 @@ const CheckoutPage: React.FC = () => {
                     <div className="text-xs text-gray-500 uppercase tracking-wide">Name</div>
                     <div className="font-medium text-gray-900 break-words text-xs">{user?.profile?.name || 'Not provided'}</div>
                   </div>
-                  {user?.profile?.company && (
-                    <div className="text-sm">
-                      <div className="text-xs text-gray-500 uppercase tracking-wide">Company</div>
-                      <div className="font-medium text-gray-900 break-words text-xs">{user.profile.company}</div>
-                    </div>
+                  {billingInfo ? (
+                    <>
+                      {billingInfo.companyName && (
+                        <div className="text-sm">
+                          <div className="text-xs text-gray-500 uppercase tracking-wide">Company</div>
+                          <div className="font-medium text-gray-900 break-words text-xs">{billingInfo.companyName}</div>
+                        </div>
+                      )}
+                      {billingInfo.gstin && (
+                        <div className="text-sm">
+                          <div className="text-xs text-gray-500 uppercase tracking-wide">GSTIN</div>
+                          <div className="font-medium text-gray-900 break-words text-xs">{billingInfo.gstin}</div>
+                        </div>
+                      )}
+                      <div className="text-sm">
+                        <div className="text-xs text-gray-500 uppercase tracking-wide">Phone</div>
+                        <div className="font-medium text-gray-900 break-words text-xs">
+                          {billingInfo.phoneCountryCode} {billingInfo.phoneNumber}
+                        </div>
+                      </div>
+                      <div className="text-sm">
+                        <div className="text-xs text-gray-500 uppercase tracking-wide">Address</div>
+                        <div className="font-medium text-gray-900 break-words text-xs">
+                          {billingInfo.billingAddress}<br />
+                          {billingInfo.billingCity}, {billingInfo.billingState} {billingInfo.billingPostalCode}<br />
+                          {billingInfo.billingCountry}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {user?.profile?.company && (
+                        <div className="text-sm">
+                          <div className="text-xs text-gray-500 uppercase tracking-wide">Company</div>
+                          <div className="font-medium text-gray-900 break-words text-xs">{user.profile.company}</div>
+                        </div>
+                      )}
+                      <div className="text-sm">
+                        <div className="text-xs text-gray-500 uppercase tracking-wide">Location</div>
+                        <div className="font-medium text-gray-900 break-words text-xs">
+                          {user?.profile?.city || 'City'}, {user?.profile?.state || 'State'}, {user?.profile?.country || 'India'}
+                        </div>
+                      </div>
+                    </>
                   )}
-                  <div className="text-sm">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide">Location</div>
-                    <div className="font-medium text-gray-900 break-words text-xs">
-                      {user?.profile?.city || 'City'}, {user?.profile?.state || 'State'}, {user?.profile?.country || 'India'}
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -317,23 +441,100 @@ const CheckoutPage: React.FC = () => {
               </div>
 
               {/* Purchase Button */}
-              <button
-                onClick={handlePurchase}
-                disabled={processing || !agreedToTerms}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {processing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    {isSubscription ? 'Subscribe to Pro Monthly' : 'Complete Purchase'}
-                    <span className="ml-2">₹{amount?.toLocaleString()}</span>
-                  </>
-                )}
-              </button>
+              {!priceBreakdown ? (
+                <button
+                  onClick={handlePurchase}
+                  disabled={processing || !agreedToTerms}
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      Enter Billing Address
+                      <span className="ml-2">₹{amount?.toLocaleString()}</span>
+                    </>
+                  )}
+                </button>
+              ) : (
+                <>
+                  {/* GST Breakdown */}
+                  <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-gray-900">Payment Breakdown</h4>
+                      {priceBreakdown.gstRate > 0 && (
+                        <img src="/images/gstlogo.png" alt="GST" className="h-8 object-contain" />
+                      )}
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Base Amount:</span>
+                        <span className="font-medium">₹{priceBreakdown.baseAmount.toLocaleString()}</span>
+                      </div>
+                      {priceBreakdown.gstRate > 0 && (
+                        <>
+                          <div className="text-xs text-gray-500 mt-2">SAC Code: 998315 (SaaS/OIDAR Services)</div>
+                          {priceBreakdown.isIntrastate ? (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">CGST (9%):</span>
+                                <span className="font-medium">₹{priceBreakdown.cgst?.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">{priceBreakdown.isUT ? 'UTGST' : 'SGST'} (9%):</span>
+                                <span className="font-medium">₹{(priceBreakdown.sgst || priceBreakdown.utgst)?.toLocaleString()}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">IGST (18%):</span>
+                              <span className="font-medium">₹{priceBreakdown.igst?.toLocaleString()}</span>
+                            </div>
+                          )}
+                          {billingInfo?.isBusinessPurchase && billingInfo?.gstin ? (
+                            <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-xs text-green-800">
+                              ✓ GSTIN provided. You can claim Input Tax Credit (ITC) on this purchase.
+                            </div>
+                          ) : billingInfo?.isBusinessPurchase && !billingInfo?.gstin ? (
+                            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                              ⚠️ No GSTIN provided. You cannot claim Input Tax Credit (ITC) on this purchase. If you're a registered business, please provide your GSTIN.
+                            </div>
+                          ) : (
+                            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                              ℹ️ Personal purchase. GST is included but you cannot claim Input Tax Credit (ITC).
+                            </div>
+                          )}
+                        </>
+                      )}
+                      <div className="flex justify-between pt-2 border-t border-blue-300">
+                        <span className="font-semibold text-gray-900">Total Amount:</span>
+                        <span className="font-bold text-lg text-blue-600">₹{priceBreakdown.totalAmount.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleProceedToPayment}
+                    disabled={processing}
+                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  >
+                    {processing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        Proceed to Pay
+                        <span className="ml-2">₹{priceBreakdown.totalAmount.toLocaleString()}</span>
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
 
               {!agreedToTerms && (
                 <div className="mt-2 text-xs text-red-600 text-center">
@@ -417,8 +618,39 @@ const CheckoutPage: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Company Information */}
+            <div className="card mt-6">
+              <h3 className="text-lg font-semibold mb-4">Billed By</h3>
+              <div className="flex items-center space-x-4 mb-4">
+                <img 
+                  src="/cloudnestle-logo.png" 
+                  alt="CloudNestle" 
+                  className="h-12 w-12 object-contain"
+                />
+                <div>
+                  <p className="font-semibold text-gray-900">CloudNestle Consulting & Services</p>
+                  <p className="text-sm text-gray-600">GSTIN: 29ADWPA6289Q1ZB</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Billing Information Modal */}
+        {showBillingForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <BillingInformationForm
+                  onSubmit={handleBillingSubmit}
+                  onBack={() => setShowBillingForm(false)}
+                  initialData={billingInfo}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

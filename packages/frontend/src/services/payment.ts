@@ -20,6 +20,14 @@ export interface PaymentRequest {
   isBusinessPurchase?: boolean;
   gstin?: string;
   companyName?: string;
+  // GST breakdown
+  baseAmount?: number;
+  cgst?: number;
+  sgst?: number;
+  utgst?: number;
+  igst?: number;
+  gstRate?: number;
+  sacCode?: string;
 }
 
 export interface PaymentResponse {
@@ -106,7 +114,21 @@ class PaymentService {
   }
 
   // Helper method to initiate payment flow
-  async initiatePayment(solutionId: string, amount: number, solutionName: string): Promise<void> {
+  async initiatePayment(
+    solutionId: string, 
+    amount: number, 
+    solutionName: string,
+    billingInfo?: {
+      billingCountry?: string;
+      billingAddress?: string;
+      billingCity?: string;
+      billingState?: string;
+      billingPostalCode?: string;
+      isBusinessPurchase?: boolean;
+      gstin?: string;
+      companyName?: string;
+    }
+  ): Promise<void> {
     try {
       const userStr = localStorage.getItem('user');
       if (!userStr) {
@@ -122,7 +144,8 @@ class PaymentService {
         userName: user.profile?.name || user.email.split('@')[0],
         userPhone: user.profile?.phone || undefined,
         amount,
-        purpose: `Purchase of ${solutionName}`
+        purpose: `Purchase of ${solutionName}`,
+        ...billingInfo
       };
 
       const response = await axios.post(

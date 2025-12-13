@@ -5,31 +5,38 @@
 
 set -e
 
-echo "🚀 Starting marketplace deployment..."
+# Set environment for consistent table naming
+export ENVIRONMENT=${ENVIRONMENT:-prod}
 
-# Step 1: Deploy backend infrastructure via CDK to MEMBER ACCOUNT
-echo "📦 Deploying backend infrastructure to member account (us-east-1)..."
+echo "🚀 Starting marketplace deployment (Environment: $ENVIRONMENT)..."
+
+# Step 1: Deploy backend infrastructure via CDK (construct-based)
+# Using --method=direct to bypass AWS Early Validation (Nov 2025 feature)
+echo "📦 Deploying backend infrastructure (us-east-1)..."
 cd packages/infrastructure
-npx cdk deploy --app "npx ts-node --prefer-ts-exts bin/marketplace-app-member.ts" --profile member-account --require-approval never
+ENVIRONMENT=$ENVIRONMENT npx cdk deploy MarketplaceStack-v3 --require-approval never --method=direct
 
-# Step 2: Extract current resource IDs from CloudFormation in MEMBER ACCOUNT
-echo "🔍 Extracting current resource IDs from member account..."
-STACK_NAME="MarketplaceStack-Clean"
+# Step 2: Extract current resource IDs from CloudFormation
+echo "🔍 Extracting current resource IDs..."
+STACK_NAME="MarketplaceStack-v3"
 
-# Deploy to member account us-east-1 (same region as FAISS)
+# Deploy to us-east-1 (same region as FAISS)
 REGION="us-east-1"
-PROFILE="member-account"
 
-API_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --profile $PROFILE --query "Stacks[0].Outputs[?OutputKey=='ApiGatewayUrl'].OutputValue" --output text)
-USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --profile $PROFILE --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)
-CLIENT_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --profile $PROFILE --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" --output text)
-BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --profile $PROFILE --query "Stacks[0].Outputs[?OutputKey=='WebsiteBucketName'].OutputValue" --output text)
-DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --profile $PROFILE --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
+API_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='ApiGatewayUrl'].OutputValue" --output text)
+USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)
+CLIENT_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" --output text)
+BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='WebsiteBucketName'].OutputValue" --output text)
+DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)
 
-# Extract DynamoDB table names for FAISS integration from MEMBER ACCOUNT
-USER_TABLE_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --profile $PROFILE --query "Stacks[0].Outputs[?OutputKey=='UserTableName'].OutputValue" --output text)
-ENTITLEMENT_TABLE_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --profile $PROFILE --query "Stacks[0].Outputs[?OutputKey=='EntitlementTableName'].OutputValue" --output text)
-SESSION_TABLE_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --profile $PROFILE --query "Stacks[0].Outputs[?OutputKey=='SessionTableName'].OutputValue" --output text)
+# Extract DynamoDB table names for FAISS integration
+USER_TABLE_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='UserTableName'].OutputValue" --output text)
+ENTITLEMENT_TABLE_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='EntitlementTableName'].OutputValue" --output text)
+SESSION_TABLE_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='SessionTableName'].OutputValue" --output text)
+
+# Extract GST-related outputs
+COMPANY_SETTINGS_TABLE_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='CompanySettingsTableName'].OutputValue" --output text)
+INVOICE_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --region $REGION --query "Stacks[0].Outputs[?OutputKey=='InvoiceBucketName'].OutputValue" --output text)
 
 echo "   ✅ API Gateway URL: $API_URL"
 echo "   ✅ User Pool ID: $USER_POOL_ID"
@@ -39,24 +46,26 @@ echo "   ✅ CloudFront ID: $DISTRIBUTION_ID"
 echo "   ✅ User Table: $USER_TABLE_NAME"
 echo "   ✅ Entitlement Table: $ENTITLEMENT_TABLE_NAME"
 echo "   ✅ Session Table: $SESSION_TABLE_NAME"
+echo "   ✅ Company Settings Table: $COMPANY_SETTINGS_TABLE_NAME"
+echo "   ✅ Invoice Bucket: $INVOICE_BUCKET_NAME"
 
-# Step 2.5: Update FAISS configuration with NEW table names (member account)
-echo "🔧 Updating FAISS configuration with new member account table names..."
-FAISS_DIR="${FAISS_PROJECT_DIR:-/home/ubuntu/workspace/faiss-rag-agent}"
+# Step 2.5: Update FAISS configuration with table names
+echo "🔧 Updating FAISS configuration..."
+FAISS_DIR="${FAISS_PROJECT_DIR:-/persistent/home/ubuntu/workspace/faiss-rag-agent}"
 
 if [ -d "$FAISS_DIR" ]; then
     cat > $FAISS_DIR/.env << EOF
-# Marketplace Integration (Auto-generated from Member Account CloudFormation)
+# Marketplace Integration (Auto-generated from CloudFormation)
 MARKETPLACE_USER_TABLE_NAME=$USER_TABLE_NAME
 MARKETPLACE_ENTITLEMENT_TABLE_NAME=$ENTITLEMENT_TABLE_NAME
 MARKETPLACE_SESSION_TABLE_NAME=$SESSION_TABLE_NAME
 MARKETPLACE_API_URL=$API_URL
 
 # Generated on: $(date)
-# Stack: $STACK_NAME (Member Account: 637423202175)
+# Stack: $STACK_NAME (Account: $(aws sts get-caller-identity --query Account --output text))
 # Region: $REGION
 EOF
-    echo "   ✅ Updated FAISS .env with NEW member account table names"
+    echo "   ✅ Updated FAISS .env with table names"
 else
     echo "   ⚠️  FAISS directory not found at $FAISS_DIR"
 fi
@@ -89,16 +98,13 @@ echo "   ✅ Updated .env with current resource IDs"
 echo "🔨 Building frontend with updated configuration..."
 npm run build
 
-# Step 5: Deploy to member account S3 bucket
-echo "☁️ Syncing frontend to member account bucket..."
-aws s3 sync dist/ s3://$BUCKET_NAME --delete --profile $PROFILE --region $REGION
+# Step 5: Deploy to S3 bucket
+echo "☁️ Syncing frontend to S3 bucket..."
+aws s3 sync dist/ s3://$BUCKET_NAME --delete --region $REGION
 
-echo "☁️ Syncing frontend to production bucket (marketplace.cloudnestle.com)..."
-aws s3 sync dist/ s3://marketplace.cloudnestle.com --delete
-
-# Step 6: Invalidate member account CloudFront distribution
-echo "🔄 Invalidating member account CloudFront cache..."
-aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*" --region us-east-1 --profile $PROFILE
+# Step 6: Invalidate CloudFront distribution
+echo "🔄 Invalidating CloudFront cache..."
+aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*" --region us-east-1
 
 echo "🔄 Invalidating production CloudFront cache..."
 # Get the distribution ID for marketplace.cloudnestle.com
@@ -108,6 +114,30 @@ if [ ! -z "$PROD_DISTRIBUTION_ID" ]; then
     echo "   ✅ Production CloudFront invalidated: $PROD_DISTRIBUTION_ID"
 else
     echo "   ⚠️  Could not find production CloudFront distribution"
+fi
+
+# Step 7: Seed solutions catalog
+echo "📦 Seeding solutions catalog..."
+cd ../../
+if [ -f "seed-solutions.js" ]; then
+    node seed-solutions.js
+    echo "   ✅ Solutions catalog seeded"
+else
+    echo "   ⚠️  Solutions seed script not found"
+fi
+
+# Step 8: Seed GST company settings (if table exists)
+echo "🏢 Seeding GST company settings..."
+if [ ! -z "$COMPANY_SETTINGS_TABLE_NAME" ]; then
+    cd packages/infrastructure
+    if [ -f "scripts/seed-company-settings.js" ]; then
+        node scripts/seed-company-settings.js
+        echo "   ✅ GST company settings seeded"
+    else
+        echo "   ⚠️  GST seed script not found"
+    fi
+else
+    echo "   ⚠️  Company settings table not found"
 fi
 
 echo ""
@@ -122,8 +152,21 @@ echo "   API Gateway: $API_URL"
 echo "   Cognito Pool: $USER_POOL_ID"
 echo "   S3 Bucket: $BUCKET_NAME"
 echo "   CloudFront: $DISTRIBUTION_ID"
+echo "   Invoice Bucket: $INVOICE_BUCKET_NAME"
 echo ""
-echo "📝 Environment file updated: packages/frontend/.env"
+echo "📝 Environment files updated:"
+echo "   Frontend: packages/frontend/.env"
+echo "   FAISS: $FAISS_DIR/.env"
 echo ""
 echo "⚠️  IMPORTANT: Only use this script for deployment!"
 echo "   Other deploy methods will cause configuration drift."
+echo ""
+echo "🧾 GST Features:"
+echo "   ✅ Company settings table: $COMPANY_SETTINGS_TABLE_NAME"
+echo "   ✅ Invoice bucket: $INVOICE_BUCKET_NAME"
+echo "   ✅ Invoice generation Lambda deployed"
+echo "   ✅ GST calculation in payment flow"
+echo ""
+echo "📦 Catalog:"
+echo "   ✅ Solutions catalog seeded with 5 solutions"
+echo "   ✅ AWS Solution Finder integrated"

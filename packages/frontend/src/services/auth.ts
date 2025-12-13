@@ -6,6 +6,9 @@ const API_BASE_URL = (import.meta as any).env.VITE_API_URL as string
 const USER_POOL_ID = (import.meta as any).env.VITE_USER_POOL_ID as string
 const CLIENT_ID = (import.meta as any).env.VITE_USER_POOL_CLIENT_ID as string
 
+// Utility function to join URLs properly
+const joinUrl = (base: string, path: string) => `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
+
 // Configure Amplify
 Amplify.configure({
   Auth: {
@@ -49,7 +52,7 @@ export const authService = {
           // Always use IdToken for API Gateway Cognito authorizer
           const tokenToTry = idToken || accessToken
           
-          const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
+          const userResponse = await fetch(joinUrl(API_BASE_URL, "user/profile"), {
             headers: { 
               'Authorization': `Bearer ${tokenToTry}`,
               'Content-Type': 'application/json'
@@ -97,7 +100,7 @@ export const authService = {
         const idToken = session.tokens?.idToken?.toString()
         
         if (accessToken && idToken) {
-          const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
+          const userResponse = await fetch(joinUrl(API_BASE_URL, "user/profile"), {
             headers: { 'Authorization': `Bearer ${idToken}` }
           })
           
@@ -147,7 +150,7 @@ export const authService = {
           const token = session.tokens?.idToken?.toString()
           
           if (token) {
-            const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
+            const userResponse = await fetch(joinUrl(API_BASE_URL, "user/profile"), {
               headers: { 'Authorization': `Bearer ${token}` }
             })
             
@@ -246,7 +249,7 @@ export const authService = {
     const token = this.getToken()
     if (!token) throw new Error('No token found')
 
-    const response = await fetch(`${API_BASE_URL}/user/profile`, {
+    const response = await fetch(joinUrl(API_BASE_URL, "user/profile"), {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     
@@ -262,7 +265,7 @@ export const authService = {
     const token = this.getToken()
     if (!token) throw new Error('No token found')
 
-    const response = await fetch(`${API_BASE_URL}/user/profile`, {
+    const response = await fetch(joinUrl(API_BASE_URL, "user/profile"), {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -308,7 +311,7 @@ export const authService = {
       }
 
       console.log('🔄 Refreshing user profile from API...')
-      const userResponse = await fetch(`${API_BASE_URL}/user/profile`, {
+      const userResponse = await fetch(joinUrl(API_BASE_URL, "user/profile"), {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       

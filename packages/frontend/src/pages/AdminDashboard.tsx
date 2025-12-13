@@ -22,7 +22,7 @@ export function AdminDashboard() {
 
   const loadFounderAnalytics = async () => {
     try {
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}/api/founder/metrics`)
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL.replace(/\/$/, '')}/api/founder/metrics`)
       
       let data;
       if (response.ok) {
@@ -188,10 +188,10 @@ export function AdminDashboard() {
       
       // Load pending partner applications and solutions
       const [applicationsRes, solutionsRes] = await Promise.all([
-        fetch(`${(import.meta as any).env.VITE_API_URL}admin/applications`, {
+        fetch(`${(import.meta as any).env.VITE_API_URL.replace(/\/$/, "")}/admin/applications`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch(`${(import.meta as any).env.VITE_API_URL}admin/solutions`, {
+        fetch(`${(import.meta as any).env.VITE_API_URL.replace(/\/$/, "")}/admin/solutions`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ])
@@ -242,7 +242,7 @@ export function AdminDashboard() {
         return
       }
       
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}admin/applications/${applicationId}`, {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL.replace(/\/$/, "")}/admin/applications/${applicationId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -292,7 +292,7 @@ export function AdminDashboard() {
         return
       }
       
-      const response = await fetch(`${(import.meta as any).env.VITE_API_URL}admin/solutions/${solutionId}`, {
+      const response = await fetch(`${(import.meta as any).env.VITE_API_URL.replace(/\/$/, "")}/admin/solutions/${solutionId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

@@ -2,6 +2,9 @@ import { fetchAuthSession } from 'aws-amplify/auth'
 
 const API_BASE_URL = (import.meta as any).env.VITE_API_URL as string || 'https://1d98dlxxhh.execute-api.us-east-1.amazonaws.com/prod'
 
+// Utility function to join URLs properly
+const joinUrl = (base: string, path: string) => `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
+
 // Helper to get access token for partner API calls
 const getAccessToken = async () => {
   try {
@@ -34,7 +37,7 @@ export const partnerService = {
       }
 
       // First check user profile for marketplace status
-      const response = await fetch(`${API_BASE_URL}/user/profile`, {
+      const response = await fetch(joinUrl(API_BASE_URL, "user/profile"), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -102,7 +105,7 @@ export const partnerService = {
       const requestBody = { application }
       console.log('Request body:', JSON.stringify(requestBody, null, 2))
 
-      const response = await fetch(`${API_BASE_URL}/partner/applications`, {
+      const response = await fetch(joinUrl(API_BASE_URL, "partner/applications"), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -152,7 +155,7 @@ export const partnerService = {
         throw new Error('Authentication required')
       }
 
-      const response = await fetch(`${API_BASE_URL}/partner/applications`, {
+      const response = await fetch(joinUrl(API_BASE_URL, "partner/applications"), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -186,7 +189,7 @@ export const partnerService = {
         }
       }
 
-      const response = await fetch(`${API_BASE_URL}/partner/solutions`, {
+      const response = await fetch(joinUrl(API_BASE_URL, "partner/solutions"), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -221,7 +224,7 @@ export const partnerService = {
         throw new Error('Authentication required')
       }
 
-      const response = await fetch(`${API_BASE_URL}/partner/solutions`, {
+      const response = await fetch(joinUrl(API_BASE_URL, "partner/solutions"), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

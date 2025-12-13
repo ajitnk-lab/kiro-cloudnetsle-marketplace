@@ -21,7 +21,7 @@ export function SolutionDetailPage() {
   useEffect(() => {
     const fetchSolution = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}catalog/${id}`)
+        const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/catalog/${id}`)
         if (response.ok) {
           const data = await response.json()
           setSolution(data.solution)
@@ -47,7 +47,7 @@ export function SolutionDetailPage() {
 
       try {
         // Check if user has a token for this solution
-        const response = await fetch(`${import.meta.env.VITE_API_URL}api/validate-token`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/api/validate-token`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export function SolutionDetailPage() {
     
     try {
       // Create payment order
-      const response = await fetch(`${import.meta.env.VITE_API_URL}payments/initiate`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/payments/initiate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

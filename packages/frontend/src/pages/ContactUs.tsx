@@ -1,5 +1,3 @@
-import { Mail } from 'lucide-react'
-
 export function ContactUs() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -41,11 +39,34 @@ export function ContactUs() {
         <div>
           <h2 className="text-2xl font-semibold mb-6">Get in touch</h2>
           <div className="space-y-6">
-            <div className="flex items-start space-x-4">
-              <Mail className="h-6 w-6 text-blue-600 mt-1" />
-              <div>
-                <h3 className="font-semibold">Email</h3>
-                <p className="text-gray-600">support@cloudnestle.com</p>
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">CloudNestle Consulting & Services</h3>
+              
+              <div className="space-y-4 text-sm text-gray-700">
+                <div>
+                  <p className="font-semibold text-gray-900 mb-1">📍 Registered Office:</p>
+                  <p className="leading-relaxed">
+                    🇮🇳 Ground floor, #85, 2nd Cross Road,<br />
+                    Central Excise Layout, Vijay Nagar,<br />
+                    Bangalore 560040, India
+                  </p>
+                </div>
+                
+                <div>
+                  <p className="font-semibold text-gray-900 mb-1">📧 Contact:</p>
+                  <p>
+                    <span className="font-medium">Sales:</span>{' '}
+                    <a href="mailto:sales@cloudnestle.com" className="text-blue-600 hover:text-blue-800">
+                      sales@cloudnestle.com
+                    </a>
+                  </p>
+                  <p>
+                    <span className="font-medium">Support:</span>{' '}
+                    <a href="mailto:support@cloudnestle.com" className="text-blue-600 hover:text-blue-800">
+                      support@cloudnestle.com
+                    </a>
+                  </p>
+                </div>
               </div>
             </div>
           </div>

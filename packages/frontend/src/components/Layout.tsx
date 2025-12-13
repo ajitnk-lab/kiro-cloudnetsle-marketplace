@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { User, LogOut, ShoppingBag, Search, Briefcase, ExternalLink } from 'lucide-react'
+import { User, LogOut, Search, Briefcase } from 'lucide-react'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -14,25 +14,21 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 relative z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto pl-0 pr-4 sm:pr-6 lg:pr-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <ShoppingBag className="h-8 w-8 text-blue-600" />
+            <Link to="/" className="flex items-center space-x-3">
+              <img 
+                src="/cloudnestle-logo.png" 
+                alt="CloudNestle" 
+                className="h-32 w-32 object-contain"
+              />
               <span className="text-xl font-bold text-gray-900">Marketplace</span>
             </Link>
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <a
-                href="https://www.cloudnestle.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 transition-colors px-3 py-2 rounded-lg font-semibold border border-blue-200"
-              >
-                <ExternalLink className="h-4 w-4" />
-                <span>CloudNestle Consulting & Services</span>
-              </a>
+              {/* CloudNestle link hidden for payment gateway compliance */}
               <Link
                 to="/catalog"
                 className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors"
@@ -112,7 +108,7 @@ export function Layout({ children }: LayoutProps) {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-auto relative z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
             <div>
               <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
                 Platform
@@ -174,10 +170,57 @@ export function Layout({ children }: LayoutProps) {
                 </li>
               </ul>
             </div>
+
+            {/* Company Info Section */}
+            <div className="md:col-span-2">
+              <div className="flex items-center space-x-4">
+                <img 
+                  src="/cloudnestle-logo.png" 
+                  alt="CloudNestle Logo" 
+                  className="h-32 w-32 object-contain flex-shrink-0"
+                />
+                <div className="flex flex-col space-y-2">
+                  <h3 className="text-base font-semibold text-gray-900 leading-tight">
+                    CloudNestle Consulting<br />& Services
+                  </h3>
+                  
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <div>
+                      <p className="font-semibold text-gray-700 mb-1">📍 Registered Office:</p>
+                      <p className="leading-relaxed">
+                        🇮🇳 Ground floor, #85, 2nd Cross Road,<br />
+                        Central Excise Layout, Vijay Nagar,<br />
+                        Bangalore 560040, India
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="font-semibold text-gray-700 mb-1">📧 Contact:</p>
+                      <p>
+                        <span className="font-medium">Sales:</span>{' '}
+                        <a href="mailto:sales@cloudnestle.com" className="text-blue-600 hover:text-blue-800">
+                          sales@cloudnestle.com
+                        </a>
+                      </p>
+                      <p>
+                        <span className="font-medium">Support:</span>{' '}
+                        <a href="mailto:support@cloudnestle.com" className="text-blue-600 hover:text-blue-800">
+                          support@cloudnestle.com
+                        </a>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="font-semibold text-gray-700">🏢 GSTIN: 29ADWPA6289Q1ZB</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div className="mt-8 pt-8 border-t border-gray-200">
-            <p className="text-center text-gray-600">
+            <p className="text-center text-gray-600 text-sm">
               © 2025 CloudNestle Consulting & Services. All rights reserved.
             </p>
           </div>

@@ -251,10 +251,10 @@ exports.handler = async (event) => {
       if (userResponse.Item) {
         const user = userResponse.Item
 
-        // Find existing entitlement - first try by user and solution
+        // Find existing entitlement - try direct lookup first, then fallback to scan
         let existingEntitlementScan
         
-        // Try to find by pk/sk first (more efficient)
+        // Try direct lookup by pk/sk (most efficient)
         try {
           const directLookup = await docClient.send(new GetCommand({
             TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
@@ -266,9 +266,11 @@ exports.handler = async (event) => {
           
           if (directLookup.Item) {
             existingEntitlementScan = { Items: [directLookup.Item] }
+            console.log('Found entitlement via direct lookup')
           } else {
-            // Fallback to scan if direct lookup fails and token exists
+            // If no direct match and token exists, try token scan
             if (transaction.token) {
+              console.log('No direct match, trying token scan')
               existingEntitlementScan = await docClient.send(new ScanCommand({
                 TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
                 FilterExpression: '#token = :token AND solutionId = :solutionId',
@@ -281,7 +283,16 @@ exports.handler = async (event) => {
                 }
               }))
             } else {
-              existingEntitlementScan = { Items: [] }
+              // No token, try scanning by userId and solutionId
+              console.log('No token, scanning by userId and solutionId')
+              existingEntitlementScan = await docClient.send(new ScanCommand({
+                TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
+                FilterExpression: 'userId = :userId AND solutionId = :solutionId',
+                ExpressionAttributeValues: {
+                  ':userId': userId,
+                  ':solutionId': solutionId
+                }
+              }))
             }
           }
         } catch (scanError) {

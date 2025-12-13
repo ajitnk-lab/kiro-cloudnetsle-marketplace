@@ -58,7 +58,7 @@ export function LoginPage() {
         if (isFaissRedirect && user.role !== 'admin') {
           try {
             // Generate token for FAISS access
-            const response = await fetch(`${import.meta.env.VITE_API_URL}api/generate-solution-token`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/api/generate-solution-token`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

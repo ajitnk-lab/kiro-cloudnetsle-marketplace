@@ -4,9 +4,10 @@ const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
 const client = new DynamoDBClient({ region: 'us-east-1' });
 const docClient = DynamoDBDocumentClient.from(client);
 
-const TABLE_NAME = 'marketplace-company-settings-1764183053';
+const TABLE_NAME = 'marketplace-company-settings-1764183053'; // Legacy table preserved for data
 
 const companySettings = {
+  settingKey: 'gst-company-info', // Required partition key
   companyId: 'cloudnestle-main',
   gstin: '29XXXXX1234X1ZX', // Replace with actual GSTIN
   legalName: 'CloudNestle Technologies Pvt Ltd',

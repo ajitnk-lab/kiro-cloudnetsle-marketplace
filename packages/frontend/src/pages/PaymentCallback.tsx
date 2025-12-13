@@ -32,7 +32,7 @@ const PaymentCallback: React.FC = () => {
         }
 
         // Check payment status with backend
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/payments/status/${transactionId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/payments/status/${transactionId}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

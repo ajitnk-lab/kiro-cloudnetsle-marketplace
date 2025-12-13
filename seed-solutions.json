@@ -1,0 +1,154 @@
+[
+  {
+    "solutionId": "aws-solution-finder-001",
+    "name": "AWS Solution Finder",
+    "description": "AI-powered tool to discover and recommend AWS services based on your requirements. Get personalized AWS architecture suggestions with cost estimates.",
+    "category": "AI & Machine Learning",
+    "pricing": {
+      "model": "freemium",
+      "amount": 0,
+      "currency": "INR",
+      "tiers": [
+        {
+          "name": "Free",
+          "amount": 0,
+          "features": ["5 queries per day", "Basic recommendations"]
+        },
+        {
+          "name": "Pro",
+          "amount": 299,
+          "features": ["Unlimited queries", "Advanced recommendations", "Cost estimates", "Architecture diagrams"]
+        }
+      ]
+    },
+    "partnerName": "CloudNestle",
+    "partnerId": "cloudnestle-001",
+    "status": "approved",
+    "externalUrl": "https://awssolutionfinder.solutions.cloudnestle.com",
+    "features": [
+      "AI-powered AWS service recommendations",
+      "Cost estimation",
+      "Architecture visualization",
+      "Best practices guidance"
+    ],
+    "createdAt": "2025-12-08T10:00:00Z",
+    "updatedAt": "2025-12-08T10:00:00Z"
+  },
+  {
+    "solutionId": "faiss-rag-agent-001",
+    "name": "FAISS RAG Agent",
+    "description": "Intelligent document search and retrieval system using FAISS vector database. Perfect for building AI-powered knowledge bases and chatbots.",
+    "category": "AI & Machine Learning",
+    "pricing": {
+      "model": "subscription",
+      "amount": 499,
+      "currency": "INR",
+      "tiers": [
+        {
+          "name": "Pro",
+          "amount": 499,
+          "features": ["10,000 documents", "Real-time search", "API access", "24/7 support"]
+        }
+      ]
+    },
+    "partnerName": "CloudNestle",
+    "partnerId": "cloudnestle-001",
+    "status": "approved",
+    "externalUrl": "https://faiss.solutions.cloudnestle.com",
+    "features": [
+      "Vector-based semantic search",
+      "RAG (Retrieval Augmented Generation)",
+      "Multi-language support",
+      "REST API integration"
+    ],
+    "createdAt": "2025-12-08T10:00:00Z",
+    "updatedAt": "2025-12-08T10:00:00Z"
+  },
+  {
+    "solutionId": "cloud-cost-optimizer-001",
+    "name": "Cloud Cost Optimizer",
+    "description": "Automated AWS cost optimization tool that analyzes your infrastructure and provides actionable recommendations to reduce cloud spending by up to 40%.",
+    "category": "DevOps & Infrastructure",
+    "pricing": {
+      "model": "subscription",
+      "amount": 999,
+      "currency": "INR",
+      "tiers": [
+        {
+          "name": "Pro",
+          "amount": 999,
+          "features": ["Real-time monitoring", "Automated recommendations", "Cost alerts", "Savings reports"]
+        }
+      ]
+    },
+    "partnerName": "CloudNestle",
+    "partnerId": "cloudnestle-001",
+    "status": "approved",
+    "features": [
+      "Cost analysis dashboard",
+      "Automated rightsizing",
+      "Reserved instance recommendations",
+      "Waste detection"
+    ],
+    "createdAt": "2025-12-08T10:00:00Z",
+    "updatedAt": "2025-12-08T10:00:00Z"
+  },
+  {
+    "solutionId": "serverless-api-builder-001",
+    "name": "Serverless API Builder",
+    "description": "No-code platform to build and deploy serverless REST APIs on AWS Lambda. Create production-ready APIs in minutes without writing infrastructure code.",
+    "category": "Developer Tools",
+    "pricing": {
+      "model": "subscription",
+      "amount": 799,
+      "currency": "INR",
+      "tiers": [
+        {
+          "name": "Pro",
+          "amount": 799,
+          "features": ["Unlimited APIs", "Custom domains", "Auto-scaling", "Monitoring dashboard"]
+        }
+      ]
+    },
+    "partnerName": "CloudNestle",
+    "partnerId": "cloudnestle-001",
+    "status": "approved",
+    "features": [
+      "Visual API designer",
+      "One-click deployment",
+      "Built-in authentication",
+      "API documentation generator"
+    ],
+    "createdAt": "2025-12-08T10:00:00Z",
+    "updatedAt": "2025-12-08T10:00:00Z"
+  },
+  {
+    "solutionId": "data-pipeline-manager-001",
+    "name": "Data Pipeline Manager",
+    "description": "Enterprise-grade ETL tool for AWS. Build, schedule, and monitor data pipelines with visual workflow designer. Supports S3, RDS, Redshift, and more.",
+    "category": "Data & Analytics",
+    "pricing": {
+      "model": "subscription",
+      "amount": 1499,
+      "currency": "INR",
+      "tiers": [
+        {
+          "name": "Pro",
+          "amount": 1499,
+          "features": ["Unlimited pipelines", "Visual designer", "Scheduling", "Error handling", "Data quality checks"]
+        }
+      ]
+    },
+    "partnerName": "CloudNestle",
+    "partnerId": "cloudnestle-001",
+    "status": "approved",
+    "features": [
+      "Drag-and-drop pipeline builder",
+      "Pre-built connectors",
+      "Data transformation",
+      "Pipeline monitoring"
+    ],
+    "createdAt": "2025-12-08T10:00:00Z",
+    "updatedAt": "2025-12-08T10:00:00Z"
+  }
+]
