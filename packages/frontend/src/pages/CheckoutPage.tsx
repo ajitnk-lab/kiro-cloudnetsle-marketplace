@@ -357,6 +357,9 @@ const CheckoutPage: React.FC = () => {
                     <div className="text-xs text-gray-500 uppercase tracking-wide">Email Address</div>
                     <div className="font-medium text-gray-900 break-all text-xs">{user?.email}</div>
                   </div>
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-900 break-words text-xs">{user?.profile?.name || 'Not provided'}</div>
+                  </div>
                   {billingInfo ? (
                     <>
                       {billingInfo.companyName && (
