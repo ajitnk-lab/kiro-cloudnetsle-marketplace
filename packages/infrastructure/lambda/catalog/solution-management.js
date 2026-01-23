@@ -210,7 +210,13 @@ exports.handler = async (event) => {
         const expressionAttributeValues = {}
 
         // Build update expression dynamically
-        const allowedFields = ['name', 'description', 'category', 'tags', 'pricing', 'assets']
+        // CRITICAL: Pricing should NEVER be updated via API for core/approved solutions
+        const allowedFields = ['name', 'description', 'category', 'tags', 'assets']
+        
+        // Only allow pricing updates for draft solutions by admins
+        if (body.pricing && requesterRole === 'admin' && existingSolution.Item.status === 'draft') {
+          allowedFields.push('pricing')
+        }
         
         allowedFields.forEach(field => {
           if (body[field] !== undefined) {

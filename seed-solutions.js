@@ -14,7 +14,7 @@ const solutions = [
     category: 'AI & Machine Learning',
     pricing: {
       free: { price: 0, features: ['Basic search', '10 queries/day'] },
-      pro: { price: 352.82, features: ['Advanced search', 'Unlimited queries', 'Priority support'] }
+      pro: { price: 150, features: ['Advanced search', 'Unlimited queries', 'Priority support'] }
     },
     status: 'approved',
     createdAt: new Date().toISOString(),
