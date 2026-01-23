@@ -216,6 +216,27 @@ export function RegisterPage() {
                   We've sent a verification code to <strong>{userEmail}</strong>
                 </p>
               </div>
+
+              {/* Email Verification Instructions */}
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-blue-800">
+                    <p className="font-semibold mb-2">📧 Check Your Email</p>
+                    <p className="mb-2">You will receive an email from <strong>Amazon SES</strong> with the subject:</p>
+                    <p className="italic text-xs bg-white p-2 rounded border border-blue-300 mb-2">
+                      "Email Address Verification Request in region US East (N. Virginia)"
+                    </p>
+                    <p className="mb-2">
+                      <strong>Important:</strong> Click the verification link in the email to authorize your email address. 
+                      This is required for receiving invoices and notifications.
+                    </p>
+                    <p className="text-xs text-blue-700">
+                      ⏰ The verification link expires in 24 hours.
+                    </p>
+                  </div>
+                </div>
+              </div>
               
               <div>
                 <label htmlFor="verificationCode" className="block text-sm font-medium text-gray-700 mb-1">
