@@ -127,6 +127,8 @@ class PaymentService {
       isBusinessPurchase?: boolean;
       gstin?: string;
       companyName?: string;
+      phoneCountryCode?: string;
+      phoneNumber?: string;
       gateway?: string;
     },
     gateway: 'cashfree' | 'payu' = 'cashfree'
@@ -139,12 +141,17 @@ class PaymentService {
 
       const user = JSON.parse(userStr);
       
+      // Combine phone country code and number from billing info
+      const fullPhoneNumber = billingInfo?.phoneCountryCode && billingInfo?.phoneNumber 
+        ? `${billingInfo.phoneCountryCode}${billingInfo.phoneNumber}`.replace(/\s+/g, '')
+        : user.profile?.phone;
+      
       const paymentRequest = {
         solutionId,
         userId: user.userId,
         userEmail: user.email,
         userName: user.profile?.name || user.email.split('@')[0],
-        userPhone: user.profile?.phone || undefined,
+        userPhone: fullPhoneNumber,
         amount,
         purpose: `Purchase of ${solutionName}`,
         ...billingInfo
