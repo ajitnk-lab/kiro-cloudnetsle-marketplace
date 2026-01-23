@@ -577,6 +577,16 @@ const CheckoutPage: React.FC = () => {
                         <span className="font-semibold text-gray-900">Total Amount:</span>
                         <span className="font-bold text-lg text-blue-600">{formatCurrency(priceBreakdown.totalAmount, selectedCurrency)}</span>
                       </div>
+                      {billingInfo?.billingCountry && billingInfo.billingCountry !== 'India' && (
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-start space-x-2">
+                            <Globe className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-xs text-blue-800">
+                              <strong>International Payment:</strong> Amount shown in INR. On the next screen, you can pay in your local currency. PayU will handle the conversion automatically.
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
