@@ -445,7 +445,11 @@ const CheckoutPage: React.FC = () => {
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                     />
                     <div className="h-12 w-20 mx-3 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-gray-700">PayU</span>
+                      <img 
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2EMrhqFYHWyEhY8yxnScriEXG3UR6uaY-yg&s" 
+                        alt="PayU" 
+                        className="h-10 object-contain"
+                      />
                     </div>
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900">PayU</div>
