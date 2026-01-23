@@ -29,7 +29,6 @@ const CheckoutPage: React.FC = () => {
   const [selectedGateway, setSelectedGateway] = useState<'cashfree' | 'payu'>('cashfree');
   const [detectedCountry, setDetectedCountry] = useState<string>('India');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('INR');
-  const [currencyConfirmed, setCurrencyConfirmed] = useState(false);
   const [displayAmount, setDisplayAmount] = useState<number>(0);
   const [priceBreakdown, setPriceBreakdown] = useState<{
     baseAmount: number;
@@ -102,7 +101,6 @@ const CheckoutPage: React.FC = () => {
 
     // Always use INR - PayU handles currency conversion
     setSelectedCurrency('INR');
-    setCurrencyConfirmed(false);
 
     await recalculatePrice(submittedBillingInfo);
   };
@@ -165,7 +163,7 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handleProceedToPayment = async () => {
-    if (!solution || !user || !billingInfo || !priceBreakdown || !currencyConfirmed) return;
+    if (!solution || !user || !billingInfo || !priceBreakdown) return;
 
     setProcessing(true);
 
