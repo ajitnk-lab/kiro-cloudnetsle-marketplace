@@ -7,7 +7,8 @@ import { useApiError } from '../hooks/useApiError';
 import { useToast } from '../components/Toast';
 import { Solution } from '../types/solution';
 import { BillingInformationForm } from '../components/BillingInformationForm';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Globe } from 'lucide-react';
+import { detectCountryFromIP, getCurrencyForCountry, formatCurrency } from '../utils/currency';
 
 const CheckoutPage: React.FC = () => {
   const { solutionId: pathSolutionId } = useParams<{ solutionId: string }>();
@@ -25,6 +26,11 @@ const CheckoutPage: React.FC = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showBillingForm, setShowBillingForm] = useState(false);
   const [billingInfo, setBillingInfo] = useState<any>(null);
+  const [selectedGateway, setSelectedGateway] = useState<'cashfree' | 'payu'>('cashfree');
+  const [detectedCountry, setDetectedCountry] = useState<string>('India');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('INR');
+  const [currencyConfirmed, setCurrencyConfirmed] = useState(false);
+  const [displayAmount, setDisplayAmount] = useState<number>(0);
   const [priceBreakdown, setPriceBreakdown] = useState<{
     baseAmount: number;
     cgst?: number;
@@ -44,7 +50,32 @@ const CheckoutPage: React.FC = () => {
     }
 
     loadSolution();
+    detectUserCountry();
   }, [solutionId, navigate]);
+
+  // Update display amount when solution or currency changes
+  useEffect(() => {
+    if (!solution) return;
+    
+    const proTier = solution.pricing?.tiers?.find(tier => tier.name === 'Pro');
+    const baseAmount = proTier?.amount || solution.pricing?.pro?.price || solution.pricing?.proTier?.amount || solution.pricing?.amount || 299;
+    
+    // Always use INR amount - PayU handles conversion
+    setDisplayAmount(baseAmount);
+  }, [solution]);
+
+  const detectUserCountry = async () => {
+    try {
+      const country = await detectCountryFromIP();
+      setDetectedCountry(country);
+      const currency = getCurrencyForCountry(country);
+      setSelectedCurrency(currency);
+    } catch (error) {
+      console.error('Country detection failed:', error);
+      setDetectedCountry('India');
+      setSelectedCurrency('INR');
+    }
+  };
 
   const loadSolution = async () => {
     await executeWithErrorHandling(
@@ -69,10 +100,22 @@ const CheckoutPage: React.FC = () => {
     setBillingInfo(submittedBillingInfo);
     setShowBillingForm(false);
 
-    const proTier = solution.pricing?.tiers?.find(tier => tier.name === 'Pro');
-    const baseAmount = proTier?.amount || solution.pricing?.pro?.price || solution.pricing?.proTier?.amount || solution.pricing?.amount || 299;
+    // Always use INR - PayU handles currency conversion
+    setSelectedCurrency('INR');
+    setCurrencyConfirmed(false);
 
-    // Calculate GST for all India purchases (18% GST is mandatory)
+    await recalculatePrice(submittedBillingInfo);
+  };
+
+  const recalculatePrice = async (billingData: any) => {
+    if (!solution) return;
+
+    const proTier = solution.pricing?.tiers?.find(tier => tier.name === 'Pro');
+    let baseAmount = proTier?.amount || solution.pricing?.pro?.price || solution.pricing?.proTier?.amount || solution.pricing?.amount || 299;
+
+    // Always use INR - no conversion needed (PayU handles it)
+    
+    // GST only applies to India
     let cgst = 0;
     let sgst = 0;
     let utgst = 0;
@@ -81,10 +124,10 @@ const CheckoutPage: React.FC = () => {
     let isIntrastate = false;
     let isUT = false;
 
-    if (submittedBillingInfo.billingCountry === 'India') {
+    if (billingData.billingCountry === 'India') {
       gstRate = 18;
       const supplierState = 'Karnataka'; // Your business is in Karnataka
-      const customerState = submittedBillingInfo.billingState;
+      const customerState = billingData.billingState;
       
       // Union Territories without legislature
       const unionTerritories = ['Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Lakshadweep', 'Ladakh'];
@@ -122,7 +165,7 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handleProceedToPayment = async () => {
-    if (!solution || !user || !billingInfo || !priceBreakdown) return;
+    if (!solution || !user || !billingInfo || !priceBreakdown || !currencyConfirmed) return;
 
     setProcessing(true);
 
@@ -134,11 +177,13 @@ const CheckoutPage: React.FC = () => {
       utgst: priceBreakdown.utgst,
       igst: priceBreakdown.igst,
       gstRate: priceBreakdown.gstRate,
-      sacCode: '998315'
+      sacCode: '998315',
+      gateway: selectedGateway,
+      currency: getCurrencyForCountry(billingInfo.billingCountry) // Send target currency for PayU
     };
 
     await executeWithErrorHandling(
-      () => paymentService.initiatePayment(solution.solutionId, priceBreakdown.baseAmount, solution.name, paymentData)
+      () => paymentService.initiatePayment(solution.solutionId, priceBreakdown.baseAmount, solution.name, paymentData, selectedGateway)
     );
   };
 
@@ -184,9 +229,6 @@ const CheckoutPage: React.FC = () => {
       </div>
     );
   }
-
-  const proTier = solution.pricing?.tiers?.find(tier => tier.name === 'Pro');
-  const amount = proTier?.amount || solution.pricing?.pro?.price || solution.pricing?.proTier?.amount || solution.pricing?.amount || 299;
 
   const isSubscription = solution.pricing.model === 'subscription';
 
@@ -269,7 +311,7 @@ const CheckoutPage: React.FC = () => {
                   <span className="text-gray-600">
                     Monthly Pro Subscription
                   </span>
-                  <span className="font-medium">₹{amount?.toLocaleString()}</span>
+                  <span className="font-medium">{formatCurrency(displayAmount, selectedCurrency)}</span>
                 </div>
                 
                 {isSubscription && (
@@ -281,7 +323,7 @@ const CheckoutPage: React.FC = () => {
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center text-lg font-semibold">
                     <span>Total</span>
-                    <span>₹{amount?.toLocaleString()}</span>
+                    <span>{formatCurrency(displayAmount, selectedCurrency)}</span>
                   </div>
                 </div>
               </div>
@@ -369,39 +411,61 @@ const CheckoutPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Payment Method */}
+              {/* Payment Gateway Selection */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">Payment Method</h3>
-                <div className="border border-gray-200 rounded-md p-4">
-                  <div className="flex items-center space-x-3 mb-3">
+                <div className="space-y-3">
+                  <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" style={{ borderColor: selectedGateway === 'cashfree' ? '#2563eb' : '#e5e7eb' }}>
+                    <input
+                      type="radio"
+                      name="gateway"
+                      value="cashfree"
+                      checked={selectedGateway === 'cashfree'}
+                      onChange={(e) => setSelectedGateway(e.target.value as 'cashfree' | 'payu')}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    />
                     <img 
                       src="/images/cashfree.png" 
                       alt="Cashfree" 
-                      className="h-16 w-24 object-contain"
+                      className="h-12 w-20 object-contain mx-3"
                     />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900">
-                        Secure Payment via Cashfree
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Cards, UPI, Net Banking, and Wallets accepted
-                      </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">Cashfree (Recommended)</div>
+                      <div className="text-xs text-gray-500">Cards, UPI, Net Banking, Wallets</div>
                     </div>
-                  </div>
+                  </label>
                   
-                  {/* Payment Method Icons */}
-                  <div className="mt-3 pt-3 border-t border-gray-100">
-                    <div className="text-xs text-gray-500 mb-2">Accepted:</div>
-                    <div className="grid grid-cols-4 gap-2">
-                      <img src="/images/visa.png" alt="Visa" className="h-6 object-contain" />
-                      <img src="/images/mastercard.png" alt="Mastercard" className="h-6 object-contain" />
-                      <img src="/images/amex.png" alt="American Express" className="h-6 object-contain" />
-                      <img src="/images/maestro.png" alt="Maestro" className="h-6 object-contain" />
-                      <img src="/images/diners.png" alt="Diners Club" className="h-6 object-contain" />
-                      <img src="/images/gpay.png" alt="Google Pay" className="h-6 object-contain" />
-                      <img src="/images/phonepe.png" alt="PhonePe" className="h-6 object-contain" />
-                      <img src="/images/bhim.png" alt="BHIM UPI" className="h-6 object-contain" />
+                  <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" style={{ borderColor: selectedGateway === 'payu' ? '#2563eb' : '#e5e7eb' }}>
+                    <input
+                      type="radio"
+                      name="gateway"
+                      value="payu"
+                      checked={selectedGateway === 'payu'}
+                      onChange={(e) => setSelectedGateway(e.target.value as 'cashfree' | 'payu')}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div className="h-12 w-20 mx-3 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-gray-700">PayU</span>
                     </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">PayU</div>
+                      <div className="text-xs text-gray-500">International payments supported</div>
+                    </div>
+                  </label>
+                </div>
+                
+                {/* Payment Method Icons */}
+                <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                  <div className="text-xs text-gray-500 mb-2">Accepted:</div>
+                  <div className="grid grid-cols-4 gap-2">
+                    <img src="/images/visa.png" alt="Visa" className="h-6 object-contain" />
+                    <img src="/images/mastercard.png" alt="Mastercard" className="h-6 object-contain" />
+                    <img src="/images/amex.png" alt="American Express" className="h-6 object-contain" />
+                    <img src="/images/maestro.png" alt="Maestro" className="h-6 object-contain" />
+                    <img src="/images/diners.png" alt="Diners Club" className="h-6 object-contain" />
+                    <img src="/images/gpay.png" alt="Google Pay" className="h-6 object-contain" />
+                    <img src="/images/phonepe.png" alt="PhonePe" className="h-6 object-contain" />
+                    <img src="/images/bhim.png" alt="BHIM UPI" className="h-6 object-contain" />
                   </div>
                 </div>
               </div>
@@ -455,7 +519,7 @@ const CheckoutPage: React.FC = () => {
                   ) : (
                     <>
                       Enter Billing Address
-                      <span className="ml-2">₹{amount?.toLocaleString()}</span>
+                      <span className="ml-2">{formatCurrency(displayAmount, selectedCurrency)}</span>
                     </>
                   )}
                 </button>
@@ -472,7 +536,7 @@ const CheckoutPage: React.FC = () => {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Base Amount:</span>
-                        <span className="font-medium">₹{priceBreakdown.baseAmount.toLocaleString()}</span>
+                        <span className="font-medium">{formatCurrency(priceBreakdown.baseAmount, selectedCurrency)}</span>
                       </div>
                       {priceBreakdown.gstRate > 0 && (
                         <>
@@ -481,17 +545,17 @@ const CheckoutPage: React.FC = () => {
                             <>
                               <div className="flex justify-between">
                                 <span className="text-gray-600">CGST (9%):</span>
-                                <span className="font-medium">₹{priceBreakdown.cgst?.toLocaleString()}</span>
+                                <span className="font-medium">{formatCurrency(priceBreakdown.cgst!, selectedCurrency)}</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-gray-600">{priceBreakdown.isUT ? 'UTGST' : 'SGST'} (9%):</span>
-                                <span className="font-medium">₹{(priceBreakdown.sgst || priceBreakdown.utgst)?.toLocaleString()}</span>
+                                <span className="font-medium">{formatCurrency((priceBreakdown.sgst || priceBreakdown.utgst)!, selectedCurrency)}</span>
                               </div>
                             </>
                           ) : (
                             <div className="flex justify-between">
                               <span className="text-gray-600">IGST (18%):</span>
-                              <span className="font-medium">₹{priceBreakdown.igst?.toLocaleString()}</span>
+                              <span className="font-medium">{formatCurrency(priceBreakdown.igst!, selectedCurrency)}</span>
                             </div>
                           )}
                           {billingInfo?.isBusinessPurchase && billingInfo?.gstin ? (
@@ -511,14 +575,72 @@ const CheckoutPage: React.FC = () => {
                       )}
                       <div className="flex justify-between pt-2 border-t border-blue-300">
                         <span className="font-semibold text-gray-900">Total Amount:</span>
-                        <span className="font-bold text-lg text-blue-600">₹{priceBreakdown.totalAmount.toLocaleString()}</span>
+                        <span className="font-bold text-lg text-blue-600">{formatCurrency(priceBreakdown.totalAmount, selectedCurrency)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Currency Confirmation */}
+                  <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-4 mb-4">
+                    <div className="flex items-start space-x-3">
+                      <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-amber-900 mb-2">Payment Currency Confirmation</h4>
+                        <div className="space-y-2 text-sm text-amber-800">
+                          <div className="flex items-center space-x-2">
+                            <Globe className="h-4 w-4" />
+                            <span>Billing Country: <strong>{billingInfo?.billingCountry}</strong></span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span>Payment Currency:</span>
+                            <select
+                              value={selectedCurrency}
+                              onChange={async (e) => {
+                                const newCurrency = e.target.value;
+                                setSelectedCurrency(newCurrency);
+                                setCurrencyConfirmed(false);
+                                // Recalculate price with new currency
+                                if (billingInfo) {
+                                  await recalculatePrice(billingInfo);
+                                }
+                              }}
+                              className="ml-2 px-3 py-1 border border-amber-300 rounded-md bg-white text-amber-900 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
+                            >
+                              <option value="INR">INR (₹) - Indian Rupee</option>
+                              <option value="USD">USD ($) - US Dollar</option>
+                              <option value="EUR">EUR (€) - Euro</option>
+                              <option value="GBP">GBP (£) - British Pound</option>
+                              <option value="AED">AED (د.إ) - UAE Dirham</option>
+                              <option value="SGD">SGD (S$) - Singapore Dollar</option>
+                              <option value="AUD">AUD (A$) - Australian Dollar</option>
+                              <option value="CAD">CAD (C$) - Canadian Dollar</option>
+                            </select>
+                          </div>
+                          <div className="pt-2 border-t border-amber-200">
+                            <p className="font-medium">You will be charged: <span className="text-lg">{formatCurrency(priceBreakdown.totalAmount, selectedCurrency)}</span></p>
+                            <p className="text-xs mt-1 text-amber-700">
+                              {selectedCurrency !== 'INR' && '(Approximate conversion. Final amount determined by PayU at checkout)'}
+                            </p>
+                          </div>
+                        </div>
+                        <label className="flex items-center mt-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={currencyConfirmed}
+                            onChange={(e) => setCurrencyConfirmed(e.target.checked)}
+                            className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300 rounded"
+                          />
+                          <span className="ml-2 text-sm font-medium text-amber-900">
+                            I confirm the currency and amount are correct
+                          </span>
+                        </label>
                       </div>
                     </div>
                   </div>
 
                   <button
                     onClick={handleProceedToPayment}
-                    disabled={processing}
+                    disabled={processing || !currencyConfirmed}
                     className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
                     {processing ? (
@@ -529,10 +651,16 @@ const CheckoutPage: React.FC = () => {
                     ) : (
                       <>
                         Proceed to Pay
-                        <span className="ml-2">₹{priceBreakdown.totalAmount.toLocaleString()}</span>
+                        <span className="ml-2">{formatCurrency(priceBreakdown.totalAmount, selectedCurrency)}</span>
                       </>
                     )}
                   </button>
+                  
+                  {!currencyConfirmed && (
+                    <div className="mt-2 text-xs text-amber-600 text-center">
+                      Please confirm the payment currency to continue
+                    </div>
+                  )}
                 </>
               )}
 
@@ -646,6 +774,7 @@ const CheckoutPage: React.FC = () => {
                   onSubmit={handleBillingSubmit}
                   onBack={() => setShowBillingForm(false)}
                   initialData={billingInfo}
+                  detectedCountry={detectedCountry}
                 />
               </div>
             </div>

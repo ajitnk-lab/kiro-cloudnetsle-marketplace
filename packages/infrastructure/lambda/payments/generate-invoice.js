@@ -291,8 +291,12 @@ async function generateInvoicePDF(transaction, company, invoiceNumber) {
     
     // Add buyer GSTIN if business purchase
     let currentY = yPos + 38;
-    if (transaction.isBusinessPurchase && transaction.buyerGstin) {
-      doc.text(`GSTIN: ${transaction.buyerGstin}`, buyerX, currentY);
+    if (transaction.isBusinessPurchase && transaction.gstin) {
+      doc.text(`GSTIN: ${transaction.gstin}`, buyerX, currentY);
+      currentY += 13;
+    }
+    if (transaction.companyName) {
+      doc.text(`Company: ${transaction.companyName}`, buyerX, currentY);
       currentY += 13;
     }
     
