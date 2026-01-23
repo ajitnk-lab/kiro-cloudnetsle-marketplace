@@ -640,50 +640,32 @@ const CheckoutPage: React.FC = () => {
                 <div className="pt-4 border-t border-gray-200">
                   <div className="text-sm font-bold text-gray-900 mb-4">🏆 Payment Gateway Compliance:</div>
                   <div className="space-y-4">
-                    <a 
-                      href="https://cashfreelogo.cashfree.com/website/pdf/cashfreepcidsscoc2025to2026.pdf" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 transition-colors group"
-                    >
+                    <div className="flex items-center space-x-3 p-2">
                       <img src="/images/pci-dss.jpg" alt="PCI DSS" className="h-10 w-10 object-contain" />
                       <div className="flex-1">
-                        <div className="text-sm font-bold text-blue-800 group-hover:text-blue-900">
+                        <div className="text-sm font-bold text-gray-800">
                           PCI DSS v4.0.1 Compliant
                         </div>
-                        <div className="text-xs text-blue-600">Click to view certificate</div>
                       </div>
-                    </a>
+                    </div>
                     
-                    <a 
-                      href="https://cashfreelogo.cashfree.com/website/pdf/CASHFREEPAYMENTSINDIAPRIVATELIMITED-ISO%209001-2024.pdf" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 transition-colors group"
-                    >
+                    <div className="flex items-center space-x-3 p-2">
                       <img src="/images/iso9001-2015.jpg" alt="ISO 9001" className="h-10 w-10 object-contain" />
                       <div className="flex-1">
-                        <div className="text-sm font-bold text-blue-800 group-hover:text-blue-900">
+                        <div className="text-sm font-bold text-gray-800">
                           ISO 9001:2015 Certified
                         </div>
-                        <div className="text-xs text-blue-600">Click to view certificate</div>
                       </div>
-                    </a>
+                    </div>
                     
-                    <a 
-                      href="https://cashfreelogo.cashfree.com/website/pdf/ISO27001_2022Year2024certificate.pdf" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-3 p-2 rounded-lg hover:bg-blue-50 transition-colors group"
-                    >
+                    <div className="flex items-center space-x-3 p-2">
                       <img src="/images/iso27001-2022.jpg" alt="ISO 27001" className="h-10 w-10 object-contain" />
                       <div className="flex-1">
-                        <div className="text-sm font-bold text-blue-800 group-hover:text-blue-900">
+                        <div className="text-sm font-bold text-gray-800">
                           ISO/IEC 27001:2022 Certified
                         </div>
-                        <div className="text-xs text-blue-600">Click to view certificate</div>
                       </div>
-                    </a>
+                    </div>
                   </div>
                 </div>
               </div>
