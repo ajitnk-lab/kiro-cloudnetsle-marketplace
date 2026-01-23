@@ -314,7 +314,7 @@ async function generateInvoicePDF(transaction, company, invoiceNumber) {
     doc.text(`${transaction.billingCountry} - ${transaction.billingPostalCode}`, buyerX, currentY);
 
     // Export/LUT Declaration for international invoices
-    const isInternational = transaction.billingCountry !== 'India';
+    const isInternational = transaction.billingCountry !== 'IN';
     if (isInternational) {
       yPos = 270;
       doc.rect(leftMargin, yPos, pageWidth, 30).fillAndStroke('#fff3cd', '#000');

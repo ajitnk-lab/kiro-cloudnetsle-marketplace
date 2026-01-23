@@ -25,7 +25,7 @@ interface Props {
 
 export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, initialData, detectedCountry }) => {
   const [formData, setFormData] = useState<BillingInfo>(initialData || {
-    billingCountry: detectedCountry || 'India',
+    billingCountry: detectedCountry || 'IN',
     billingAddress: '',
     billingCity: '',
     billingState: '',
@@ -36,6 +36,16 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof BillingInfo, string>>>({});
+
+  // Auto-update phone country code when billing country changes
+  const handleCountryChange = (countryCode: string) => {
+    const country = countries.find(c => c.code === countryCode);
+    setFormData({ 
+      ...formData, 
+      billingCountry: countryCode,
+      phoneCountryCode: country?.phoneCode || formData.phoneCountryCode
+    });
+  };
 
   const validate = () => {
     const newErrors: Partial<Record<keyof BillingInfo, string>> = {};
@@ -51,9 +61,13 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
     
     // Postal code validation
     if (formData.billingPostalCode) {
-      if (formData.billingCountry === 'India' && !/^\d{6}$/.test(formData.billingPostalCode)) {
+      if (formData.billingCountry === 'IN' && !/^\d{6}$/.test(formData.billingPostalCode)) {
         newErrors.billingPostalCode = 'Indian postal code must be 6 digits';
-      } else if (formData.billingCountry !== 'India' && formData.billingPostalCode.length < 3) {
+      } else if (['US', 'CA'].includes(formData.billingCountry) && !/^\d{5}(-\d{4})?$/.test(formData.billingPostalCode)) {
+        newErrors.billingPostalCode = 'Invalid postal code format';
+      } else if (formData.billingCountry === 'GB' && !/^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$/i.test(formData.billingPostalCode)) {
+        newErrors.billingPostalCode = 'Invalid UK postcode format';
+      } else if (formData.billingPostalCode.length < 3) {
         newErrors.billingPostalCode = 'Invalid postal code';
       }
     }
@@ -65,7 +79,7 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
       newErrors.phoneNumber = 'Phone number must be 7-15 digits';
     }
 
-    if (formData.isBusinessPurchase && formData.billingCountry === 'India' && formData.gstin) {
+    if (formData.isBusinessPurchase && formData.billingCountry === 'IN' && formData.gstin) {
       if (!validateGSTIN(formData.gstin)) {
         newErrors.gstin = 'Invalid GSTIN format';
       }
@@ -90,16 +104,16 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
         <label className="block text-sm font-medium mb-1">Country *</label>
         <select
           value={formData.billingCountry}
-          onChange={(e) => setFormData({ ...formData, billingCountry: e.target.value })}
+          onChange={(e) => handleCountryChange(e.target.value)}
           className="w-full p-2 border rounded"
         >
           {countries.map((c) => (
             <option key={c.code} value={c.code}>{c.name}</option>
           ))}
         </select>
-        {detectedCountry && detectedCountry !== 'India' && (
+        {detectedCountry && detectedCountry !== 'IN' && (
           <p className="text-xs text-blue-600 mt-1">
-            ℹ️ Auto-detected: {detectedCountry}
+            ℹ️ Auto-detected: {countries.find(c => c.code === detectedCountry)?.name || detectedCountry}
           </p>
         )}
         {errors.billingCountry && <p className="text-red-500 text-sm">{errors.billingCountry}</p>}
@@ -129,8 +143,8 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">State *</label>
-          {formData.billingCountry === 'India' ? (
+          <label className="block text-sm font-medium mb-1">State/Province *</label>
+          {formData.billingCountry === 'IN' ? (
             <select
               value={formData.billingState}
               onChange={(e) => setFormData({ ...formData, billingState: e.target.value })}
@@ -146,6 +160,7 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
               type="text"
               value={formData.billingState}
               onChange={(e) => setFormData({ ...formData, billingState: e.target.value })}
+              placeholder="State/Province/Region"
               className="w-full p-2 border rounded"
             />
           )}
@@ -167,13 +182,17 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
       <div className="grid grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Country Code *</label>
-          <input
-            type="text"
+          <select
             value={formData.phoneCountryCode}
             onChange={(e) => setFormData({ ...formData, phoneCountryCode: e.target.value })}
-            placeholder="+91"
             className="w-full p-2 border rounded"
-          />
+          >
+            {countries.map((c) => (
+              <option key={c.phoneCode} value={c.phoneCode}>
+                {c.phoneCode} ({c.code})
+              </option>
+            ))}
+          </select>
         </div>
         <div className="col-span-2">
           <label className="block text-sm font-medium mb-1">Phone Number *</label>
@@ -211,7 +230,7 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
             />
           </div>
 
-          {formData.billingCountry === 'India' && (
+          {formData.billingCountry === 'IN' && (
             <div>
               <label className="block text-sm font-medium mb-1">GSTIN (Optional)</label>
               <input

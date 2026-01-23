@@ -124,7 +124,7 @@ const CheckoutPage: React.FC = () => {
     let isIntrastate = false;
     let isUT = false;
 
-    if (billingData.billingCountry === 'India') {
+    if (billingData.billingCountry === 'IN') {
       gstRate = 18;
       const supplierState = 'Karnataka'; // Your business is in Karnataka
       const customerState = billingData.billingState;
@@ -417,7 +417,7 @@ const CheckoutPage: React.FC = () => {
                 {billingInfo && (
                   <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-xs text-blue-800">
-                      <strong>💡 Recommendation:</strong> {billingInfo.billingCountry === 'India' 
+                      <strong>💡 Recommendation:</strong> {billingInfo.billingCountry === 'IN' 
                         ? 'For Indian billing address, we recommend using Cashfree for faster processing.' 
                         : 'For international billing address, we recommend using PayU for better currency support.'}
                     </p>
@@ -592,7 +592,7 @@ const CheckoutPage: React.FC = () => {
                         <span className="font-semibold text-gray-900">Total Amount:</span>
                         <span className="font-bold text-lg text-blue-600">{formatCurrency(priceBreakdown.totalAmount, selectedCurrency)}</span>
                       </div>
-                      {billingInfo?.billingCountry && billingInfo.billingCountry !== 'India' && (
+                      {billingInfo?.billingCountry && billingInfo.billingCountry !== 'IN' && (
                         <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                           <div className="flex items-start space-x-2">
                             <Globe className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />

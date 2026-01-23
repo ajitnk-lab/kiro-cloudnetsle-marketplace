@@ -158,7 +158,7 @@ exports.handler = async (event) => {
     }
 
     // Calculate GST (18% for India, 0% for others)
-    const gstRate = billingCountry === 'India' ? 18 : 0
+    const gstRate = billingCountry === 'IN' ? 18 : 0
     const gstAmount = (baseAmount * gstRate) / 100
     const totalAmount = baseAmount + gstAmount
 
