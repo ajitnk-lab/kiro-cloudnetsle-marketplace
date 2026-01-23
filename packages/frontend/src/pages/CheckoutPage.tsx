@@ -7,7 +7,7 @@ import { useApiError } from '../hooks/useApiError';
 import { useToast } from '../components/Toast';
 import { Solution } from '../types/solution';
 import { BillingInformationForm } from '../components/BillingInformationForm';
-import { ArrowLeft, Loader2, AlertCircle, Globe } from 'lucide-react';
+import { ArrowLeft, Loader2, Globe } from 'lucide-react';
 import { detectCountryFromIP, getCurrencyForCountry, formatCurrency } from '../utils/currency';
 
 const CheckoutPage: React.FC = () => {
