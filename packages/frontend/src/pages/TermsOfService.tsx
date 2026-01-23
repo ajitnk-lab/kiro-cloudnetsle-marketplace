@@ -101,18 +101,18 @@ export function TermsOfService() {
             <p className="font-semibold text-gray-900">CloudNestle Consulting & Services</p>
             
             <div>
-              <p className="font-semibold text-gray-900 mb-1">📍 Registered Office:</p>
+              <p className="font-semibold text-gray-900 mb-1">🇺🇸 US Sales & Support:</p>
+              <p>Sales: <a href="mailto:sales@cloudnestle.com" className="text-blue-600 hover:text-blue-800">sales@cloudnestle.com</a></p>
+              <p>Support: <a href="mailto:support@cloudnestle.com" className="text-blue-600 hover:text-blue-800">support@cloudnestle.com</a></p>
+            </div>
+            
+            <div>
+              <p className="font-semibold text-gray-900 mb-1">📍 Global Headquarters:</p>
               <p className="leading-relaxed">
                 🇮🇳 Ground floor, #85, 2nd Cross Road,<br />
                 Central Excise Layout, Vijay Nagar,<br />
                 Bangalore 560040, India
               </p>
-            </div>
-            
-            <div>
-              <p className="font-semibold text-gray-900 mb-1">📧 Contact:</p>
-              <p>Sales: <a href="mailto:sales@cloudnestle.com" className="text-blue-600 hover:text-blue-800">sales@cloudnestle.com</a></p>
-              <p>Support: <a href="mailto:support@cloudnestle.com" className="text-blue-600 hover:text-blue-800">support@cloudnestle.com</a></p>
             </div>
             
             <div>

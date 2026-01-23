@@ -44,16 +44,7 @@ export function ContactUs() {
               
               <div className="space-y-4 text-sm text-gray-700">
                 <div>
-                  <p className="font-semibold text-gray-900 mb-1">📍 Registered Office:</p>
-                  <p className="leading-relaxed">
-                    🇮🇳 Ground floor, #85, 2nd Cross Road,<br />
-                    Central Excise Layout, Vijay Nagar,<br />
-                    Bangalore 560040, India
-                  </p>
-                </div>
-                
-                <div>
-                  <p className="font-semibold text-gray-900 mb-1">📧 Contact:</p>
+                  <p className="font-semibold text-gray-900 mb-1">🇺🇸 US Sales & Support:</p>
                   <p>
                     <span className="font-medium">Sales:</span>{' '}
                     <a href="mailto:sales@cloudnestle.com" className="text-blue-600 hover:text-blue-800">
@@ -65,6 +56,15 @@ export function ContactUs() {
                     <a href="mailto:support@cloudnestle.com" className="text-blue-600 hover:text-blue-800">
                       support@cloudnestle.com
                     </a>
+                  </p>
+                </div>
+                
+                <div>
+                  <p className="font-semibold text-gray-900 mb-1">📍 Global Headquarters:</p>
+                  <p className="leading-relaxed">
+                    🇮🇳 Ground floor, #85, 2nd Cross Road,<br />
+                    Central Excise Layout, Vijay Nagar,<br />
+                    Bangalore 560040, India
                   </p>
                 </div>
               </div>
