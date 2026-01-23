@@ -209,7 +209,6 @@ export function Layout({ children }: LayoutProps) {
                         Bangalore 560040, India
                       </p>
                     </div>
-                    </div>
                     
                     <div>
                       <p className="font-semibold text-gray-700">🏢 GSTIN: 29ADWPA6289Q1ZB</p>
