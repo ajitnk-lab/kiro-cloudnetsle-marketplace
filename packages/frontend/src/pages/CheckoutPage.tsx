@@ -699,15 +699,15 @@ const CheckoutPage: React.FC = () => {
             {/* Company Information */}
             <div className="card mt-6">
               <h3 className="text-lg font-semibold mb-4">Billed By</h3>
-              <div className="flex items-center space-x-4 mb-4">
+              <div className="flex items-start space-x-4 mb-4">
                 <img 
                   src="/cloudnestle-logo.png" 
                   alt="CloudNestle" 
-                  className="h-12 w-12 object-contain"
+                  className="h-12 w-12 object-contain flex-shrink-0"
                 />
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900">CloudNestle Consulting & Services</p>
-                  <p className="text-sm text-gray-600">GSTIN: 29ADWPA6289Q1ZB</p>
+                  <p className="text-sm text-gray-600 break-all">GSTIN: 29ADWPA6289Q1ZB</p>
                 </div>
               </div>
             </div>
