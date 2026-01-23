@@ -313,8 +313,22 @@ async function generateInvoicePDF(transaction, company, invoiceNumber) {
     currentY += 13;
     doc.text(`${transaction.billingCountry} - ${transaction.billingPostalCode}`, buyerX, currentY);
 
+    // Export/LUT Declaration for international invoices
+    const isInternational = transaction.billingCountry !== 'India';
+    if (isInternational) {
+      yPos = 270;
+      doc.rect(leftMargin, yPos, pageWidth, 30).fillAndStroke('#fff3cd', '#000');
+      doc.fillColor('#000').fontSize(9).font('Helvetica-Bold');
+      doc.text('Export Declaration:', leftMargin + 10, yPos + 8);
+      doc.font('Helvetica').fontSize(8);
+      doc.text('Supply meant for export under Letter of Undertaking (LUT)', leftMargin + 10, yPos + 20);
+      doc.text('LUT ARN: AD291225033708W', leftMargin + 300, yPos + 20);
+      yPos = 310;
+    } else {
+      yPos = 280;
+    }
+
     // Items Table
-    yPos = 280;
     const tableTop = yPos;
     const col1 = leftMargin + 5;
     const col2 = leftMargin + 30;
@@ -355,7 +369,12 @@ async function generateInvoicePDF(transaction, company, invoiceNumber) {
     doc.text('INR ' + String(transaction.baseAmount), totalsX + 120, yPos);
     
     yPos += 12;
-    if (transaction.gstRate) {
+    
+    // For international invoices, show IGST as 0% (zero-rated export)
+    if (isInternational) {
+      doc.text('IGST (0% - Export under LUT):', totalsX, yPos);
+      doc.text('INR 0.00', totalsX + 120, yPos);
+    } else if (transaction.gstRate) {
       const isIntraState = transaction.billingState === 'Karnataka';
       
       if (isIntraState) {
