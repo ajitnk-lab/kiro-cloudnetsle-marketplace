@@ -580,67 +580,9 @@ const CheckoutPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Currency Confirmation */}
-                  <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-4 mb-4">
-                    <div className="flex items-start space-x-3">
-                      <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-amber-900 mb-2">Payment Currency Confirmation</h4>
-                        <div className="space-y-2 text-sm text-amber-800">
-                          <div className="flex items-center space-x-2">
-                            <Globe className="h-4 w-4" />
-                            <span>Billing Country: <strong>{billingInfo?.billingCountry}</strong></span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span>Payment Currency:</span>
-                            <select
-                              value={selectedCurrency}
-                              onChange={async (e) => {
-                                const newCurrency = e.target.value;
-                                setSelectedCurrency(newCurrency);
-                                setCurrencyConfirmed(false);
-                                // Recalculate price with new currency
-                                if (billingInfo) {
-                                  await recalculatePrice(billingInfo);
-                                }
-                              }}
-                              className="ml-2 px-3 py-1 border border-amber-300 rounded-md bg-white text-amber-900 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
-                            >
-                              <option value="INR">INR (₹) - Indian Rupee</option>
-                              <option value="USD">USD ($) - US Dollar</option>
-                              <option value="EUR">EUR (€) - Euro</option>
-                              <option value="GBP">GBP (£) - British Pound</option>
-                              <option value="AED">AED (د.إ) - UAE Dirham</option>
-                              <option value="SGD">SGD (S$) - Singapore Dollar</option>
-                              <option value="AUD">AUD (A$) - Australian Dollar</option>
-                              <option value="CAD">CAD (C$) - Canadian Dollar</option>
-                            </select>
-                          </div>
-                          <div className="pt-2 border-t border-amber-200">
-                            <p className="font-medium">You will be charged: <span className="text-lg">{formatCurrency(priceBreakdown.totalAmount, selectedCurrency)}</span></p>
-                            <p className="text-xs mt-1 text-amber-700">
-                              {selectedCurrency !== 'INR' && '(Approximate conversion. Final amount determined by PayU at checkout)'}
-                            </p>
-                          </div>
-                        </div>
-                        <label className="flex items-center mt-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={currencyConfirmed}
-                            onChange={(e) => setCurrencyConfirmed(e.target.checked)}
-                            className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300 rounded"
-                          />
-                          <span className="ml-2 text-sm font-medium text-amber-900">
-                            I confirm the currency and amount are correct
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
                   <button
                     onClick={handleProceedToPayment}
-                    disabled={processing || !currencyConfirmed}
+                    disabled={processing}
                     className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   >
                     {processing ? (
