@@ -41,11 +41,29 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
     const newErrors: Partial<Record<keyof BillingInfo, string>> = {};
 
     if (!formData.billingCountry) newErrors.billingCountry = 'Country is required';
-    if (!formData.billingAddress) newErrors.billingAddress = 'Address is required';
-    if (!formData.billingCity) newErrors.billingCity = 'City is required';
-    if (!formData.billingState) newErrors.billingState = 'State is required';
-    if (!formData.billingPostalCode) newErrors.billingPostalCode = 'Postal code is required';
-    if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
+    if (!formData.billingAddress?.trim()) newErrors.billingAddress = 'Address is required';
+    if (formData.billingAddress && formData.billingAddress.length < 10) {
+      newErrors.billingAddress = 'Address must be at least 10 characters';
+    }
+    if (!formData.billingCity?.trim()) newErrors.billingCity = 'City is required';
+    if (!formData.billingState?.trim()) newErrors.billingState = 'State is required';
+    if (!formData.billingPostalCode?.trim()) newErrors.billingPostalCode = 'Postal code is required';
+    
+    // Postal code validation
+    if (formData.billingPostalCode) {
+      if (formData.billingCountry === 'India' && !/^\d{6}$/.test(formData.billingPostalCode)) {
+        newErrors.billingPostalCode = 'Indian postal code must be 6 digits';
+      } else if (formData.billingCountry !== 'India' && formData.billingPostalCode.length < 3) {
+        newErrors.billingPostalCode = 'Invalid postal code';
+      }
+    }
+    
+    // Phone validation
+    if (!formData.phoneNumber?.trim()) {
+      newErrors.phoneNumber = 'Phone number is required';
+    } else if (!/^\d{7,15}$/.test(formData.phoneNumber.replace(/[\s-]/g, ''))) {
+      newErrors.phoneNumber = 'Phone number must be 7-15 digits';
+    }
 
     if (formData.isBusinessPurchase && formData.billingCountry === 'India' && formData.gstin) {
       if (!validateGSTIN(formData.gstin)) {
