@@ -156,10 +156,10 @@ export const detectCountryFromIP = async (): Promise<string> => {
   try {
     const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();
-    return data.country_name || 'India'; // Default to India
+    return data.country || 'IN'; // Use ISO code (country field, not country_name)
   } catch (error) {
     console.error('IP detection failed:', error);
-    return 'India'; // Default fallback
+    return 'IN'; // Default fallback to ISO code
   }
 };
 

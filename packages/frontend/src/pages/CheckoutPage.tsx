@@ -27,7 +27,7 @@ const CheckoutPage: React.FC = () => {
   const [showBillingForm, setShowBillingForm] = useState(false);
   const [billingInfo, setBillingInfo] = useState<any>(null);
   const [selectedGateway, setSelectedGateway] = useState<'cashfree' | 'payu'>('cashfree');
-  const [detectedCountry, setDetectedCountry] = useState<string>('India');
+  const [detectedCountry, setDetectedCountry] = useState<string>('IN');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('INR');
   const [displayAmount, setDisplayAmount] = useState<number>(0);
   const [priceBreakdown, setPriceBreakdown] = useState<{
@@ -71,7 +71,7 @@ const CheckoutPage: React.FC = () => {
       setSelectedCurrency(currency);
     } catch (error) {
       console.error('Country detection failed:', error);
-      setDetectedCountry('India');
+      setDetectedCountry('IN');
       setSelectedCurrency('INR');
     }
   };
