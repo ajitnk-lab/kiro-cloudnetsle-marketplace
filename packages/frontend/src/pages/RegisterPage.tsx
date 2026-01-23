@@ -213,56 +213,55 @@ export function RegisterPage() {
               <div className="text-center mb-4">
                 <h3 className="text-lg font-medium text-gray-900">Verify Your Email</h3>
                 <p className="text-sm text-gray-600 mt-2">
-                  We've sent a verification code to <strong>{userEmail}</strong>
+                  Verification code sent to <strong>{userEmail}</strong>
                 </p>
               </div>
 
-              {/* Email Verification Instructions */}
-              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-start space-x-2">
-                  <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-blue-800">
-                    <p className="font-semibold mb-2">📧 Check Your Email</p>
-                    <p className="mb-2">You will receive an email from <strong>Amazon SES</strong> with the subject:</p>
-                    <p className="italic text-xs bg-white p-2 rounded border border-blue-300 mb-2">
-                      "Email Address Verification Request in region US East (N. Virginia)"
-                    </p>
-                    <p className="mb-2">
-                      <strong>Important:</strong> Click the verification link in the email to authorize your email address. 
-                      This is required for receiving invoices and notifications.
-                    </p>
-                    <p className="text-xs text-blue-700">
-                      ⏰ The verification link expires in 24 hours.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="verificationCode" className="block text-sm font-medium text-gray-700 mb-1">
-                  Verification Code
+              {/* Step 1: Enter Verification Code */}
+              <div className="mb-6">
+                <label htmlFor="verificationCode" className="block text-sm font-semibold text-gray-900 mb-2">
+                  Step 1: Enter Verification Code
                 </label>
                 <input
                   id="verificationCode"
                   type="text"
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
-                  className="input border-2 border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-blue-50 text-center text-lg font-mono tracking-widest"
+                  className="input w-full border-2 border-blue-500 focus:border-blue-600 focus:ring-4 focus:ring-blue-200 bg-white text-center text-2xl font-mono tracking-widest py-3 shadow-lg"
                   placeholder="000000"
                   maxLength={6}
                   autoFocus
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Enter the 6-digit code sent to your email</p>
+                <p className="text-xs text-gray-600 mt-2 text-center">Check your email inbox for the 6-digit code</p>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading || verificationCode.length !== 6}
-                className="btn btn-primary w-full"
+                className="btn btn-primary w-full text-lg py-3"
               >
                 {isLoading ? 'Verifying...' : 'Verify Email'}
               </button>
+
+              {/* Step 2: Amazon SES Email */}
+              <div className="mt-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-amber-900">
+                    <p className="font-semibold mb-2">Step 2: Verify Email with Amazon SES</p>
+                    <p className="mb-2">
+                      After clicking "Verify Email" above, you'll receive a <strong>second email from Amazon SES</strong> to authorize your email for invoices and notifications.
+                    </p>
+                    <p className="text-xs bg-white p-2 rounded border border-amber-300 mb-2 italic">
+                      Subject: "Email Address Verification Request in region US East (N. Virginia)"
+                    </p>
+                    <p className="font-medium">
+                      ⚠️ Click the link in that email to complete setup (expires in 24 hours)
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <button
                 type="button"
