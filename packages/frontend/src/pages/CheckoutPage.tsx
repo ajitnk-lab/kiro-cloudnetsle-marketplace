@@ -441,6 +441,7 @@ const CheckoutPage: React.FC = () => {
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900">Cashfree (Recommended)</div>
                       <div className="text-xs text-gray-500">Cards, UPI, Net Banking, Wallets</div>
+                      <div className="text-xs text-orange-600 font-medium mt-1">🇮🇳 Domestic payments only (India)</div>
                     </div>
                   </label>
                   
@@ -463,6 +464,7 @@ const CheckoutPage: React.FC = () => {
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-900">PayU</div>
                       <div className="text-xs text-gray-500">International payments supported</div>
+                      <div className="text-xs text-green-600 font-medium mt-1">🌍 Accepts payments worldwide</div>
                     </div>
                   </label>
                 </div>
