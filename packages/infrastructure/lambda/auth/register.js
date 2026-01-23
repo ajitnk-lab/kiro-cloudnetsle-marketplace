@@ -1,12 +1,14 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
 const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb')
 const { CognitoIdentityProviderClient, AdminGetUserCommand } = require('@aws-sdk/client-cognito-identity-provider')
+const { SESClient, VerifyEmailIdentityCommand } = require('@aws-sdk/client-ses')
 const https = require('https')
 const crypto = require('crypto')
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
 const cognitoClient = new CognitoIdentityProviderClient({})
+const sesClient = new SESClient({})
 
 // Generate permanent token for user-solution combination
 const generatePermanentToken = (userEmail, solutionId) => {
@@ -143,6 +145,15 @@ exports.handler = async (event) => {
       TableName: process.env.USER_TABLE_NAME,
       Item: userProfile,
     }))
+
+    // Auto-register email with SES sandbox for invoice delivery
+    try {
+      await sesClient.send(new VerifyEmailIdentityCommand({ EmailAddress: email }))
+      console.log(`✅ SES verification email sent to: ${email}`)
+    } catch (sesError) {
+      console.error('SES verification failed (non-blocking):', sesError)
+      // Don't fail registration if SES verification fails
+    }
 
     let responseData = {
       message: 'User profile created successfully',

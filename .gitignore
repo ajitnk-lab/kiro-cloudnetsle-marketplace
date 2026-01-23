@@ -47,3 +47,10 @@ create-repo.json
 # CDK context and cache
 cdk.context.json
 .cdk.staging/
+
+# Compiled TypeScript in lib directories
+packages/infrastructure/lib/**/*.js
+packages/infrastructure/lib/**/*.d.ts
+
+# Lambda deployment packages
+packages/infrastructure/lambda/**/*.zip

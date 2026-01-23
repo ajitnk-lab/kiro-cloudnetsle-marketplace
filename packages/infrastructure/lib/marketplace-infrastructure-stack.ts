@@ -41,6 +41,7 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
       upgradeToProFunction: dataConstruct.upgradeToProFunction,
       paymentCallbackFunction: dataConstruct.paymentCallbackFunction,
       cashfreeWebhookFunction: dataConstruct.cashfreeWebhookFunction,
+      payuWebhookFunction: dataConstruct.payuWebhookFunction,
       phonepeWebhookFunction: dataConstruct.phonepeWebhookFunction,
       phonepeReconciliationFunction: dataConstruct.phonepeReconciliationFunction,
       invoiceGenerationFunction: dataConstruct.invoiceGenerationFunction,

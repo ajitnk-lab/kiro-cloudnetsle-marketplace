@@ -1,10 +1,12 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
 const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb')
+const { SESClient, VerifyEmailIdentityCommand } = require('@aws-sdk/client-ses')
 const crypto = require('crypto')
 const { getCountryFromRequest } = require('./geo-utils')
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
+const sesClient = new SESClient({})
 
 // Generate permanent token for user-solution combination
 const generatePermanentToken = (userEmail, solutionId) => {
@@ -49,6 +51,14 @@ exports.handler = async (event) => {
     }))
 
     console.log('User profile created:', userProfile)
+
+    // Auto-register email with SES sandbox for invoice delivery
+    try {
+      await sesClient.send(new VerifyEmailIdentityCommand({ EmailAddress: userEmail }))
+      console.log(`✅ SES verification email sent to: ${userEmail}`)
+    } catch (sesError) {
+      console.error('SES verification failed (non-blocking):', sesError)
+    }
 
     // Create entitlement for aws-solution-finder-001 for all new users
     if (process.env.USER_SOLUTION_ENTITLEMENTS_TABLE) {

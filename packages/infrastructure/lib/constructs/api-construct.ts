@@ -10,6 +10,7 @@ interface ApiConstructProps {
   upgradeToProFunction: lambda.IFunction
   paymentCallbackFunction: lambda.IFunction
   cashfreeWebhookFunction: lambda.IFunction
+  payuWebhookFunction: lambda.IFunction
   phonepeWebhookFunction: lambda.IFunction
   phonepeReconciliationFunction: lambda.IFunction
   invoiceGenerationFunction: lambda.IFunction
@@ -118,6 +119,7 @@ export class ApiConstruct extends Construct {
       authorizer: cognitoAuthorizer,
     })
     paymentsApi.addResource('cashfree-webhook').addMethod('POST', new apigateway.LambdaIntegration(props.cashfreeWebhookFunction))
+    paymentsApi.addResource('payu-webhook').addMethod('POST', new apigateway.LambdaIntegration(props.payuWebhookFunction))
     paymentsApi.addResource('phonepe-webhook').addMethod('POST', new apigateway.LambdaIntegration(props.phonepeWebhookFunction))
     paymentsApi.addResource('reconciliation').addMethod('POST', new apigateway.LambdaIntegration(props.paymentReconciliationFunction), {
       authorizer: cognitoAuthorizer,
