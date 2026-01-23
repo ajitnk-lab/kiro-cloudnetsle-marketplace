@@ -414,6 +414,15 @@ const CheckoutPage: React.FC = () => {
               {/* Payment Gateway Selection */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">Payment Method</h3>
+                {billingInfo && (
+                  <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-800">
+                      <strong>💡 Recommendation:</strong> {billingInfo.billingCountry === 'India' 
+                        ? 'For Indian billing address, we recommend using Cashfree for faster processing.' 
+                        : 'For international billing address, we recommend using PayU for better currency support.'}
+                    </p>
+                  </div>
+                )}
                 <div className="space-y-3">
                   <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" style={{ borderColor: selectedGateway === 'cashfree' ? '#2563eb' : '#e5e7eb' }}>
                     <input
