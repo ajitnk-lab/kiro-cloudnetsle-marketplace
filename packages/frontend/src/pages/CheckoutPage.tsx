@@ -620,12 +620,6 @@ const CheckoutPage: React.FC = () => {
                       </>
                     )}
                   </button>
-                  
-                  {!currencyConfirmed && (
-                    <div className="mt-2 text-xs text-amber-600 text-center">
-                      Please confirm the payment currency to continue
-                    </div>
-                  )}
                 </>
               )}
 
