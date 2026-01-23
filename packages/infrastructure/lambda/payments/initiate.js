@@ -18,6 +18,14 @@ const getCashfreeCredentials = async () => {
   return JSON.parse(response.SecretString)
 }
 
+const getPayUCredentials = async () => {
+  const command = new GetSecretValueCommand({
+    SecretId: 'marketplace/payu/credentials'
+  })
+  const response = await secretsClient.send(command)
+  return JSON.parse(response.SecretString)
+}
+
 const createCashfreeOrder = async (credentials, orderData) => {
   const postData = JSON.stringify(orderData)
   
@@ -86,7 +94,7 @@ const corsHeaders = {
 }
 
 exports.handler = async (event) => {
-  console.log('Cashfree payment request:', JSON.stringify(event, null, 2))
+  console.log('Payment initiation request:', JSON.stringify(event, null, 2))
 
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -105,6 +113,7 @@ exports.handler = async (event) => {
       userEmail, 
       userName, 
       userPhone,
+      gateway = 'cashfree', // NEW: gateway selection
       // Billing information (optional, for GST)
       billingCountry,
       billingAddress,
@@ -113,8 +122,11 @@ exports.handler = async (event) => {
       billingPostalCode,
       isBusinessPurchase,
       gstin,
-      companyName
+      companyName,
+      currency = 'INR' // NEW: currency support
     } = body
+
+    console.log(`Processing ${gateway} payment for user ${userId}`)
 
     if (!userId) {
       return {
@@ -149,93 +161,28 @@ exports.handler = async (event) => {
     const gstRate = billingCountry === 'India' ? 18 : 0
     const gstAmount = (baseAmount * gstRate) / 100
     const totalAmount = baseAmount + gstAmount
-    const amountInPaisa = Math.round(totalAmount * 100) // Convert to paisa for Cashfree
 
-    const credentials = await getCashfreeCredentials()
-    const transactionId = `CF_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    
-    const orderData = {
-      order_id: transactionId,
-      order_amount: parseFloat(totalAmount.toFixed(2)), // Fix floating point precision
-      order_currency: 'INR',
-      customer_details: {
-        customer_id: userId,
-        customer_phone: userPhone || '9999999999',
-        customer_email: userEmail || 'user@example.com',
-        customer_name: userName || 'Customer'
-      },
-      order_meta: {
-        return_url: `https://marketplace.cloudnestle.com/payment-callback?gateway=cashfree&transactionId=${transactionId}`,
-        notify_url: `https://ltp1ccays5.execute-api.us-east-1.amazonaws.com/prod/payments/cashfree-webhook`
-      },
-      order_note: `${solutionName} - ${tier.toUpperCase()} tier upgrade`
-    }
-
-    console.log('Creating Cashfree order:', JSON.stringify(orderData, null, 2))
-
-    // Create transaction record
-    await docClient.send(new PutCommand({
-      TableName: PAYMENT_TRANSACTIONS_TABLE,
-      Item: {
-        transactionId,
-        userId,
-        solutionId,
-        solutionName,
-        amount: amountInPaisa, // Legacy field in paisa
-        baseAmount, // New: amount before GST
-        gstAmount, // New: GST amount
-        gstRate, // New: GST percentage
-        totalAmount, // New: final amount
-        currency: 'INR',
-        paymentGateway: 'cashfree',
-        gatewayOrderId: transactionId,
-        status: 'initiated',
-        tier: tier,
-        customerEmail: userEmail || 'user@example.com',
-        customerName: userName || 'Customer',
-        customerPhone: userPhone || '9999999999',
-        // Billing information (optional)
-        ...(billingCountry && {
-          billingCountry,
-          billingAddress,
-          billingCity,
-          billingState,
-          billingPostalCode,
-          isBusinessPurchase,
-          gstin,
-          companyName
-        }),
-        createdAt: new Date().toISOString(),
-        gateway_data: {
-          order_id: transactionId,
-          solution_name: solutionName,
-          tier_purchased: tier
-        }
-      }
-    }))
-
-    const cashfreeResponse = await createCashfreeOrder(credentials, orderData)
-    console.log('Cashfree order created:', JSON.stringify(cashfreeResponse, null, 2))
-
-    // Return payment session ID for frontend to use with Cashfree JS SDK
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        success: true,
-        transactionId,
-        paymentSessionId: cashfreeResponse.payment_session_id,
-        gateway: 'cashfree',
-        amount: totalAmount,
-        baseAmount,
-        gstAmount,
-        gstRate,
-        sessionId: cashfreeResponse.payment_session_id
+    // Route to appropriate gateway
+    if (gateway === 'payu') {
+      return await handlePayUPayment({
+        userId, solutionId, solutionName, tier,
+        baseAmount, gstAmount, gstRate, totalAmount,
+        userEmail, userName, userPhone, currency,
+        billingCountry, billingAddress, billingCity, billingState, billingPostalCode,
+        isBusinessPurchase, gstin, companyName
+      })
+    } else {
+      return await handleCashfreePayment({
+        userId, solutionId, solutionName, tier,
+        baseAmount, gstAmount, gstRate, totalAmount,
+        userEmail, userName, userPhone,
+        billingCountry, billingAddress, billingCity, billingState, billingPostalCode,
+        isBusinessPurchase, gstin, companyName
       })
     }
 
   } catch (error) {
-    console.error('Cashfree payment error:', error)
+    console.error('Payment initiation error:', error)
     return {
       statusCode: 500,
       headers: corsHeaders,
@@ -244,5 +191,198 @@ exports.handler = async (event) => {
         details: error.message 
       })
     }
+  }
+}
+
+async function handleCashfreePayment(params) {
+  const {
+    userId, solutionId, solutionName, tier,
+    baseAmount, gstAmount, gstRate, totalAmount,
+    userEmail, userName, userPhone,
+    billingCountry, billingAddress, billingCity, billingState, billingPostalCode,
+    isBusinessPurchase, gstin, companyName
+  } = params
+
+  const amountInPaisa = Math.round(totalAmount * 100) // Convert to paisa for Cashfree
+  const credentials = await getCashfreeCredentials()
+  const transactionId = `CF_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  
+  const orderData = {
+    order_id: transactionId,
+    order_amount: parseFloat(totalAmount.toFixed(2)),
+    order_currency: 'INR',
+    customer_details: {
+      customer_id: userId,
+      customer_phone: userPhone || '9999999999',
+      customer_email: userEmail || 'user@example.com',
+      customer_name: userName || 'Customer'
+    },
+    order_meta: {
+      return_url: `https://marketplace.cloudnestle.com/payment-callback?gateway=cashfree&transactionId=${transactionId}`,
+      notify_url: `https://ltp1ccays5.execute-api.us-east-1.amazonaws.com/prod/payments/cashfree-webhook`
+    },
+    order_note: `${solutionName} - ${tier.toUpperCase()} tier upgrade`
+  }
+
+  // Create transaction record
+  await docClient.send(new PutCommand({
+    TableName: PAYMENT_TRANSACTIONS_TABLE,
+    Item: {
+      transactionId,
+      userId,
+      solutionId,
+      solutionName,
+      amount: amountInPaisa,
+      baseAmount,
+      gstAmount,
+      gstRate,
+      totalAmount,
+      currency: 'INR',
+      paymentGateway: 'cashfree',
+      gatewayOrderId: transactionId,
+      status: 'initiated',
+      tier,
+      customerEmail: userEmail || 'user@example.com',
+      customerName: userName || 'Customer',
+      customerPhone: userPhone || '9999999999',
+      ...(billingCountry && {
+        billingCountry, billingAddress, billingCity, billingState, billingPostalCode,
+        isBusinessPurchase, gstin, companyName
+      }),
+      createdAt: new Date().toISOString(),
+      gateway_data: { order_id: transactionId, solution_name: solutionName, tier_purchased: tier }
+    }
+  }))
+
+  const cashfreeResponse = await createCashfreeOrder(credentials, orderData)
+
+  return {
+    statusCode: 200,
+    headers: corsHeaders,
+    body: JSON.stringify({
+      success: true,
+      transactionId,
+      paymentSessionId: cashfreeResponse.payment_session_id,
+      gateway: 'cashfree',
+      amount: totalAmount,
+      baseAmount,
+      gstAmount,
+      gstRate,
+      sessionId: cashfreeResponse.payment_session_id
+    })
+  }
+}
+
+async function handlePayUPayment(params) {
+  const crypto = require('crypto')
+  const {
+    userId, solutionId, solutionName, tier,
+    baseAmount, gstAmount, gstRate, totalAmount,
+    userEmail, userName, userPhone, currency,
+    billingCountry, billingAddress, billingCity, billingState, billingPostalCode,
+    isBusinessPurchase, gstin, companyName
+  } = params
+
+  const credentials = await getPayUCredentials()
+  const transactionId = `PAYU_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  
+  // Use currency or default to INR
+  const paymentCurrency = currency || 'INR'
+  
+  console.log('PayU Payment Request - Full Details:', {
+    transactionId,
+    userId,
+    solutionId,
+    solutionName,
+    tier,
+    baseAmount,
+    gstAmount,
+    gstRate,
+    totalAmount,
+    currency: paymentCurrency,
+    userEmail,
+    userName,
+    userPhone,
+    billingCountry,
+    billingCity,
+    billingState
+  })
+  
+  // PayU hash calculation: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||salt
+  const hashString = `${credentials.key}|${transactionId}|${totalAmount.toFixed(2)}|${solutionName}|${userName || 'Customer'}|${userEmail}|||||||||||${credentials.salt}`
+  const hash = crypto.createHash('sha512').update(hashString).digest('hex')
+
+  // Log the complete PayU form data that will be sent
+  const payuFormData = {
+    key: credentials.key,
+    txnid: transactionId,
+    amount: totalAmount.toFixed(2),
+    productinfo: solutionName,
+    firstname: userName || 'Customer',
+    email: userEmail,
+    phone: userPhone || '9999999999',
+    currency: paymentCurrency,
+    surl: `https://marketplace.cloudnestle.com/payment-callback?gateway=payu&transactionId=${transactionId}&status=success`,
+    furl: `https://marketplace.cloudnestle.com/payment-callback?gateway=payu&transactionId=${transactionId}&status=failure`,
+    hash,
+    service_provider: 'payu_paisa',
+    curl: `https://marketplace.cloudnestle.com/payment-callback?gateway=payu&transactionId=${transactionId}&status=cancel`
+  }
+  
+  // Add international payment parameters if currency is not INR
+  if (paymentCurrency !== 'INR') {
+    payuFormData.enforce_paymethod = 'internationalpayment'
+    payuFormData.user_credentials = `${userEmail}:${userPhone || '9999999999'}`
+  }
+
+  console.log('PayU Form Data Being Sent to Payment Gateway:', JSON.stringify(payuFormData, null, 2))
+  console.log('PayU Endpoint URL:', credentials.baseUrl + '/_payment')
+
+  // Create transaction record
+  await docClient.send(new PutCommand({
+    TableName: PAYMENT_TRANSACTIONS_TABLE,
+    Item: {
+      transactionId,
+      userId,
+      solutionId,
+      solutionName,
+      amount: Math.round(totalAmount * 100),
+      baseAmount,
+      gstAmount,
+      gstRate,
+      totalAmount,
+      currency: paymentCurrency,
+      paymentGateway: 'payu',
+      gatewayOrderId: transactionId,
+      status: 'initiated',
+      tier,
+      customerEmail: userEmail || 'user@example.com',
+      customerName: userName || 'Customer',
+      customerPhone: userPhone || '9999999999',
+      ...(billingCountry && {
+        billingCountry, billingAddress, billingCity, billingState, billingPostalCode,
+        isBusinessPurchase, gstin, companyName
+      }),
+      createdAt: new Date().toISOString(),
+      gateway_data: { txnid: transactionId, solution_name: solutionName, tier_purchased: tier }
+    }
+  }))
+
+  // Return PayU form data for frontend to submit
+  return {
+    statusCode: 200,
+    headers: corsHeaders,
+    body: JSON.stringify({
+      success: true,
+      transactionId,
+      gateway: 'payu',
+      amount: totalAmount,
+      currency: paymentCurrency,
+      baseAmount,
+      gstAmount,
+      gstRate,
+      payuFormData,
+      payuUrl: credentials.baseUrl + '/_payment'
+    })
   }
 }

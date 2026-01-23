@@ -47,7 +47,8 @@ const PaymentCallback: React.FC = () => {
                    data.status === 'FAILED' ? 'failed' : 'pending',
             message: data.message || 'Payment status updated',
             transactionId: data.transactionId,
-            merchantOrderId: data.merchantOrderId
+            merchantOrderId: data.merchantOrderId,
+            amount: data.amount
           })
         } else {
           setPaymentStatus({
@@ -139,7 +140,7 @@ const PaymentCallback: React.FC = () => {
               )}
               <div className="flex justify-between">
                 <span className="text-sm font-medium text-gray-500">Amount:</span>
-                <span className="text-sm text-gray-900">₹{paymentStatus.amount || '299'}</span>
+                <span className="text-sm text-gray-900">₹{paymentStatus.amount || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm font-medium text-gray-500">Plan:</span>

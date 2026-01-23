@@ -37,6 +37,7 @@ export class DataConstruct extends Construct {
   public readonly upgradeToProFunction: lambda.Function
   public readonly paymentCallbackFunction: lambda.Function
   public readonly cashfreeWebhookFunction: lambda.Function
+  public readonly payuWebhookFunction: lambda.Function
   public readonly phonepeWebhookFunction: lambda.Function
   public readonly phonepeReconciliationFunction: lambda.Function
   public readonly invoiceGenerationFunction: lambda.Function
@@ -308,6 +309,7 @@ export class DataConstruct extends Construct {
               ],
               resources: [
                 'arn:aws:secretsmanager:us-east-1:637423202175:secret:marketplace/cashfree/credentials-yGol1I',
+                'arn:aws:secretsmanager:us-east-1:637423202175:secret:marketplace/payu/credentials-U7CUFj',
               ],
             }),
             new iam.PolicyStatement({
@@ -362,6 +364,21 @@ export class DataConstruct extends Construct {
     this.cashfreeWebhookFunction = new lambda.Function(this, 'CashfreeWebhookFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'cashfree-webhook.handler',
+      code: lambda.Code.fromAsset('lambda/payments'),
+      environment: {
+        USER_TABLE: this.userTable.tableName,
+        PAYMENT_TRANSACTIONS_TABLE: this.paymentTransactionsTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: this.userSolutionEntitlementsTable.tableName,
+        SUBSCRIPTION_HISTORY_TABLE: this.subscriptionHistoryTable.tableName,
+        INVOICE_LAMBDA_NAME: this.invoiceGenerationFunction.functionName,
+      },
+      role: lambdaRole,
+      timeout: cdk.Duration.seconds(30),
+    })
+
+    this.payuWebhookFunction = new lambda.Function(this, 'PayUWebhookFunction', {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      handler: 'payu-webhook.handler',
       code: lambda.Code.fromAsset('lambda/payments'),
       environment: {
         USER_TABLE: this.userTable.tableName,
@@ -506,6 +523,7 @@ export class DataConstruct extends Construct {
       code: lambda.Code.fromAsset('lambda/auth'),
       environment: {
         USER_TABLE_NAME: this.userTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: this.userSolutionEntitlementsTable.tableName,
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),

@@ -127,7 +127,9 @@ class PaymentService {
       isBusinessPurchase?: boolean;
       gstin?: string;
       companyName?: string;
-    }
+      gateway?: string;
+    },
+    gateway: 'cashfree' | 'payu' = 'cashfree'
   ): Promise<void> {
     try {
       const userStr = localStorage.getItem('user');
@@ -148,31 +150,58 @@ class PaymentService {
         ...billingInfo
       };
 
+      // Use different endpoints based on gateway
+      const endpoint = '/payments/initiate';
+
       const response = await axios.post(
-        `${API_BASE_URL}/payments/initiate`,
+        `${API_BASE_URL}${endpoint}`,
         paymentRequest,
         { headers: this.getAuthHeaders() }
       );
       
-      if (response.data.success && response.data.paymentSessionId) {
-        // Store transaction ID for later reference
-        localStorage.setItem('currentTransactionId', response.data.transactionId);
-        
-        // Use Cashfree JavaScript SDK
-        if (window.Cashfree) {
-          const cashfree = window.Cashfree({
-            mode: "production"
+      if (gateway === 'payu') {
+        // PayU returns form data to submit
+        if (response.data.success && response.data.payuFormData) {
+          localStorage.setItem('currentTransactionId', response.data.transactionId);
+          
+          // Create and submit PayU form
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = response.data.payuUrl || 'https://secure.payu.in/_payment';
+          
+          Object.entries(response.data.payuFormData).forEach(([key, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = String(value);
+            form.appendChild(input);
           });
           
-          cashfree.checkout({
-            paymentSessionId: response.data.paymentSessionId,
-            redirectTarget: "_self"
-          });
+          document.body.appendChild(form);
+          form.submit();
         } else {
-          throw new Error('Cashfree SDK not loaded');
+          throw new Error(response.data.error || 'PayU payment initiation failed');
         }
       } else {
-        throw new Error(response.data.error || 'Payment initiation failed');
+        // Cashfree flow
+        if (response.data.success && response.data.paymentSessionId) {
+          localStorage.setItem('currentTransactionId', response.data.transactionId);
+          
+          if (window.Cashfree) {
+            const cashfree = window.Cashfree({
+              mode: "production"
+            });
+            
+            cashfree.checkout({
+              paymentSessionId: response.data.paymentSessionId,
+              redirectTarget: "_self"
+            });
+          } else {
+            throw new Error('Cashfree SDK not loaded');
+          }
+        } else {
+          throw new Error(response.data.error || 'Payment initiation failed');
+        }
       }
       
     } catch (error) {

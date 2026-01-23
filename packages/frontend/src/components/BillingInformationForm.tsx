@@ -20,11 +20,12 @@ interface Props {
   onSubmit: (billingInfo: BillingInfo) => void;
   onBack?: () => void;
   initialData?: BillingInfo;
+  detectedCountry?: string;
 }
 
-export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, initialData }) => {
+export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, initialData, detectedCountry }) => {
   const [formData, setFormData] = useState<BillingInfo>(initialData || {
-    billingCountry: 'India',
+    billingCountry: detectedCountry || 'India',
     billingAddress: '',
     billingCity: '',
     billingState: '',
@@ -78,6 +79,11 @@ export const BillingInformationForm: React.FC<Props> = ({ onSubmit, onBack, init
             <option key={c.code} value={c.code}>{c.name}</option>
           ))}
         </select>
+        {detectedCountry && detectedCountry !== 'India' && (
+          <p className="text-xs text-blue-600 mt-1">
+            ℹ️ Auto-detected: {detectedCountry}
+          </p>
+        )}
         {errors.billingCountry && <p className="text-red-500 text-sm">{errors.billingCountry}</p>}
       </div>
 
