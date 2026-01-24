@@ -173,7 +173,7 @@ export function CatalogPage() {
     return (
       <div className="min-h-screen relative">
         <BackgroundImage />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="relative z-10 max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-16">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading solutions...</p>
@@ -186,7 +186,7 @@ export function CatalogPage() {
   return (
     <div className="min-h-screen relative">
       <BackgroundImage />
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
+      <div className="relative z-10 max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-900">Solution Catalog</h1>

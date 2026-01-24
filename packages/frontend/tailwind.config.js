@@ -6,6 +6,14 @@ export default {
   ],
   theme: {
     extend: {
+      fontSize: {
+        'base': '18px',
+        'lg': '20px',
+        'xl': '22px',
+        '2xl': '26px',
+        '3xl': '32px',
+        '4xl': '38px',
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },

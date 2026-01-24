@@ -56,7 +56,7 @@ export function HomePage() {
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/60 to-blue-800/60"></div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 md:py-40">
+        <div className="relative z-10 max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-32 md:py-40">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               Your Gateway to
@@ -94,7 +94,7 @@ export function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Why Choose Our Marketplace?
@@ -188,7 +188,7 @@ export function HomePage() {
 
       {/* Stats Section */}
       <section className="bg-gradient-to-r from-gray-50 to-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div className="group">
               <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-3 group-hover:scale-110 transition-transform duration-300">
@@ -231,7 +231,7 @@ export function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-3xl p-16 text-white relative overflow-hidden">
           {/* Animated background elements */}
           <div className="absolute inset-0 opacity-10">
