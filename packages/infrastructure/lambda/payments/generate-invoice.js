@@ -153,7 +153,7 @@ exports.handler = async (event) => {
 
     // Send email
     try {
-      const customerName = txn.customerName.replace(' Name', '');
+      const customerName = txn.customerName.replace(/ Name$/, '');
       await sesClient.send(new SendEmailCommand({
         Source: 'noreply@cloudnestle.com',
         Destination: { ToAddresses: [customerEmail] },
@@ -287,7 +287,7 @@ async function generateInvoicePDF(transaction, company, invoiceNumber) {
     const buyerX = leftMargin + pageWidth/2 + 10;
     doc.fontSize(10).font('Helvetica-Bold').text('Buyer Details:', buyerX, yPos + 10);
     doc.fontSize(9).font('Helvetica');
-    doc.text(transaction.customerName.replace(' Name', ''), buyerX, yPos + 25);
+    doc.text(transaction.customerName.replace(/ Name$/, ''), buyerX, yPos + 25);
     
     // Add buyer GSTIN if business purchase
     let currentY = yPos + 38;

@@ -402,7 +402,7 @@ exports.handler = async (event) => {
                 Html: {
                   Data: `
                     <h2>Payment Successful!</h2>
-                    <p>Dear ${user.profile?.name || user.email},</p>
+                    <p>Dear ${user.profile?.name?.replace(/ Name$/, '') || user.email},</p>
                     <p>Your payment has been processed successfully via Cashfree.</p>
                     <p><strong>Transaction Details:</strong></p>
                     <ul>
