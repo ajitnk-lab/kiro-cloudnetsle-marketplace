@@ -7,12 +7,17 @@ export default {
   theme: {
     extend: {
       fontSize: {
-        'base': '18px',
-        'lg': '20px',
-        'xl': '22px',
-        '2xl': '26px',
-        '3xl': '32px',
-        '4xl': '38px',
+        'sm': '15px',
+        'base': '17px',
+        'lg': '19px',
+        'xl': '21px',
+        '2xl': '24px',
+        '3xl': '30px',
+        '4xl': '36px',
+        '5xl': '48px',
+      },
+      maxWidth: {
+        'site': '80%',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

@@ -2,7 +2,7 @@ import { Users, Target, Award, Globe } from 'lucide-react'
 
 export function AboutUs() {
   return (
-    <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-site mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-16">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">About CloudNestle Marketplace</h1>
         <p className="text-2xl text-blue-600 font-semibold mb-8">
