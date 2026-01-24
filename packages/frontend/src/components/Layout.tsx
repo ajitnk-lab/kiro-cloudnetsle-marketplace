@@ -208,6 +208,11 @@ export function Layout({ children }: LayoutProps) {
                     <div>
                       <p className="font-semibold text-gray-700 mb-1">🇺🇸 US Sales & Support:</p>
                       <p>
+                        <a href="tel:+13465765655" className="text-blue-600 hover:text-blue-800 font-medium">
+                          +1 (346) 576-5655
+                        </a>
+                      </p>
+                      <p>
                         <span className="font-medium">Sales:</span>{' '}
                         <a href="mailto:sales@cloudnestle.com" className="text-blue-600 hover:text-blue-800">
                           sales@cloudnestle.com
@@ -223,8 +228,13 @@ export function Layout({ children }: LayoutProps) {
                     
                     <div>
                       <p className="font-semibold text-gray-700 mb-1">📍 Global Headquarters:</p>
-                      <p className="leading-relaxed">
-                        🇮🇳 Ground floor, #85, 2nd Cross Road,<br />
+                      <p>
+                        <a href="tel:+919591040061" className="text-green-600 hover:text-green-800 font-medium">
+                          🇮🇳 +91 95910 40061
+                        </a>
+                      </p>
+                      <p className="leading-relaxed mt-1">
+                        Ground floor, #85, 2nd Cross Road,<br />
                         Central Excise Layout, Vijay Nagar,<br />
                         Bangalore 560040, India
                       </p>
