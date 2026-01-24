@@ -294,43 +294,47 @@ async function generateInvoicePDF(transaction, company, invoiceNumber) {
     doc.fontSize(9).font('Helvetica');
     doc.text(transaction.customerName.replace(/ Name$/, ''), buyerX, yPos + 25);
     
-    // Add buyer GSTIN if business purchase
-    let currentY = yPos + 38;
-    if (transaction.isBusinessPurchase && transaction.gstin) {
-      doc.text(`GSTIN: ${transaction.gstin}`, buyerX, currentY);
-      currentY += 13;
-    }
+    // Add buyer details with proper spacing for business purchases
+    let currentY = yPos + 40; // Increased from 38 to 40
+    
+    // Company name first (if business)
     if (transaction.companyName) {
       doc.text(`Company: ${transaction.companyName}`, buyerX, currentY);
-      currentY += 13;
+      currentY += 15; // Increased spacing
+    }
+    
+    // GSTIN (if business purchase)
+    if (transaction.isBusinessPurchase && transaction.gstin) {
+      doc.text(`GSTIN: ${transaction.gstin}`, buyerX, currentY);
+      currentY += 15; // Increased spacing
     }
     
     doc.text(`Email: ${transaction.customerEmail}`, buyerX, currentY);
-    currentY += 13;
+    currentY += 15; // Increased from 13
     doc.text(`Phone: ${transaction.customerPhone || 'N/A'}`, buyerX, currentY);
-    currentY += 13;
+    currentY += 15; // Increased from 13
     
     if (transaction.billingAddress) {
       doc.text(transaction.billingAddress, buyerX, currentY, { width: pageWidth/2 - 20 });
-      currentY += 19;
+      currentY += 20; // Increased from 19
     }
     doc.text(`${transaction.billingCity}, ${transaction.billingState}`, buyerX, currentY);
-    currentY += 13;
+    currentY += 15; // Increased from 13
     doc.text(`${transaction.billingCountry} - ${transaction.billingPostalCode}`, buyerX, currentY);
 
     // Export/LUT Declaration for international invoices
     const isInternational = transaction.billingCountry !== 'IN';
     if (isInternational) {
-      yPos = 270;
+      yPos = 290; // Increased from 270 to give more space
       doc.rect(leftMargin, yPos, pageWidth, 30).fillAndStroke('#fff3cd', '#000');
       doc.fillColor('#000').fontSize(9).font('Helvetica-Bold');
       doc.text('Export Declaration:', leftMargin + 10, yPos + 8);
       doc.font('Helvetica').fontSize(8);
       doc.text('Supply meant for export under Letter of Undertaking (LUT)', leftMargin + 10, yPos + 20);
       doc.text('LUT ARN: AD291225033708W', leftMargin + 300, yPos + 20);
-      yPos = 310;
+      yPos = 330; // Increased from 310
     } else {
-      yPos = 280;
+      yPos = 300; // Increased from 280
     }
 
     // Items Table
