@@ -12,6 +12,21 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen">
+      {/* Top Contact Bar */}
+      <div className="bg-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-end items-center h-10 text-sm space-x-6">
+            <a href="tel:+13465765655" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+              <span className="mr-1">🇺🇸</span>
+              <span>+1 (346) 576-5655</span>
+            </a>
+            <a href="mailto:sales@cloudnestle.com" className="text-gray-600 hover:text-blue-600 transition-colors">
+              sales@cloudnestle.com
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 relative z-50">
         <div className="max-w-7xl mx-auto pl-0 pr-4 sm:pr-6 lg:pr-8">
