@@ -11,10 +11,10 @@ const companySettings = {
   companyId: 'cloudnestle-main',
   gstin: '29XXXXX1234X1ZX', // Replace with actual GSTIN
   legalName: 'CloudNestle Technologies Pvt Ltd',
-  address: '123 Tech Park, Electronic City',
-  city: 'Bangalore',
+  address: 'Ground floor, #85, 2nd Cross Road, Central Excise Layout, Vijay Nagar, Bengaluru 560040',
+  city: 'Bengaluru',
   state: 'Karnataka',
-  postalCode: '560100',
+  postalCode: '560040',
   country: 'India',
   hsnSacCode: '998314', // HSN/SAC code for IT services
 };
