@@ -142,7 +142,7 @@ echo "🏢 Seeding GST company settings..."
 if [ ! -z "$COMPANY_SETTINGS_TABLE_NAME" ]; then
     cd packages/infrastructure
     if [ -f "scripts/seed-company-settings.js" ]; then
-        node scripts/seed-company-settings.js
+        COMPANY_SETTINGS_TABLE_NAME=$COMPANY_SETTINGS_TABLE_NAME node scripts/seed-company-settings.js
         echo "   ✅ GST company settings seeded"
     else
         echo "   ⚠️  GST seed script not found"

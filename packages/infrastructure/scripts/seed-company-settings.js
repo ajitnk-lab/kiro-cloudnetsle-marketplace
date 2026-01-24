@@ -4,7 +4,7 @@ const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
 const client = new DynamoDBClient({ region: 'us-east-1' });
 const docClient = DynamoDBDocumentClient.from(client);
 
-const TABLE_NAME = 'marketplace-company-settings-1764183053'; // Legacy table preserved for data
+const TABLE_NAME = process.env.COMPANY_SETTINGS_TABLE_NAME || 'marketplace-company-settings-prod';
 
 const companySettings = {
   settingKey: 'gst-company-info', // Required partition key
