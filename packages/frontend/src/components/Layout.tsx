@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { User, LogOut, Search, Briefcase } from 'lucide-react'
+import { User, LogOut, Search, Briefcase, Phone, Mail } from 'lucide-react'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -68,14 +68,22 @@ export function Layout({ children }: LayoutProps) {
 
             {/* Contact Info & User Menu */}
             <div className="flex items-center space-x-6">
-              {/* Contact Info */}
-              <div className="hidden lg:flex items-center space-x-4 text-sm border-r border-gray-300 pr-6">
-                <a href="tel:+13465765655" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
-                  <span className="mr-1">🇺🇸</span>
-                  <span>+1 (346) 576-5655</span>
+              {/* Contact Info - Highlighted */}
+              <div className="hidden lg:flex items-center space-x-5 bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-2 rounded-lg border border-blue-200">
+                <a 
+                  href="tel:+13465765655" 
+                  className="flex items-center space-x-2 text-blue-700 hover:text-blue-900 transition-colors font-medium group"
+                >
+                  <Phone className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm">+1 (346) 576-5655</span>
                 </a>
-                <a href="mailto:sales@cloudnestle.com" className="text-gray-600 hover:text-blue-600 transition-colors">
-                  sales@cloudnestle.com
+                <div className="h-6 w-px bg-blue-300"></div>
+                <a 
+                  href="mailto:sales@cloudnestle.com" 
+                  className="flex items-center space-x-2 text-blue-700 hover:text-blue-900 transition-colors font-medium group"
+                >
+                  <Mail className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm">sales@cloudnestle.com</span>
                 </a>
               </div>
 
