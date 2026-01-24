@@ -204,44 +204,37 @@ export function Layout({ children }: LayoutProps) {
                     CloudNestle Consulting<br />& Services
                   </h3>
                   
-                  <div className="text-sm text-gray-600 space-y-2">
-                    <div>
-                      <p className="font-semibold text-gray-700 mb-1">🇺🇸 US Sales & Support:</p>
-                      <p>
-                        <a href="tel:+13465765655" className="hover:text-gray-800">
+                  <div className="text-sm space-y-3">
+                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                      <p className="font-semibold text-blue-900 mb-2">🇺🇸 US Sales & Support</p>
+                      <p className="mb-1">
+                        <a href="tel:+13465765655" className="text-blue-700 hover:text-blue-900 font-medium">
                           +1 (346) 576-5655
                         </a>
                       </p>
-                      <p>
-                        <span className="font-medium">Sales:</span>{' '}
+                      <p className="text-gray-700">
                         <a href="mailto:sales@cloudnestle.com" className="text-blue-600 hover:text-blue-800">
                           sales@cloudnestle.com
                         </a>
                       </p>
-                      <p>
-                        <span className="font-medium">Support:</span>{' '}
-                        <a href="mailto:support@cloudnestle.com" className="text-blue-600 hover:text-blue-800">
-                          support@cloudnestle.com
-                        </a>
-                      </p>
                     </div>
                     
-                    <div>
-                      <p className="font-semibold text-gray-700 mb-1">📍 Global Headquarters:</p>
-                      <p>
-                        <a href="tel:+919591040061" className="hover:text-gray-800">
+                    <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                      <p className="font-semibold text-green-900 mb-2">📍 Global Headquarters</p>
+                      <p className="mb-1">
+                        <a href="tel:+919591040061" className="text-green-700 hover:text-green-900 font-medium">
                           🇮🇳 +91 95910 40061
                         </a>
                       </p>
-                      <p className="leading-relaxed mt-1">
+                      <p className="text-gray-700 leading-relaxed text-xs">
                         Ground floor, #85, 2nd Cross Road,<br />
                         Central Excise Layout, Vijay Nagar,<br />
                         Bangalore 560040, India
                       </p>
                     </div>
                     
-                    <div>
-                      <p className="font-semibold text-gray-700">🏢 GSTIN: 29ADWPA6289Q1ZB</p>
+                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                      <p className="font-semibold text-gray-800">🏢 GSTIN: 29ADWPA6289Q1ZB</p>
                     </div>
                   </div>
                 </div>
