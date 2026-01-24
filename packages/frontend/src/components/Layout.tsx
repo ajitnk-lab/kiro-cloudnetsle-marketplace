@@ -14,7 +14,7 @@ export function Layout({ children }: LayoutProps) {
     <div className="min-h-screen">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 relative z-50">
-        <div className="max-w-7xl mx-auto pl-0 pr-4 sm:pr-6 lg:pr-8">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3">
@@ -127,7 +127,7 @@ export function Layout({ children }: LayoutProps) {
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-auto relative z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 md:grid-cols-6 gap-8">
             <div>
               <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
