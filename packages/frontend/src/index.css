@@ -6,13 +6,13 @@
   html {
     font-family: 'Inter', system-ui, sans-serif;
     overflow-x: hidden;
-    font-size: 17px;
+    font-size: 18px;
   }
   
   body {
     @apply bg-gray-50 text-gray-900;
     overflow-x: hidden;
-    font-size: 17px;
+    font-size: 18px;
     line-height: 1.7;
   }
 
