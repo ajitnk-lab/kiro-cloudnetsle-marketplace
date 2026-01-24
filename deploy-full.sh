@@ -5,10 +5,16 @@
 
 set -e
 
-# Load NVM and use Node 18
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm use 18 || nvm install 18
+# Use system Node 18
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js not found"
+    exit 1
+fi
+NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+if [ "$NODE_VERSION" -lt 18 ]; then
+    echo "❌ Node.js 18+ required (found: $(node --version))"
+    exit 1
+fi
 
 # Set environment for consistent table naming
 export ENVIRONMENT=${ENVIRONMENT:-prod}
@@ -56,7 +62,7 @@ echo "   ✅ Invoice Bucket: $INVOICE_BUCKET_NAME"
 
 # Step 2.5: Update FAISS configuration with table names
 echo "🔧 Updating FAISS configuration..."
-FAISS_DIR="${FAISS_PROJECT_DIR:-/persistent/home/ubuntu/workspace/faiss-rag-agent}"
+FAISS_DIR="${FAISS_PROJECT_DIR:-/home/ubuntu/workspace/vscode-workspace/faiss-rag-agent}"
 
 if [ -d "$FAISS_DIR" ]; then
     cat > $FAISS_DIR/.env << EOF
