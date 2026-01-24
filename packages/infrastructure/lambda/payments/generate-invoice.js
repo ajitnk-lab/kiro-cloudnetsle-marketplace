@@ -235,9 +235,14 @@ async function generateInvoicePDF(transaction, company, invoiceNumber) {
         doc.image(logoBuffer, leftMargin + 10, 50, { width: 80 });
         // Company name under logo
         doc.fontSize(9).font('Helvetica-Bold').text('CloudNestle Consulting & Services', leftMargin + 10, 95);
-        // Place of Supply with state code
-        const stateCode = getStateCode(transaction.billingState);
-        doc.fontSize(8).font('Helvetica').text(`Place of Supply: ${stateCode}-${transaction.billingState}`, leftMargin + 10, 108);
+        // Place of Supply - show country for international, state code for domestic
+        const isInternational = transaction.billingCountry !== 'IN';
+        if (isInternational) {
+          doc.fontSize(8).font('Helvetica').text(`Place of Supply: ${transaction.billingCountry}`, leftMargin + 10, 108);
+        } else {
+          const stateCode = getStateCode(transaction.billingState);
+          doc.fontSize(8).font('Helvetica').text(`Place of Supply: ${stateCode}-${transaction.billingState}`, leftMargin + 10, 108);
+        }
         // GST Number
         doc.text(`GSTIN: ${company.gstin}`, leftMargin + 10, 120);
       } catch (err) {
