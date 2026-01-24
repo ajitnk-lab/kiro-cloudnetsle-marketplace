@@ -208,7 +208,7 @@ export function Layout({ children }: LayoutProps) {
                     <div>
                       <p className="font-semibold text-gray-700 mb-1">🇺🇸 US Sales & Support:</p>
                       <p>
-                        <a href="tel:+13465765655" className="text-blue-600 hover:text-blue-800 font-medium">
+                        <a href="tel:+13465765655" className="hover:text-gray-800">
                           +1 (346) 576-5655
                         </a>
                       </p>
@@ -229,7 +229,7 @@ export function Layout({ children }: LayoutProps) {
                     <div>
                       <p className="font-semibold text-gray-700 mb-1">📍 Global Headquarters:</p>
                       <p>
-                        <a href="tel:+919591040061" className="text-green-600 hover:text-green-800 font-medium">
+                        <a href="tel:+919591040061" className="hover:text-gray-800">
                           🇮🇳 +91 95910 40061
                         </a>
                       </p>
