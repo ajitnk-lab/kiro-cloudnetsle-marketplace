@@ -238,6 +238,7 @@ async function handleCashfreePayment(params) {
       gstRate,
       totalAmount,
       currency: 'INR',
+      gateway: 'cashfree',
       paymentGateway: 'cashfree',
       gatewayOrderId: transactionId,
       status: 'initiated',
@@ -329,10 +330,11 @@ async function handlePayUPayment(params) {
     curl: `https://marketplace.cloudnestle.com/payment-callback?gateway=payu&transactionId=${transactionId}&status=cancel`
   }
   
-  // Add international payment parameters if currency is not INR
-  if (paymentCurrency !== 'INR') {
+  // Add international payment parameters for non-India billing addresses
+  if (billingCountry !== 'IN') {
     payuFormData.enforce_paymethod = 'internationalpayment'
     payuFormData.user_credentials = `${userEmail}:${userPhone || '9999999999'}`
+    console.log('🌍 International payment detected - enforce_paymethod added for country:', billingCountry)
   }
 
   console.log('PayU Form Data Being Sent to Payment Gateway:', JSON.stringify(payuFormData, null, 2))
@@ -352,6 +354,7 @@ async function handlePayUPayment(params) {
       gstRate,
       totalAmount,
       currency: paymentCurrency,
+      gateway: 'payu',
       paymentGateway: 'payu',
       gatewayOrderId: transactionId,
       status: 'initiated',
