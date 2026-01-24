@@ -322,7 +322,7 @@ export function RegisterPage() {
               <input
                 {...register('name')}
                 type="text"
-                autoComplete="name"
+                autoComplete="off"
                 className="mt-1 input-field"
                 placeholder="Enter your full name"
               />

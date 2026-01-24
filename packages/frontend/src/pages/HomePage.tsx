@@ -247,7 +247,7 @@ export function HomePage() {
             </h2>
             <p className="text-xl mb-10 text-blue-100 max-w-2xl mx-auto leading-relaxed">
               {isAuthenticated
-                ? `Welcome back, ${user?.profile.name || user?.email}! Explore our latest solutions.`
+                ? `Welcome back, ${user?.profile.name?.replace(/ Name$/, '') || user?.email}! Explore our latest solutions.`
                 : 'Join thousands of customers and partners in our marketplace today.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">

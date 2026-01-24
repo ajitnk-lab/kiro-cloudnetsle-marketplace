@@ -75,7 +75,7 @@ export function Layout({ children }: LayoutProps) {
                     className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
                   >
                     <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">{user?.profile?.name || user?.email}</span>
+                    <span className="hidden sm:inline">{user?.profile?.name?.replace(/ Name$/, '') || user?.email}</span>
                   </Link>
                   <button
                     onClick={logout}

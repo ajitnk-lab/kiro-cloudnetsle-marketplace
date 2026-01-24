@@ -106,7 +106,7 @@ export function ProfilePage() {
                 <User className="h-5 w-5 text-gray-400" />
                 <div>
                   <div className="text-sm font-medium text-gray-900">Full Name</div>
-                  <div className="text-gray-600">{user.profile.name || 'Not provided'}</div>
+                  <div className="text-gray-600">{user.profile.name?.replace(/ Name$/, '') || 'Not provided'}</div>
                 </div>
               </div>
 
