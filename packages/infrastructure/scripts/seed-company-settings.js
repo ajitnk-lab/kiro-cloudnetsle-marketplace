@@ -10,7 +10,7 @@ const companySettings = {
   settingKey: 'gst-company-info', // Required partition key
   companyId: 'cloudnestle-main',
   gstin: '29XXXXX1234X1ZX', // Replace with actual GSTIN
-  legalName: 'CloudNestle Technologies Pvt Ltd',
+  legalName: 'CloudNestle Consulting & Services',
   address: 'Ground floor, #85, 2nd Cross Road, Central Excise Layout, Vijay Nagar, Bengaluru 560040',
   city: 'Bengaluru',
   state: 'Karnataka',
