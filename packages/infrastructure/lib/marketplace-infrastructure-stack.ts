@@ -30,7 +30,7 @@ export class MarketplaceInfrastructureStack extends cdk.Stack {
     
     // Update AuthStack Lambda environment variables with table names
     authStack.postConfirmationFunction.addEnvironment('USER_TABLE_NAME', dataConstruct.userTable.tableName)
-    authStack.postConfirmationFunction.addEnvironment('ENTITLEMENT_TABLE_NAME', dataConstruct.userSolutionEntitlementsTable.tableName)
+    authStack.postConfirmationFunction.addEnvironment('USER_SOLUTION_ENTITLEMENTS_TABLE', dataConstruct.userSolutionEntitlementsTable.tableName)
     authStack.postConfirmationFunction.addEnvironment('SUBSCRIPTION_HISTORY_TABLE_NAME', dataConstruct.subscriptionHistoryTable.tableName)
 
     // Create API layer (API Gateway only - references Lambda from DataConstruct)
