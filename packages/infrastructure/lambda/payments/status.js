@@ -1,10 +1,11 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
-const { DynamoDBDocumentClient, GetCommand } = require('@aws-sdk/lib-dynamodb')
+const { DynamoDBDocumentClient, GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb')
 
 const dynamoClient = new DynamoDBClient({})
 const docClient = DynamoDBDocumentClient.from(dynamoClient)
 
 const PAYMENT_TRANSACTIONS_TABLE = process.env.PAYMENT_TRANSACTIONS_TABLE
+const USER_SOLUTION_ENTITLEMENTS_TABLE = process.env.USER_SOLUTION_ENTITLEMENTS_TABLE
 
 const corsHeaders = {
   'Content-Type': 'application/json',
@@ -66,6 +67,29 @@ exports.handler = async (event) => {
     }
 
     const frontendStatus = statusMapping[transaction.status] || 'UNKNOWN'
+    
+    // Fetch entitlement token if payment is completed
+    let token = null
+    let userEmail = transaction.customerEmail || null
+    
+    if (transaction.status === 'completed' && transaction.solutionId && userEmail && USER_SOLUTION_ENTITLEMENTS_TABLE) {
+      try {
+        const entitlementResponse = await docClient.send(new QueryCommand({
+          TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
+          KeyConditionExpression: 'pk = :pk AND sk = :sk',
+          ExpressionAttributeValues: {
+            ':pk': `user#${userEmail}`,
+            ':sk': `solution#${transaction.solutionId}`
+          }
+        }))
+        
+        if (entitlementResponse.Items && entitlementResponse.Items.length > 0) {
+          token = entitlementResponse.Items[0].token
+        }
+      } catch (error) {
+        console.error('Error fetching entitlement token:', error)
+      }
+    }
 
     return {
       statusCode: 200,
@@ -80,7 +104,9 @@ exports.handler = async (event) => {
         paymentGateway: transaction.paymentGateway,
         createdAt: transaction.createdAt,
         updatedAt: transaction.updatedAt,
-        message: `Payment ${transaction.status}`
+        message: `Payment ${transaction.status}`,
+        token,
+        userEmail
       })
     }
 

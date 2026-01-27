@@ -65,16 +65,19 @@ exports.handler = async (event) => {
       try {
         const solutionId = 'aws-solution-finder-001'
         const token = generatePermanentToken(userEmail, solutionId)
-        const pk = `user#${userProfile.userId}`
+        // Use email for pk to match registration format
+        const pk = `user#${userEmail}`
         const sk = `solution#${solutionId}`
         
         const entitlement = {
           pk,
           sk,
           userId: userProfile.userId,
+          user_email: userEmail,
           solutionId,
           token,
           tier: 'registered',
+          access_tier: 'registered',
           accessTier: 'registered', // Add this field for validation
           dailyLimit: 10, // Add daily limit for registered users
           dailyUsage: 0,

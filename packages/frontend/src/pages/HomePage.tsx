@@ -106,55 +106,17 @@ export function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* Functional USPs */}
           <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500 hover:border-l-blue-600">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-              <ShoppingBag className="h-8 w-8 text-blue-600" />
+              <Search className="h-8 w-8 text-blue-600" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3 text-blue-600">Easy Discovery</h3>
             <p className="text-gray-600 leading-relaxed">
-              Find the perfect software solutions with our advanced search and filtering capabilities.
+              Find the right tool, fast. Our smart search filters help you pinpoint the perfect SaaS solution in minutes.
             </p>
             <div className="mt-4 h-1 bg-blue-100 rounded-full overflow-hidden">
               <div className="h-full bg-blue-500 rounded-full animate-pulse" style={{width: '85%'}}></div>
-            </div>
-          </div>
-
-          <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500 hover:border-l-green-600">
-            <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Shield className="h-8 w-8 text-green-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-green-600">Secure Payments</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Safe and secure payment processing with support for cards, UPI, and other payment methods.
-            </p>
-            <div className="mt-4 h-1 bg-green-100 rounded-full overflow-hidden">
-              <div className="h-full bg-green-500 rounded-full animate-pulse" style={{width: '95%'}}></div>
-            </div>
-          </div>
-
-          <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-500 hover:border-l-purple-600">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Users className="h-8 w-8 text-purple-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-purple-600">Partner Program</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Join our partner program to sell your software solutions and reach new customers.
-            </p>
-            <div className="mt-4 h-1 bg-purple-100 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500 rounded-full animate-pulse" style={{width: '78%'}}></div>
-            </div>
-          </div>
-
-          <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500 hover:border-l-orange-600">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-              <TrendingUp className="h-8 w-8 text-orange-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-orange-600">Analytics & Insights</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Comprehensive analytics and reporting for partners to track performance and optimize sales.
-            </p>
-            <div className="mt-4 h-1 bg-orange-100 rounded-full overflow-hidden">
-              <div className="h-full bg-orange-500 rounded-full animate-pulse" style={{width: '92%'}}></div>
             </div>
           </div>
 
@@ -164,10 +126,37 @@ export function HomePage() {
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3 text-red-600">Instant Access</h3>
             <p className="text-gray-600 leading-relaxed">
-              Get immediate access to purchased solutions with automated delivery and licensing.
+              Start immediately, no waiting. Get frictionless access to trials and purchases with a few clicks.
             </p>
             <div className="mt-4 h-1 bg-red-100 rounded-full overflow-hidden">
               <div className="h-full bg-red-500 rounded-full animate-pulse" style={{width: '88%'}}></div>
+            </div>
+          </div>
+
+          <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500 hover:border-l-orange-600">
+            <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <TrendingUp className="h-8 w-8 text-orange-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-orange-600">Actionable Insights</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Optimize your sales with data. For sellers, our robust analytics help you understand performance and market trends.
+            </p>
+            <div className="mt-4 h-1 bg-orange-100 rounded-full overflow-hidden">
+              <div className="h-full bg-orange-500 rounded-full animate-pulse" style={{width: '92%'}}></div>
+            </div>
+          </div>
+
+          {/* Trust & Credibility USPs */}
+          <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500 hover:border-l-green-600">
+            <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Shield className="h-8 w-8 text-green-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-green-600">Secure & Private</h3>
+            <p className="text-gray-600 leading-relaxed">
+              2026 Data & Payment Protection. We prioritize your security with zero-trust protocols and verified payment gateways.
+            </p>
+            <div className="mt-4 h-1 bg-green-100 rounded-full overflow-hidden">
+              <div className="h-full bg-green-500 rounded-full animate-pulse" style={{width: '95%'}}></div>
             </div>
           </div>
 
@@ -177,10 +166,63 @@ export function HomePage() {
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-3 text-indigo-600">Quality Assurance</h3>
             <p className="text-gray-600 leading-relaxed">
-              All solutions are reviewed and approved by our team to ensure quality and security.
+              Vetted & reliable software. Every product is screened against a stringent quality checklist before listing.
             </p>
             <div className="mt-4 h-1 bg-indigo-100 rounded-full overflow-hidden">
               <div className="h-full bg-indigo-500 rounded-full animate-pulse" style={{width: '96%'}}></div>
+            </div>
+          </div>
+
+          <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-green-500 hover:border-l-green-600">
+            <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <ShoppingBag className="h-8 w-8 text-green-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-green-600">B2B Ready (GST & MSME)</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Seamless B2B transactions. We provide GST-compliant invoices allowing you to claim Input Tax Credit (ITC) easily.
+            </p>
+            <div className="mt-4 h-1 bg-green-100 rounded-full overflow-hidden">
+              <div className="h-full bg-green-500 rounded-full animate-pulse" style={{width: '93%'}}></div>
+            </div>
+          </div>
+
+          <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-500 hover:border-l-purple-600">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <TrendingUp className="h-8 w-8 text-purple-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-purple-600">Global Reach (IEC Verified)</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Trade without borders. Authorized for international transactions to support global buyers and sellers.
+            </p>
+            <div className="mt-4 h-1 bg-purple-100 rounded-full overflow-hidden">
+              <div className="h-full bg-purple-500 rounded-full animate-pulse" style={{width: '90%'}}></div>
+            </div>
+          </div>
+
+          {/* Ecosystem & Support USPs */}
+          <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-purple-500 hover:border-l-purple-600">
+            <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Users className="h-8 w-8 text-purple-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-purple-600">Partner Program</h3>
+            <p className="text-gray-600 leading-relaxed">
+              Grow with us. Leverage our affiliate and seller programs to scale your business within our ecosystem.
+            </p>
+            <div className="mt-4 h-1 bg-purple-100 rounded-full overflow-hidden">
+              <div className="h-full bg-purple-500 rounded-full animate-pulse" style={{width: '78%'}}></div>
+            </div>
+          </div>
+
+          <div className="card text-center group hover:shadow-xl transition-all duration-300 border-l-4 border-l-blue-500 hover:border-l-blue-600">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Shield className="h-8 w-8 text-blue-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3 text-blue-600">Reliable Support</h3>
+            <p className="text-gray-600 leading-relaxed">
+              We're here when you need us. Get timely, human support via multiple channels (chat, email, and phone).
+            </p>
+            <div className="mt-4 h-1 bg-blue-100 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 rounded-full animate-pulse" style={{width: '94%'}}></div>
             </div>
           </div>
         </div>

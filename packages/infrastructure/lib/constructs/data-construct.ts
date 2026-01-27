@@ -401,6 +401,7 @@ export class DataConstruct extends Construct {
       environment: {
         USER_TABLE_NAME: this.userTable.tableName,
         PAYMENT_TRANSACTIONS_TABLE: this.paymentTransactionsTable.tableName,
+        USER_SOLUTION_ENTITLEMENTS_TABLE: this.userSolutionEntitlementsTable.tableName,
       },
       role: lambdaRole,
       timeout: cdk.Duration.seconds(30),

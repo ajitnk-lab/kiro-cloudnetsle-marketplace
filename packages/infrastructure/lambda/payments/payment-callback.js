@@ -182,10 +182,13 @@ async function updateTransactionAndUser(transactionId, status, webhookData = {})
     await docClient.send(updateUserCommand)
 
     // Create or update entitlement for aws-solution-finder-001
+    let entitlementToken = null
     if (USER_SOLUTION_ENTITLEMENTS_TABLE) {
       try {
         const solutionId = 'aws-solution-finder-001'
-        const pk = `user#${transaction.userId}`
+        // Use email for pk to match registration format
+        const userEmail = transaction.customerEmail || transaction.userId
+        const pk = `user#${userEmail}`
         const sk = `solution#${solutionId}`
         
         // Check if entitlement already exists
@@ -200,20 +203,39 @@ async function updateTransactionAndUser(transactionId, status, webhookData = {})
 
         if (existingEntitlement.Items && existingEntitlement.Items.length > 0) {
           // Update existing entitlement to pro tier
+          const proExpiresAt = new Date()
+          proExpiresAt.setMonth(proExpiresAt.getMonth() + 1) // 1 month subscription
+          
+          // Check if token exists, if not generate one
+          const existingToken = existingEntitlement.Items[0].token
+          const token = existingToken || crypto.randomBytes(32).toString('hex')
+          entitlementToken = token // Store for FAISS redirect
+          
           const updateEntitlementCommand = new UpdateCommand({
             TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
             Key: { pk, sk },
-            UpdateExpression: 'SET tier = :tier, updatedAt = :updatedAt',
+            UpdateExpression: 'SET tier = :tier, access_tier = :tier, accessTier = :tier, pro_expires_at = :expires, #token = :token, updatedAt = :updatedAt, #status = :status',
+            ExpressionAttributeNames: {
+              '#status': 'status',
+              '#token': 'token'
+            },
             ExpressionAttributeValues: {
               ':tier': 'pro',
+              ':expires': proExpiresAt.toISOString(),
+              ':token': token,
+              ':status': 'active',
               ':updatedAt': new Date().toISOString()
             }
           })
           await docClient.send(updateEntitlementCommand)
-          console.log(`Updated entitlement for ${transaction.userId}:${solutionId} to Pro tier`)
+          console.log(`Updated entitlement for ${transaction.userId}:${solutionId} to Pro tier with token ${token.substring(0,10)}... expiry ${proExpiresAt.toISOString()}`)
         } else {
           // Create new entitlement
           const token = crypto.randomBytes(32).toString('hex')
+          entitlementToken = token // Store for FAISS redirect
+          const proExpiresAt = new Date()
+          proExpiresAt.setMonth(proExpiresAt.getMonth() + 1) // 1 month subscription
+          
           const entitlement = {
             pk,
             sk,
@@ -221,6 +243,10 @@ async function updateTransactionAndUser(transactionId, status, webhookData = {})
             solutionId,
             token,
             tier: 'pro',
+            access_tier: 'pro',
+            accessTier: 'pro',
+            pro_expires_at: proExpiresAt.toISOString(),
+            status: 'active',
             dailyUsage: 0,
             lastUsageDate: new Date().toISOString().split('T')[0],
             createdAt: new Date().toISOString(),
@@ -231,7 +257,7 @@ async function updateTransactionAndUser(transactionId, status, webhookData = {})
             TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
             Item: entitlement
           }))
-          console.log(`Created Pro entitlement for ${transaction.userId}:${solutionId} with token ${token}`)
+          console.log(`Created Pro entitlement for ${transaction.userId}:${solutionId} with token ${token} expiring ${proExpiresAt.toISOString()}`)
         }
       } catch (error) {
         console.error('Error creating/updating solution entitlement:', error)
@@ -249,6 +275,10 @@ async function updateTransactionAndUser(transactionId, status, webhookData = {})
   if (isExternalReturn) {
     // For external solutions, redirect with status parameters
     const redirectUrl = new URL(returnUrl)
+    
+    // Remove old tier parameter first to avoid duplicates
+    redirectUrl.searchParams.delete('tier')
+    
     redirectUrl.searchParams.set('upgrade_status', status === 'completed' ? 'success' : 'failed')
     if (status === 'completed') {
       redirectUrl.searchParams.set('tier', 'pro')
@@ -259,7 +289,15 @@ async function updateTransactionAndUser(transactionId, status, webhookData = {})
       redirectUrl: redirectUrl.toString()
     }
   } else {
-    // For marketplace pages, return HTML response
+    // For marketplace pages, generate FAISS redirect URL if solution is aws-solution-finder
+    let faissRedirectUrl = null
+    if (status === 'completed' && transaction.solutionId === 'aws-solution-finder-001' && entitlementToken) {
+      const userEmail = transaction.customerEmail || transaction.userId
+      faissRedirectUrl = `https://awssolutionfinder.solutions.cloudnestle.com/search?token=${entitlementToken}&user_email=${encodeURIComponent(userEmail)}&tier=pro`
+      console.log(`Generated FAISS redirect URL with token: ${entitlementToken.substring(0,10)}...`)
+    }
+    
+    // Return HTML response
     const htmlResponse = status === 'completed' ? 
       `<html>
         <head><title>Payment Successful</title></head>
@@ -267,7 +305,10 @@ async function updateTransactionAndUser(transactionId, status, webhookData = {})
           <h1 style="color: green;">✅ Payment Successful!</h1>
           <p>Your account has been upgraded to Pro.</p>
           <p>You now have unlimited access to all solutions.</p>
-          <a href="${returnUrl}" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Continue</a>
+          ${faissRedirectUrl ? 
+            `<a href="${faissRedirectUrl}" style="background: #ff9900; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: 600; margin: 10px;">🚀 Start Using AWS Solution Finder</a><br><br>` : 
+            ''}
+          <a href="${returnUrl}" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Profile</a>
         </body>
       </html>` :
       `<html>

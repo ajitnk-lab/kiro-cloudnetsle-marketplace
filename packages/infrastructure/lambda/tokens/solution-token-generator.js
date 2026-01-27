@@ -69,7 +69,22 @@ exports.handler = async (event) => {
       }
     }
 
-    const pk = `user#${user_id}` // Use UUID-based key (consistent with other functions)
+    // Get user email from USER_TABLE
+    let userEmail = user_id // fallback to user_id if email not found
+    try {
+      const userResponse = await docClient.send(new GetCommand({
+        TableName: USER_TABLE,
+        Key: { userId: user_id }
+      }))
+      if (userResponse.Item && userResponse.Item.email) {
+        userEmail = userResponse.Item.email
+      }
+    } catch (error) {
+      console.error('Error fetching user email:', error)
+      // Continue with user_id as fallback
+    }
+
+    const pk = `user#${userEmail}` // Use email-based key to match registration
     const sk = `solution#${solution_id}`
     
     // Check if entitlement already exists

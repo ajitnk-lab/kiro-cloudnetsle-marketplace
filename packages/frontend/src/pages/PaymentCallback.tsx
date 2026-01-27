@@ -8,6 +8,8 @@ interface PaymentStatus {
   transactionId?: string
   merchantOrderId?: string
   amount?: string | number
+  token?: string
+  userEmail?: string
 }
 
 const PaymentCallback: React.FC = () => {
@@ -19,6 +21,10 @@ const PaymentCallback: React.FC = () => {
   })
 
   useEffect(() => {
+    let pollInterval: NodeJS.Timeout | null = null
+    let pollCount = 0
+    const MAX_POLLS = 30 // Poll for up to 30 seconds
+
     const checkPaymentStatus = async () => {
       try {
         const transactionId = searchParams.get('transactionId')
@@ -42,19 +48,35 @@ const PaymentCallback: React.FC = () => {
         const data = await response.json()
         
         if (response.ok) {
+          const newStatus = data.status === 'COMPLETED' ? 'success' : 
+                           data.status === 'FAILED' ? 'failed' : 'pending'
+          
           setPaymentStatus({
-            status: data.status === 'COMPLETED' ? 'success' : 
-                   data.status === 'FAILED' ? 'failed' : 'pending',
+            status: newStatus,
             message: data.message || 'Payment status updated',
             transactionId: data.transactionId,
             merchantOrderId: data.merchantOrderId,
-            amount: data.amount
+            amount: data.amount,
+            token: data.token,
+            userEmail: data.userEmail
           })
+
+          // Stop polling if payment is completed or failed
+          if (newStatus === 'success' || newStatus === 'failed') {
+            if (pollInterval) {
+              clearInterval(pollInterval)
+              pollInterval = null
+            }
+          }
         } else {
           setPaymentStatus({
             status: 'failed',
             message: data.message || 'Failed to verify payment status'
           })
+          if (pollInterval) {
+            clearInterval(pollInterval)
+            pollInterval = null
+          }
         }
       } catch (error) {
         console.error('Error checking payment status:', error)
@@ -62,10 +84,38 @@ const PaymentCallback: React.FC = () => {
           status: 'failed',
           message: 'Unable to verify payment status. Please contact support.'
         })
+        if (pollInterval) {
+          clearInterval(pollInterval)
+          pollInterval = null
+        }
       }
     }
 
+    // Initial check
     checkPaymentStatus()
+
+    // Poll every 2 seconds for pending payments
+    pollInterval = setInterval(() => {
+      pollCount++
+      if (pollCount >= MAX_POLLS) {
+        if (pollInterval) {
+          clearInterval(pollInterval)
+          pollInterval = null
+        }
+        setPaymentStatus(prev => ({
+          ...prev,
+          message: 'Payment verification taking longer than expected. Please check your email or contact support.'
+        }))
+        return
+      }
+      checkPaymentStatus()
+    }, 2000)
+
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval)
+      }
+    }
   }, [searchParams])
 
   const getStatusIcon = () => {
@@ -101,8 +151,12 @@ const PaymentCallback: React.FC = () => {
 
   const handleContinue = () => {
     if (paymentStatus.status === 'success') {
-      // Redirect to AWS Solution Finder with Pro access
-      window.location.href = 'https://awssolutionfinder.solutions.cloudnestle.com/search'
+      // Redirect to AWS Solution Finder with token if available
+      if (paymentStatus.token && paymentStatus.userEmail) {
+        window.location.href = `https://awssolutionfinder.solutions.cloudnestle.com/search?token=${paymentStatus.token}&user_email=${encodeURIComponent(paymentStatus.userEmail)}&tier=pro`
+      } else {
+        window.location.href = 'https://awssolutionfinder.solutions.cloudnestle.com/search'
+      }
     } else if (paymentStatus.status === 'failed') {
       // Redirect back to upgrade page
       navigate('/solutions/61deb2fb-6e5e-4cda-ac5d-ff20202a8788')

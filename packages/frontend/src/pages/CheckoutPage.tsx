@@ -324,6 +324,22 @@ const CheckoutPage: React.FC = () => {
                     <span>{formatCurrency(displayAmount, selectedCurrency)}</span>
                   </div>
                 </div>
+
+                {/* GST Information Notice */}
+                <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-600 text-lg">ℹ️</span>
+                    <div className="text-sm space-y-1">
+                      <p className="font-semibold text-blue-900">GST Information</p>
+                      <p className="text-gray-700">• All prices are GST-inclusive</p>
+                      <p className="text-gray-700">• B2B invoices with GSTIN provided upon request</p>
+                      <p className="text-gray-700">• Claim Input Tax Credit (ITC) for business purchases</p>
+                      <p className="text-xs text-gray-600 mt-2">
+                        Our GSTIN: <span className="font-mono font-semibold">29ADWPA6289Q1ZB</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

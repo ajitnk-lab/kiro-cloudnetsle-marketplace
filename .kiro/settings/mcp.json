@@ -25,7 +25,8 @@
         "UV_TIMEOUT": "3600",
         "UV_COMPILE_BYTECODE": "0",
         "UV_PRECOMPILE": "0",
-        "PYTHONDONTWRITEBYTECODE": "1"
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "UV_CACHE_DIR": "~/.cache/uv"
       },
       "disabled": false,
       "autoApprove": [
@@ -40,7 +41,8 @@
       "env": {
         "AWS_DOCUMENTATION_PARTITION": "aws",
         "FASTMCP_LOG_LEVEL": "ERROR",
-        "UV_TIMEOUT": "1200"
+        "UV_TIMEOUT": "1200",
+        "UV_CACHE_DIR": "~/.cache/uv"
       },
       "disabled": false,
       "autoApprove": [
@@ -54,7 +56,8 @@
       ],
       "env": {
         "UV_TIMEOUT": "1200",
-        "UV_COMPILE_BYTECODE": "1"
+        "UV_COMPILE_BYTECODE": "1",
+        "UV_CACHE_DIR": "~/.cache/uv"
       },
       "disabled": false,
       "autoApprove": [
@@ -69,7 +72,8 @@
       ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR",
-        "UV_TIMEOUT": "1200"
+        "UV_TIMEOUT": "1200",
+        "UV_CACHE_DIR": "~/.cache/uv"
       },
       "disabled": false,
       "autoApprove": [
@@ -83,7 +87,8 @@
       ],
       "env": {
         "UV_TIMEOUT": "1200",
-        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE",
+        "UV_CACHE_DIR": "~/.cache/uv"
       },
       "disabled": false,
       "autoApprove": [
@@ -104,7 +109,8 @@
         "AWS_PROFILE": "default",
         "AWS_REGION": "us-east-1",
         "FASTMCP_LOG_LEVEL": "ERROR",
-        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE"
+        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE",
+        "UV_CACHE_DIR": "~/.cache/uv"
       },
       "disabled": false,
       "autoApprove": [

@@ -166,6 +166,25 @@ export function SolutionDetailPage() {
 
           <p className="text-gray-700">{solution.description}</p>
 
+          {/* Product Information */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Product Information</h3>
+            <div className="space-y-1 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">Country of Origin:</span>
+                <span className="font-semibold text-gray-900">🇮🇳 India</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">Vendor:</span>
+                <span className="font-semibold text-gray-900">CloudNestle Consulting & Services</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">GSTIN:</span>
+                <span className="font-mono text-xs font-semibold text-gray-900">29ADWPA6289Q1ZB</span>
+              </div>
+            </div>
+          </div>
+
           {/* Features */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
@@ -191,6 +210,18 @@ export function SolutionDetailPage() {
                 <span className="text-gray-600 ml-2">
                   {solution.pricing?.model === 'freemium' ? 'Free tier available' : `per ${solution.pricing?.billingCycle || 'month'}`}
                 </span>
+              </div>
+            </div>
+
+            {/* GST Pricing Notice */}
+            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-xs space-y-1">
+                <p className="text-gray-700">
+                  <span className="font-semibold text-blue-900">🇮🇳 Indian buyers:</span> +18% GST (B2B invoices with GSTIN provided)
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-semibold text-purple-900">🌐 International buyers:</span> 0% GST under LUT
+                </p>
               </div>
             </div>
 

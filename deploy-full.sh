@@ -5,6 +5,14 @@
 
 set -e
 
+# Install uv if not present (required for MCP servers)
+if ! command -v uv &> /dev/null; then
+    echo "📦 Installing uv (Python package manager)..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
+    echo "   ✅ uv installed"
+fi
+
 # Use system Node 18
 if ! command -v node &> /dev/null; then
     echo "❌ Node.js not found"

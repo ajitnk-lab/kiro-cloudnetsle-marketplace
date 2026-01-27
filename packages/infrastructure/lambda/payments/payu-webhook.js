@@ -366,24 +366,51 @@ exports.handler = async (event) => {
       const expiryDate = new Date(currentDate)
       expiryDate.setMonth(expiryDate.getMonth() + 1) // 1 month subscription
 
-      // Update user entitlements
+      // Use email for pk to match registration format
+      const userEmail = transaction.customerEmail || userId
+      
+      // Get existing entitlement to preserve token
+      let existingToken = null
+      try {
+        const existing = await docClient.send(new GetCommand({
+          TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
+          Key: {
+            pk: `user#${userEmail}`,
+            sk: `solution#${solutionId}`
+          }
+        }))
+        if (existing.Item && existing.Item.token) {
+          existingToken = existing.Item.token
+        }
+      } catch (err) {
+        console.log('No existing entitlement found, will create new one')
+      }
+      
+      // Update user entitlements - preserve token if exists
+      const entitlementItem = {
+        pk: `user#${userEmail}`,
+        sk: `solution#${solutionId}`,
+        userId,
+        solutionId,
+        access_tier: 'pro',
+        status: 'active',
+        startDate: currentDate.toISOString(),
+        endDate: expiryDate.toISOString(),
+        pro_expires_at: expiryDate.toISOString(),
+        paymentGateway: 'payu',
+        transactionId,
+        createdAt: currentDate.toISOString(),
+        updatedAt: currentDate.toISOString()
+      }
+      
+      // Preserve token if it exists
+      if (existingToken) {
+        entitlementItem.token = existingToken
+      }
+      
       await docClient.send(new PutCommand({
         TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
-        Item: {
-          pk: `user#${userId}`,
-          sk: `solution#${solutionId}`,
-          userId,
-          solutionId,
-          access_tier: 'pro',
-          status: 'active',
-          startDate: currentDate.toISOString(),
-          endDate: expiryDate.toISOString(),
-          pro_expires_at: expiryDate.toISOString(),
-          paymentGateway: 'payu',
-          transactionId,
-          createdAt: currentDate.toISOString(),
-          updatedAt: currentDate.toISOString()
-        }
+        Item: entitlementItem
       }))
 
       // Update user tier in users table

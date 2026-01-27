@@ -263,13 +263,18 @@ export function CatalogPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {solutions.map((solution) => (
-            <div key={solution.solutionId} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{solution.name}</h3>
+          {solutions.map((solution) => {
+            const proPrice = (solution.pricing as any)?.pro?.price || (solution.pricing as any)?.pro?.M?.price?.N
+            const hasFree = (solution.pricing as any)?.free || (solution.pricing as any)?.free?.M
+            
+            return (
+            <div key={solution.solutionId} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all">
+              {/* Header */}
+              <div className="p-5 border-b border-gray-100">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="text-lg font-bold text-gray-900 leading-tight">{solution.name}</h3>
                   {isAdmin && solution.status && (
-                    <span className={`px-2 py-1 text-xs rounded-full ${
+                    <span className={`px-2 py-1 text-xs rounded-full flex-shrink-0 ml-2 ${
                       solution.status === 'approved' ? 'bg-green-100 text-green-800' :
                       solution.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-red-100 text-red-800'
@@ -278,17 +283,57 @@ export function CatalogPage() {
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mb-2">{solution.category}</p>
-                <p className="text-gray-700 text-sm line-clamp-3">{solution.description}</p>
+                
+                {/* Vendor & Origin */}
+                <div className="flex items-center gap-2 text-xs text-gray-600 mb-3">
+                  <span>by {solution.partnerName || 'CloudNestle'}</span>
+                  <span className="text-gray-300">•</span>
+                  <span className="flex items-center gap-1">
+                    <span>🇮🇳</span>
+                    <span>India</span>
+                  </span>
+                </div>
+                
+                {/* Category Badge */}
+                <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
+                  {solution.category}
+                </span>
               </div>
               
-              <div className="flex items-center justify-between">
-                {solution.pricing.amount > 0 && (
-                  <div className="text-lg font-bold text-green-600">
-                    {solution.pricing.currency} {solution.pricing.amount}
-                    {solution.pricing.model === 'subscription' && <span className="text-sm font-normal">/month</span>}
-                  </div>
-                )}
+              {/* Description */}
+              <div className="p-5">
+                <p className="text-sm text-gray-600 line-clamp-3 mb-4">{solution.description}</p>
+                
+                {/* Pricing Section */}
+                <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                  {hasFree && (
+                    <div className="text-sm font-semibold text-green-600 mb-1">
+                      ✓ Free tier available
+                    </div>
+                  )}
+                  {proPrice && (
+                    <div className="mb-2">
+                      <div className="text-lg font-bold text-gray-900">
+                        Pro Subscription: ₹{proPrice}
+                        <span className="text-sm font-normal text-gray-600">/month</span>
+                      </div>
+                    </div>
+                  )}
+                  {proPrice && (
+                    <div className="text-xs text-gray-600 pt-2 border-t border-gray-200">
+                      <div className="flex items-center gap-1">
+                        <span>🇮🇳</span>
+                        <span>+18% GST (India)</span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span>🌐</span>
+                        <span>0% GST (International)</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* CTA Button */}
                 <button 
                   onClick={async () => {
                     console.log('🔘 CATALOG: Button clicked for solution:', solution.name)
@@ -429,19 +474,14 @@ export function CatalogPage() {
                       setSelectedSolution(solution)
                     }
                   }}
-                  className="btn-primary text-sm"
+                  className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
                 >
                   {solution.externalUrl && solution.externalUrl.includes('awssolutionfinder') ? 'Access Now' : (solution.actionButtonText || 'View Details')}
                 </button>
               </div>
-              
-              {solution.partnerName && (
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <p className="text-xs text-gray-500">by {solution.partnerName}</p>
-                </div>
-              )}
             </div>
-          ))}
+            )
+          })}
         </div>
       )}
 

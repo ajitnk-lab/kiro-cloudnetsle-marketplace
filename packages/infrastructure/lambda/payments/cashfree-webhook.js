@@ -250,16 +250,17 @@ exports.handler = async (event) => {
 
       if (userResponse.Item) {
         const user = userResponse.Item
+        const userEmail = user.email || userId
 
         // Find existing entitlement - try direct lookup first, then fallback to scan
         let existingEntitlementScan
         
-        // Try direct lookup by pk/sk (most efficient)
+        // Try direct lookup by pk/sk (most efficient) - use email for pk
         try {
           const directLookup = await docClient.send(new GetCommand({
             TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
             Key: {
-              pk: `user#${userId}`,
+              pk: `user#${userEmail}`,
               sk: `solution#${solutionId}`
             }
           }))
@@ -346,7 +347,7 @@ exports.handler = async (event) => {
           await docClient.send(new PutCommand({
             TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
             Item: {
-              pk: `user#${userId}`,
+              pk: `user#${userEmail}`,
               sk: `solution#${solutionId}`,
               userId: userId,
               solutionId: solutionId,
