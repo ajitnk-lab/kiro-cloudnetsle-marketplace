@@ -87,7 +87,6 @@
       ],
       "env": {
         "UV_TIMEOUT": "1200",
-        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE",
         "UV_CACHE_DIR": "~/.cache/uv"
       },
       "disabled": false,
@@ -109,7 +108,6 @@
         "AWS_PROFILE": "default",
         "AWS_REGION": "us-east-1",
         "FASTMCP_LOG_LEVEL": "ERROR",
-        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE",
         "UV_CACHE_DIR": "~/.cache/uv"
       },
       "disabled": false,

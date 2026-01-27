@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search, Filter, Grid, List, Package, CheckCircle, XCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { BackgroundImage } from '../components/BackgroundImage'
@@ -26,16 +27,64 @@ interface Solution {
 export function CatalogPage() {
   const { user, isAuthenticated } = useAuth()
   const { popup, showPopup, closePopup } = usePopup()
+  const navigate = useNavigate()
   const [solutions, setSolutions] = useState<Solution[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedSolution, setSelectedSolution] = useState<Solution | null>(null)
+  const [userTier, setUserTier] = useState<string>('registered') // Track user's tier
 
   const isAdmin = user?.role === 'admin'
 
   useEffect(() => {
     loadSolutions()
   }, [])
+
+  // Fetch user's tier for AWS Solution Finder
+  useEffect(() => {
+    const fetchUserTier = async () => {
+      if (!isAuthenticated || !user) return
+      
+      try {
+        const apiUrl = (import.meta as any).env.VITE_API_URL || 'https://juvt4m81ld.execute-api.us-east-1.amazonaws.com/prod'
+        const response = await fetch(`${apiUrl.replace(/\/$/, '')}/user/profile`, {
+          headers: {
+            'Authorization': `Bearer ${authService.getToken()}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          const profileData = await response.json()
+          const entitlements = profileData.entitlements || []
+          
+          // Find AWS Solution Finder entitlement
+          const awsFinderEntitlement = entitlements.find((e: any) => 
+            e.solutionId === 'aws-solution-finder' || 
+            e.solutionId === 'aws-solution-finder-001'
+          )
+          
+          if (awsFinderEntitlement) {
+            const tier = awsFinderEntitlement.access_tier || 'registered'
+            const expiresAt = awsFinderEntitlement.pro_expires_at
+            
+            // Check if pro tier is still valid
+            if (tier === 'pro' && expiresAt) {
+              const expiryDate = new Date(expiresAt)
+              const now = new Date()
+              setUserTier(expiryDate > now ? 'pro' : 'registered')
+            } else {
+              setUserTier(tier)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user tier:', error)
+      }
+    }
+    
+    fetchUserTier()
+  }, [isAuthenticated, user])
 
   const loadSolutions = async () => {
     try {
@@ -268,11 +317,11 @@ export function CatalogPage() {
             const hasFree = (solution.pricing as any)?.free || (solution.pricing as any)?.free?.M
             
             return (
-            <div key={solution.solutionId} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all">
-              {/* Header */}
-              <div className="p-5 border-b border-gray-100">
+            <div key={solution.solutionId} className="bg-white rounded-lg shadow-md border-2 border-gray-200 overflow-hidden hover:shadow-xl hover:border-blue-300 transition-all">
+              {/* Section 1: Identity & Description */}
+              <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-bold text-gray-900 leading-tight">{solution.name}</h3>
+                  <h3 className="text-lg font-bold text-gray-900 leading-tight flex-1">{solution.name}</h3>
                   {isAdmin && solution.status && (
                     <span className={`px-2 py-1 text-xs rounded-full flex-shrink-0 ml-2 ${
                       solution.status === 'approved' ? 'bg-green-100 text-green-800' :
@@ -284,57 +333,53 @@ export function CatalogPage() {
                   )}
                 </div>
                 
-                {/* Vendor & Origin */}
-                <div className="flex items-center gap-2 text-xs text-gray-600 mb-3">
+                {/* Compact vendor & origin line */}
+                <div className="flex items-center gap-1.5 text-xs text-gray-600 mb-2">
                   <span>by {solution.partnerName || 'CloudNestle'}</span>
-                  <span className="text-gray-300">•</span>
-                  <span className="flex items-center gap-1">
+                  <span className="text-gray-400">•</span>
+                  <span className="flex items-center gap-0.5">
                     <span>🇮🇳</span>
                     <span>India</span>
                   </span>
+                  <span className="text-gray-400">•</span>
+                  <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{solution.category}</span>
                 </div>
                 
-                {/* Category Badge */}
-                <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
-                  {solution.category}
-                </span>
+                <p className="text-sm text-gray-600 line-clamp-2">{solution.description}</p>
               </div>
               
-              {/* Description */}
-              <div className="p-5">
-                <p className="text-sm text-gray-600 line-clamp-3 mb-4">{solution.description}</p>
-                
-                {/* Pricing Section */}
-                <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                  {hasFree && (
-                    <div className="text-sm font-semibold text-green-600 mb-1">
-                      ✓ Free tier available
-                    </div>
-                  )}
-                  {proPrice && (
-                    <div className="mb-2">
-                      <div className="text-lg font-bold text-gray-900">
-                        Pro Subscription: ₹{proPrice}
-                        <span className="text-sm font-normal text-gray-600">/month</span>
-                      </div>
-                    </div>
-                  )}
-                  {proPrice && (
-                    <div className="text-xs text-gray-600 pt-2 border-t border-gray-200">
-                      <div className="flex items-center gap-1">
-                        <span>🇮🇳</span>
-                        <span>+18% GST (India)</span>
-                      </div>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <span>🌐</span>
-                        <span>0% GST (International)</span>
-                      </div>
+              {/* Section 2: Plans & Pricing */}
+              <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+                <div className="space-y-2">
+                  {/* Available Plans */}
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-semibold text-gray-700">Plans:</span>
+                    {hasFree && <span className="text-green-600 font-medium">Free ✓</span>}
+                    {hasFree && proPrice && <span className="text-gray-400">|</span>}
+                    {proPrice && <span className="text-purple-700 font-medium">Pro ₹{proPrice}/mo</span>}
+                  </div>
+                  
+                  {/* Current Plan - Only for AWS Solution Finder */}
+                  {solution.solutionId === 'aws-solution-finder-001' && isAuthenticated && user && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-semibold text-gray-700">Your Plan:</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        userTier === 'pro' 
+                          ? 'bg-purple-100 text-purple-700' 
+                          : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {userTier === 'pro' ? '⭐ Pro' : '🆓 Free (10/day)'}
+                      </span>
                     </div>
                   )}
                 </div>
-                
-                {/* CTA Button */}
-                <button 
+              </div>
+              
+              {/* Section 3: Actions & GST */}
+              <div className="p-4 border-t border-gray-200">
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                  <button 
                   onClick={async () => {
                     console.log('🔘 CATALOG: Button clicked for solution:', solution.name)
                     console.log('🔘 CATALOG: User from AuthContext:', user?.email || 'null')
@@ -478,6 +523,55 @@ export function CatalogPage() {
                 >
                   {solution.externalUrl && solution.externalUrl.includes('awssolutionfinder') ? 'Access Now' : (solution.actionButtonText || 'View Details')}
                 </button>
+                
+                {/* Upgrade Button - Only for AWS Solution Finder if not pro */}
+                {solution.solutionId === 'aws-solution-finder-001' && isAuthenticated && user && userTier !== 'pro' && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/generate-solution-token`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authService.getToken()}`
+                          },
+                          body: JSON.stringify({
+                            solutionId: 'aws-solution-finder-001'
+                          })
+                        })
+                        
+                        if (response.ok) {
+                          const data = await response.json()
+                          const returnUrl = `https://awssolutionfinder.solutions.cloudnestle.com/search?token=${data.token}&user_id=${encodeURIComponent(user.userId || user.email)}&user_email=${encodeURIComponent(user.email)}&tier=pro`
+                          navigate(`/upgrade?solution=aws-solution-finder-001&return_url=${encodeURIComponent(returnUrl)}`)
+                        } else {
+                          navigate('/upgrade?solution=aws-solution-finder-001')
+                        }
+                      } catch (error) {
+                        console.error('Error generating token:', error)
+                        navigate('/upgrade?solution=aws-solution-finder-001')
+                      }
+                    }}
+                    className="w-full bg-purple-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-purple-700 transition-colors text-sm"
+                  >
+                    ⭐ Upgrade to Pro - ₹10/month
+                  </button>
+                )}
+                
+                {/* Pro Active Message */}
+                {solution.solutionId === 'aws-solution-finder-001' && isAuthenticated && user && userTier === 'pro' && (
+                  <div className="text-xs text-purple-600 text-center font-medium">
+                    🎉 Unlimited access to all Pro features!
+                  </div>
+                )}
+                </div>
+                
+                {/* GST Info - Only if pricing exists */}
+                {proPrice && (
+                  <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600 text-center">
+                    <span className="font-medium">GST:</span> 🇮🇳 +18% (India) | 🌐 0% (International)
+                  </div>
+                )}
               </div>
             </div>
             )

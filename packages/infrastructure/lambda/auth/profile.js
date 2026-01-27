@@ -55,15 +55,17 @@ exports.handler = async (event) => {
       let entitlements = []
       if (USER_SOLUTION_ENTITLEMENTS_TABLE) {
         try {
+          // Query by email (pk = user#email) for consistency
+          const userEmail = result.Item.email
           const entitlementResult = await docClient.send(new QueryCommand({
             TableName: USER_SOLUTION_ENTITLEMENTS_TABLE,
             KeyConditionExpression: 'pk = :pk',
             ExpressionAttributeValues: {
-              ':pk': `user#${userId}`
+              ':pk': `user#${userEmail}` // Use email instead of userId
             }
           }))
           entitlements = entitlementResult.Items || []
-          console.log('Found entitlements:', entitlements)
+          console.log('Found entitlements for email:', userEmail, entitlements)
         } catch (error) {
           console.error('Error fetching entitlements:', error)
         }
